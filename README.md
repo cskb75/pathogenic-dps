@@ -2,7 +2,23 @@
 
 A build planner and DPS calculator for [Pathogenic](https://store.steampowered.com/app/3808690/Pathogenic/). Build a pathogen the way you would in game, and see what every organelle contributes, how attacks travel through your organelle chains, and where each number comes from.
 
-Only the **Nanobot** is supported so far.
+## Pathogens
+
+| Pathogen | Body | Source |
+| --- | --- | --- |
+| Bacterium | Fixed layout, 6 evolutions in 2 tiers, mirrored side slots | Demo build scenes |
+| Helminth | Fixed layout, 6 evolutions in 2 tiers, mirrored side slots | Demo build scenes |
+| Fungal Spore | Fixed layout, 6 evolutions in 2 tiers, built-in Omni/Volatile/Conductive slots | Demo build scenes |
+| Diatom | Starting body only | Transcribed from the wiki.gg slot screenshot |
+| Nanobot | Square and triangle modules you attach yourself | Player descriptions |
+
+Things that work the way the game does:
+- **Mirrored slots.** In a bilateral body, an organelle in a side slot is copied to the matching slot on the other side.
+- **Evolutions.** Organelles keep their slot when you evolve, as long as the new body has a slot with the same name. An evolution's damage bonus stays with you after you evolve again.
+- **Built-in special slots** act like grafts.
+- **"Left half" and "bottom half".** Effects such as Chirality or Dorsal Dominance are measured from the body's centre bone, as the game does.
+
+The full game has a third evolution tier, and the Amoeba and the Lil Collector aren't in the demo, so those need the full game's files (see `tools/extract`).
 
 ## Where the numbers come from
 
@@ -10,10 +26,13 @@ Only the **Nanobot** is supported so far.
 - **Official patch notes** (Steam, up to the August 7, 2026 balance patch) override demo values wherever they give an exact new number. Each organelle's notes in the app say when that happened, or where a demo value is known to be out of date.
 - **The organelle list** (all 120, with slot, category and in-game description) comes from the pathogenic.wiki database. Infuser types come from the wiki.gg Organelles page.
 - **Mutations and plasmids.** The lists and descriptions come from the pathogenic.wiki mutation and plasmid databases. Damage formulas are ported from the demo's mutation scripts where the mutation exists there. Otherwise they come from the current in-game description. Each mutation says which in the app.
-- **The Nanobot itself isn't in the demo.** Its body layout comes from player descriptions: square and triangle modules, each with an internal slot in the centre and external slots on free edges. Its plasmids come from the wiki. The plasmid tree's layout isn't known yet, so you pick plasmids from a list. Traits aren't in the demo either. Per the wiki, they're treated as "+N stat boost", which means N extra rarity steps.
+- **Body plans** for the Bacterium, Helminth and Fungal Spore come from the demo's scenes: slot positions, connections, mirroring, built-in special slots, evolutions and their bonuses.
+- **The Nanobot isn't in the demo.** Its body layout comes from player descriptions: square and triangle modules, each with an internal slot in the centre and external slots on free edges.
+- **Plasmids** for every pathogen come from the wiki. The plasmid tree's layout isn't known yet, so you pick plasmids from a list. Traits aren't in the demo either. Per the wiki, they're treated as "+N stat boost", which means N extra rarity steps.
+- **Art.** Organelle, mutation and plasmid icons come from pathogenic.wiki. Body sprites come from the demo build. It's all the game creators' art.
 - **Slot grafts cover slot upgrades.** Mark a slot as Volatile, Conductive or Omni in the editor for anything that converts slots, such as Volatile Assembly or the receptor mutations.
 
-Organelles the calculator can't model yet (actives, minions, most positional effects) can still be placed. The app labels them and leaves them out of the total.
+Actives that deal damage (Explosive Charge, Ciliate Strike) count as firing whenever they have charged up from Overcharge. The Galvanic Sac counts as zapping whenever an enemy is next to you. Organelles that never deal damage (healing, cores, armor) are labelled that way. Organelles the calculator can't model yet can still be placed: minions (driven by the game's AI), trails and some full-game organelles. The app says why for each one and leaves it out of the total.
 
 ## How damage is calculated
 
@@ -63,7 +82,7 @@ Organelle behaviour lives in `src/engine/sim/behaviours.ts`, one entry per organ
 
 `src/data/organelles.ts` is the organelle catalogue, `src/data/mutations.ts` the mutations, and `src/data/nanobot.ts` the Nanobot's modules and plasmids. `src/data/index.ts` holds rarities, traits, grafts and the fight assumptions. Mutation and plasmid effects are described as data (`RunEffects` in `src/engine/types.ts`). `src/engine/run.ts` turns them into bonuses.
 
-`tools/extract` has the scripts that read the game's files (`.pck`) to check numbers against them; see its README. Never commit their output.
+`src/data/bodies.json` (the body plans) and the sprites in `public/art/bodies` are generated by `tools/extract/bodies.py` and `app_data.py`. The icons in `public/art` come from `tools/extract/wiki_icons.py`. `tools/extract` also has the scripts that read the game's files (`.pck`) to check numbers against them; see its README. Never commit decompiled scripts.
 
 ## Development
 

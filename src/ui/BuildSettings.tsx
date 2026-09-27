@@ -1,5 +1,4 @@
 import type { Dispatch } from 'react';
-import { findClass } from '../engine/calc';
 import type { Build, CustomKind, CustomModifier, GameData, ParamDef } from '../engine/types';
 import type { Action } from '../state/build';
 
@@ -17,47 +16,28 @@ const KINDS: Record<CustomKind, { label: string; unit: 'percent' | 'mult'; initi
 };
 
 const GROUPS: { title: string; ids: string[] }[] = [
-  { title: 'Aim and positioning', ids: ['angledHit', 'pelletHit', 'sideHit', 'mineHit', 'orbContact', 'targetDistance', 'backstabChance', 'beatSync'] },
+  { title: 'Aim and positioning', ids: ['angledHit', 'pelletHit', 'sideHit', 'mineHit', 'orbContact', 'targetDistance', 'backstabChance', 'beatSync', 'nearbyTime'] },
   { title: 'Mitochondria triggers', ids: ['roomLength', 'killRate', 'hitsTakenRate', 'dodgeRate', 'pickupRate', 'perfectRooms'] },
   { title: 'Stamina and stacking organelles', ids: ['staminaLimits', 'maxStamina', 'resonantStacks', 'phagosomeKills'] },
 ];
 
 export function BuildSettings({ data, build, dispatch }: Props) {
-  const cls = findClass(data, build.classId);
   const params = new Map(data.params.map((p) => [p.id, p]));
   const setCustom = (custom: CustomModifier[]) => dispatch({ type: 'setCustom', custom });
   const updateCustom = (id: string, patch: Partial<CustomModifier>) => setCustom(build.custom.map((c) => (c.id === id ? { ...c, ...patch } : c)));
 
   return (
-    <section className="panel settings" aria-label="Build settings">
-      <h2>{cls.name} settings</h2>
-      <p className="muted small">{cls.description}</p>
-
+    <section className="panel settings" aria-labelledby="settings-heading">
+      <h2 id="settings-heading">Fight assumptions</h2>
+      <p className="muted small">Things that depend on how you play. Hover a name for details.</p>
       <div className="settings-grid">
         <fieldset>
-          <legend>{cls.upgrades.length > 0 ? `${cls.name} upgrades` : 'Targets'}</legend>
-          {cls.upgrades.map((u) => (
-            <label key={u.id} className="check" title={u.description}>
-              <input
-                type="checkbox"
-                checked={(build.upgrades[u.id] ?? 0) > 0}
-                onChange={(e) => dispatch({ type: 'setUpgrade', id: u.id, stacks: e.target.checked ? 1 : 0 })}
-              />
-              <span>
-                {u.name} <span className="muted small">{u.description}</span>
-              </span>
-            </label>
-          ))}
-          <label className="number-row">
+          <legend>Targets</legend>
+          <label className="number-row" title="Enemies an area or piercing attack can reach at once, for multi-target DPS.">
             <span>Enemies in range</span>
             <input type="number" min={1} max={50} value={build.targets} onChange={(e) => dispatch({ type: 'setTargets', targets: Number(e.target.value) })} />
           </label>
         </fieldset>
-      </div>
-
-      <h3>Fight assumptions</h3>
-      <p className="muted small">Things that depend on how you play. Hover a name for details.</p>
-      <div className="settings-grid">
         {GROUPS.map((g) => (
           <fieldset key={g.title}>
             <legend>{g.title}</legend>

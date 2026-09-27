@@ -29,20 +29,36 @@ export function validateData(data: GameData): string[] {
       problems.push(`Behaviour for "${id}" has no catalogue entry`);
       continue;
     }
-    if (b.weapon && info.category !== 'weapon') problems.push(`"${id}" has a weapon profile but is a ${info.category}`);
+    if (b.weapon && !['weapon', 'active', 'support'].includes(info.category)) problems.push(`"${id}" has a weapon profile but is a ${info.category}`);
     if (b.mito && info.category !== 'mitochondrion' && info.category !== 'active') problems.push(`"${id}" has a mitochondrion profile but is a ${info.category}`);
     if (b.weapon?.aimParam && !params.has(b.weapon.aimParam)) problems.push(`"${id}" uses unknown parameter "${b.weapon.aimParam}"`);
   }
+  for (const [id, plan] of Object.entries(data.bodies)) {
+    const slots = new Set<string>();
+    for (const s of plan.slots) {
+      if (slots.has(s.id)) problems.push(`Body "${id}": duplicate slot "${s.id}"`);
+      slots.add(s.id);
+    }
+    for (const s of plan.slots) {
+      if (s.mirrorOf && !slots.has(s.mirrorOf)) problems.push(`Body "${id}": slot "${s.id}" mirrors missing slot "${s.mirrorOf}"`);
+    }
+    for (const [a, b] of plan.links) {
+      if (!slots.has(a) || !slots.has(b)) problems.push(`Body "${id}": link ${a}-${b} uses a missing slot`);
+    }
+  }
+  dupes(data.classes.map((c) => c.id), 'class');
   for (const c of data.classes) {
-    if (!c.pieceTypes.some((p) => p.id === c.corePiece)) problems.push(`Class "${c.id}": core piece "${c.corePiece}" is not a piece type`);
+    if (c.body.kind === 'modular') {
+      const body = c.body;
+      if (!body.pieceTypes.some((p) => p.id === body.corePiece)) problems.push(`Class "${c.id}": core piece "${body.corePiece}" is not a piece type`);
+    } else {
+      for (const id of [c.body.start, ...c.body.tiers.flat()]) {
+        if (!data.bodies[id]) problems.push(`Class "${c.id}": unknown body plan "${id}"`);
+      }
+    }
     dupes(c.plasmids.map((p) => p.id), `${c.id} plasmid`);
     for (const p of c.plasmids) {
       if (p.mutation && !data.mutations.some((m) => m.id === p.mutation)) problems.push(`Plasmid "${p.id}": unknown mutation "${p.mutation}"`);
-    }
-    for (const u of c.upgrades) {
-      for (const t of u.pieceDamage?.pieceTypes ?? []) {
-        if (!c.pieceTypes.some((p) => p.id === t)) problems.push(`Upgrade "${u.id}": unknown piece type "${t}"`);
-      }
     }
   }
   return problems;

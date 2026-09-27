@@ -1,10 +1,13 @@
-// Turns a list of pieces into the slot graph the calculator works on.
+// Turns a body into the slot graph the calculator works on.
 //
-// Each piece has an internal slot in its centre and an external slot on every
-// edge that is not covered by another piece. Connectors are fixed by the
-// geometry:
+// Modular bodies (Nanobot) are built from pieces. Each piece has an internal
+// slot in its centre and an external slot on every edge that is not covered
+// by another piece. Connectors are fixed by the geometry:
 //   - a piece's centre slot connects to each external slot on its own edges
 //   - centre slots of two pieces that share an edge connect to each other
+//
+// Other classes have fixed layouts (body plans) extracted from the game, with
+// their own connections, built-in special slots and mirrored slots.
 
 import {
   coveredEdges,
@@ -18,6 +21,7 @@ import {
   type PlacedPiece,
   type Vec,
 } from './geometry';
+import type { BodyPlan, SpecialSlot } from './types';
 
 export type SlotKind = 'internal' | 'external';
 
@@ -38,6 +42,10 @@ export interface Slot {
   /** Direction an external slot faces (out of the body). */
   facing?: Vec;
   edge?: number;
+  /** Built into the body: acts like a graft. */
+  special?: SpecialSlot;
+  /** Mirrored twin of this slot: holds a copy of its organelle. */
+  mirrorOf?: string;
 }
 
 export interface Body {
@@ -51,6 +59,8 @@ export interface Body {
   links: [string, string][];
   freeEdges: { pieceId: string; edge: number }[];
   errors: { pieceId: string; reason: string }[];
+  /** Fixed layouts: the body plan (outline, sprite). */
+  plan?: BodyPlan;
 }
 
 export const centerSlotId = (pieceId: string) => `${pieceId}.c`;
@@ -107,6 +117,30 @@ export function buildBody(pieces: PieceInstance[], shapeOf: (type: string) => Pi
   }
 
   return { placed, pieceById, slots, slotById: new Map(slots.map((s) => [s.id, s])), connections, links, freeEdges, errors };
+}
+
+/** Pseudo piece id for slots on a fixed layout. */
+export const PLAN_PIECE = 'body';
+
+export function buildPlanBody(plan: BodyPlan): Body {
+  const slots: Slot[] = plan.slots.map((s) => ({
+    id: s.id,
+    pieceId: PLAN_PIECE,
+    pieceType: PLAN_PIECE,
+    kind: s.kind,
+    position: { x: s.x, y: s.y },
+    ...(s.kind === 'external' ? { facing: { x: Math.cos(s.r), y: Math.sin(s.r) } } : {}),
+    ...(s.special ? { special: s.special } : {}),
+    ...(s.mirrorOf ? { mirrorOf: s.mirrorOf } : {}),
+  }));
+  const slotById = new Map(slots.map((s) => [s.id, s]));
+  const links = plan.links.filter(([a, b]) => slotById.has(a) && slotById.has(b));
+  const connections = new Map<string, string[]>(slots.map((s) => [s.id, []]));
+  for (const [a, b] of links) {
+    connections.get(a)!.push(b);
+    connections.get(b)!.push(a);
+  }
+  return { placed: [], pieceById: new Map(), slots, slotById, connections, links, freeEdges: [], errors: [], plan };
 }
 
 export interface PlacementOption {

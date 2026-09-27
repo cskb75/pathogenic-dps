@@ -25,14 +25,14 @@ describe('build state', () => {
   });
 
   it('sanitises malformed slot data from links', () => {
-    const build = emptyBuild(gameData);
+    const build = emptyBuild(gameData, 'nanobot');
     const tampered = { ...build, slots: { 'core.c': { organelle: { id: 'ossificator', rarity: 'ultra', traits: 'x' }, uptime: 7 } } };
     const parsed = decodeBuild(encodeBuild(tampered as never), gameData)!;
     expect(parsed.slots['core.c']).toEqual({ organelle: { id: 'ossificator', rarity: 'common', traits: [] }, uptime: 1 });
   });
 
   it('drops malformed or duplicate pieces from links', () => {
-    const build = emptyBuild(gameData);
+    const build = emptyBuild(gameData, 'nanobot');
     const tampered = {
       ...build,
       pieces: [
@@ -66,7 +66,7 @@ describe('build state', () => {
   });
 
   it('adds pieces with fresh ids and drops slots covered by them', () => {
-    let build = emptyBuild(gameData);
+    let build = emptyBuild(gameData, 'nanobot');
     build = reducer(build, { type: 'setOrganelle', slotId: 'core.e1', organelle: { id: 'caustic-secretor', rarity: 'common', traits: [] } });
     build = reducer(build, { type: 'addPiece', pieceType: 'square', to: 'core', edge: 1 });
     expect(build.pieces.map((p) => p.id)).toEqual(['core', 'p1']);
@@ -79,6 +79,39 @@ describe('build state', () => {
     expect(build.pieces.some((p) => p.id === 'p1')).toBe(false);
     expect(Object.keys(build.slots).some((id) => id.startsWith('p1.'))).toBe(false);
     expect(reducer(build, { type: 'removePiece', pieceId: 'core' })).toBe(build);
+  });
+
+  it('switches class with a fresh body, keeping run state but not plasmids', () => {
+    let build = exampleBuild(gameData);
+    build = reducer(build, { type: 'setMutation', id: 'corrosive-acid', count: 2 });
+    build = reducer(build, { type: 'setPlasmid', id: 'nanobot-staminaplasmid', count: 1 });
+    build = reducer(build, { type: 'setClass', classId: 'helminth' });
+    expect(build.classId).toBe('helminth');
+    expect(build.pieces).toEqual([]);
+    expect(build.slots).toEqual({});
+    expect(build.mutations).toEqual({ 'corrosive-acid': 2 });
+    expect(build.plasmids).toEqual({});
+    expect(calculate(build, gameData).body.plan?.id).toBe('helminth-start');
+  });
+
+  it('picks evolutions per tier, keeping organelles in slots with the same name', () => {
+    let build = emptyBuild(gameData, 'bacterium');
+    build = reducer(build, { type: 'setOrganelle', slotId: 'ESlot1', organelle: { id: 'caustic-secretor', rarity: 'common', traits: [] } });
+    build = reducer(build, { type: 'setEvolution', tier: 1, id: 'bacterium-clostridium' });
+    expect(build.evolutions).toEqual(['', 'bacterium-clostridium']);
+    expect(calculate(build, gameData).body.plan?.id).toBe('bacterium-clostridium');
+    expect(calculate(build, gameData).weapons.map((w) => w.slotId)).toEqual(['ESlot1']);
+    build = reducer(build, { type: 'setEvolution', tier: 1, id: '' });
+    expect(build.evolutions).toEqual([]);
+  });
+
+  it('round-trips an evolving build and drops bad evolutions from links', () => {
+    let build = emptyBuild(gameData, 'fungal-spore');
+    build = reducer(build, { type: 'setEvolution', tier: 0, id: 'fungal-spore-ascomycota' });
+    build = reducer(build, { type: 'setOrganelle', slotId: 'ESlot1', organelle: { id: 'caustic-secretor', rarity: 'rare', traits: [] } });
+    expect(decodeBuild(encodeBuild(build), gameData)).toEqual(build);
+    const tampered = { ...build, evolutions: ['fungal-spore-aspergillus', 42] };
+    expect(decodeBuild(encodeBuild(tampered as never), gameData)!.evolutions).toEqual([]);
   });
 
   it('counts mutation stacks and plasmid nodes, dropping them at zero', () => {

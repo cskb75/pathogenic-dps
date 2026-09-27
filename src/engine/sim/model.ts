@@ -149,6 +149,8 @@ export interface WeaponProfile {
   base: number;
   /** Damage multiplier by rarity. Default 1 + 0.4 x rarity. */
   damageMult?: (r: number) => number;
+  /** Damage set directly by the organelle; `base` stays the attack's base damage for bonuses. */
+  damage?: (r: number) => number;
   /** Seconds between attacks at this rarity. */
   interval: (r: number) => number;
   /** Attack speed gained per point of Overcharge. Default 0.3. */
@@ -174,6 +176,13 @@ export interface WeaponProfile {
   combo?: boolean;
   /** Spins up: consecutive attacks come up to this much sooner. */
   spinUp?: number;
+  /**
+   * Actives: Overcharge-seconds needed per use (energy builds by the Overcharge
+   * held each second). Assumes you use it as soon as it's ready.
+   */
+  energyCost?: (r: number) => number;
+  /** Uses per second set by the organelle itself, instead of an attack interval. */
+  rate?: (ctx: Ctx, r: number, charge: number) => number;
 }
 
 export interface MitoProfile {
@@ -201,6 +210,8 @@ export interface Behaviour {
   modifyGun?(ctx: Ctx, self: Item, gun: GunState, times: number): void;
   /** How faithfully this organelle is modeled, shown in the UI. */
   notes?: string;
+  /** Does nothing to damage (healing, cores, armor...): counts as modeled. */
+  noDps?: boolean;
 }
 
 // ---------------------------------------------------------------------------

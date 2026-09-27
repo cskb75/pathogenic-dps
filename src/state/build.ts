@@ -11,9 +11,9 @@ export function emptyBuild(data: GameData, classId = data.classes[0].id): Build 
     version: 2,
     name: `${cls.name} build`,
     classId: cls.id,
-    pieces: [{ id: 'core', type: cls.corePiece }],
+    pieces: cls.body.kind === 'modular' ? [{ id: 'core', type: cls.body.corePiece }] : [],
+    evolutions: [],
     slots: {},
-    upgrades: {},
     mutations: {},
     plasmids: {},
     params: {},
@@ -60,7 +60,8 @@ export type Action =
   | { type: 'removePiece'; pieceId: string }
   | { type: 'setOrganelle'; slotId: string; organelle: OrganelleInstance | undefined }
   | { type: 'setSlot'; slotId: string; patch: Partial<Omit<SlotState, 'organelle'>> }
-  | { type: 'setUpgrade'; id: string; stacks: number }
+  | { type: 'setClass'; classId: string }
+  | { type: 'setEvolution'; tier: number; id: string }
   | { type: 'setMutation'; id: string; count: number }
   | { type: 'setPlasmid'; id: string; count: number }
   | { type: 'clearMutations' }
@@ -103,6 +104,21 @@ export function makeReducer(data: GameData) {
       case 'removePiece':
         if (action.pieceId === build.pieces[0]?.id) return build;
         return pruneSlots({ ...build, pieces: removePieceTree(build.pieces, action.pieceId) }, data);
+      case 'setClass': {
+        // A new body; what you've picked up this run stays (plasmids belong to each pathogen).
+        if (action.classId === build.classId) return build;
+        const next = emptyBuild(data, action.classId);
+        return { ...next, mutations: build.mutations, params: build.params, targets: build.targets, custom: build.custom };
+      }
+      case 'setEvolution': {
+        // Organelles stay in slots with the same name, as in the game; others wait
+        // in case you switch back, and are dropped when the build is saved.
+        const evolutions = [...build.evolutions];
+        while (evolutions.length <= action.tier) evolutions.push('');
+        evolutions[action.tier] = action.id;
+        while (evolutions.length && !evolutions[evolutions.length - 1]) evolutions.pop();
+        return { ...build, evolutions };
+      }
       case 'setOrganelle': {
         const current = build.slots[action.slotId] ?? {};
         const next: SlotState = { ...current, organelle: action.organelle };
@@ -116,8 +132,6 @@ export function makeReducer(data: GameData) {
         const current = build.slots[action.slotId] ?? {};
         return { ...build, slots: { ...build.slots, [action.slotId]: { ...current, ...action.patch } } };
       }
-      case 'setUpgrade':
-        return { ...build, upgrades: { ...build.upgrades, [action.id]: action.stacks } };
       case 'setMutation':
         return { ...build, mutations: withCount(build.mutations, action.id, action.count) };
       case 'setPlasmid':
@@ -205,12 +219,17 @@ function isCustomModifier(v: unknown): v is CustomModifier {
 
 export function parseBuild(raw: unknown, data: GameData): Build | null {
   // Version 1 builds used made-up sample organelles: their layout carries over, unknown organelles are dropped.
-  if (!isRecord(raw) || (raw.version !== 1 && raw.version !== 2) || !Array.isArray(raw.pieces) || raw.pieces.length === 0) return null;
+  if (!isRecord(raw) || (raw.version !== 1 && raw.version !== 2)) return null;
   const known = new Set(data.organelles.map((o) => o.id));
-  const base = emptyBuild(data, typeof raw.classId === 'string' ? raw.classId : undefined);
+  // Builds from before there were other classes are all Nanobot builds.
+  const classId = typeof raw.classId === 'string' && data.classes.some((c) => c.id === raw.classId) ? raw.classId : 'nanobot';
+  const base = emptyBuild(data, classId);
+  const cls = findClass(data, base.classId);
+  if (cls.body.kind === 'modular' && (!Array.isArray(raw.pieces) || raw.pieces.length === 0)) return null;
+  const rawPieces = cls.body.kind === 'modular' && Array.isArray(raw.pieces) ? raw.pieces : [];
   const seen = new Set<string>();
   const pieces: Build['pieces'] = [];
-  raw.pieces.forEach((p, i) => {
+  rawPieces.forEach((p, i) => {
     if (!isRecord(p) || typeof p.id !== 'string' || typeof p.type !== 'string' || seen.has(p.id)) return;
     const { id, type, attach } = p;
     if (i === 0) {
@@ -223,20 +242,27 @@ export function parseBuild(raw: unknown, data: GameData): Build | null {
     }
     seen.add(id);
   });
-  if (pieces.length === 0) return null;
+  if (cls.body.kind === 'modular' && pieces.length === 0) return null;
+  const evolutions =
+    cls.body.kind === 'evolving' && Array.isArray(raw.evolutions)
+      ? cls.body.tiers.map((options, i) => {
+          const pick = (raw.evolutions as unknown[])[i];
+          return typeof pick === 'string' && options.includes(pick) ? pick : '';
+        })
+      : [];
+  while (evolutions.length && !evolutions[evolutions.length - 1]) evolutions.pop();
   const numberMap = (v: unknown) =>
     isRecord(v) ? Object.fromEntries(Object.entries(v).filter(([, x]) => typeof x === 'number' && Number.isFinite(x))) : {};
   // Counters keep known ids only, as whole numbers from 1 to 99.
   const countMap = (v: unknown, ids: Set<string>) =>
     Object.entries(numberMap(v) as Record<string, number>).reduce((m, [id, n]) => (ids.has(id) ? withCount(m, id, n) : m), {} as Record<string, number>);
-  const cls = findClass(data, base.classId);
   return pruneSlots(
     {
       ...base,
       name: typeof raw.name === 'string' ? raw.name.slice(0, 80) : base.name,
-      pieces,
+      pieces: cls.body.kind === 'modular' ? pieces : [],
+      evolutions,
       slots: parseSlots(raw.slots, known),
-      upgrades: numberMap(raw.upgrades) as Record<string, number>,
       mutations: countMap(raw.mutations, new Set(data.mutations.map((m) => m.id))),
       plasmids: countMap(raw.plasmids, new Set(cls.plasmids.map((p) => p.id))),
       params: numberMap(raw.params) as Record<string, number>,

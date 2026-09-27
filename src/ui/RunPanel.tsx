@@ -3,6 +3,7 @@ import { findClass, type CalcResult } from '../engine/calc';
 import { mutationStacks } from '../engine/run';
 import type { Build, GameData, MutationDef, ParamDef, PlasmidDef } from '../engine/types';
 import type { Action } from '../state/build';
+import { Icon, mutationIcon, plasmidIcon } from './art';
 import { ParamInput } from './BuildSettings';
 
 interface Props {
@@ -45,6 +46,7 @@ export function RunPanel({ data, build, result, dispatch }: Props) {
   const plasmidRow = (p: PlasmidDef) => (
     <PlasmidRow
       key={p.id}
+      icon={plasmidIcon(p, data)}
       plasmid={p}
       grants={p.mutation ? mutationName.get(p.mutation) : undefined}
       count={build.plasmids[p.id] ?? 0}
@@ -63,7 +65,12 @@ export function RunPanel({ data, build, result, dispatch }: Props) {
           {RUN_PARAMS.map((id) => params.get(id))
             .filter((p): p is ParamDef => !!p)
             .map((p) => (
-              <ParamInput key={p.id} param={p} value={build.params[p.id] ?? p.default} onChange={(v) => dispatch({ type: 'setParam', id: p.id, value: v })} />
+              <ParamInput
+                key={p.id}
+                param={p}
+                value={build.params[p.id] ?? (p.id === 'hp' ? cls.hp : p.default)}
+                onChange={(v) => dispatch({ type: 'setParam', id: p.id, value: v })}
+              />
             ))}
         </fieldset>
         <div className="run-summary" aria-live="polite">
@@ -123,25 +130,47 @@ export function RunPanel({ data, build, result, dispatch }: Props) {
   );
 }
 
+/** Splits "Formula from the demo code. Uses your HP." into where the numbers come from and what to do. */
+function splitNotes(notes?: string): { source?: string; tip?: string } {
+  if (!notes) return {};
+  const m = notes.match(/^((?:Formula|Numbers) from [^.]+\.)\s*(.*)$/);
+  return m ? { source: m[1], tip: m[2] || undefined } : { tip: notes };
+}
+
 function MutationRow({ mutation: m, count, granted, onChange }: { mutation: MutationDef; count: number; granted: number; onChange: (n: number) => void }) {
+  const { source, tip } = splitNotes(m.notes);
   return (
-    <li className={`pick ${count + granted > 0 ? 'on' : ''}`}>
+    <li className={`pick ${count + granted > 0 ? 'on' : ''}`} title={source}>
+      <Icon src={mutationIcon(m.id)} size={40} className="pick-icon" />
       <div className="pick-text">
         <span className="pick-name">
           {m.name}
           {granted > 0 && <span className="badge">+{granted} from plasmids</span>}
         </span>
         <span className="muted small">{m.description}</span>
-        {m.notes && <span className="pick-note small">{m.notes}</span>}
+        {tip && <span className="pick-note small">{tip}</span>}
       </div>
       <Stepper label={m.name} value={count} onChange={onChange} />
     </li>
   );
 }
 
-function PlasmidRow({ plasmid: p, grants, count, onChange }: { plasmid: PlasmidDef; grants?: MutationDef; count: number; onChange: (n: number) => void }) {
+function PlasmidRow({
+  plasmid: p,
+  icon,
+  grants,
+  count,
+  onChange,
+}: {
+  plasmid: PlasmidDef;
+  icon: string;
+  grants?: MutationDef;
+  count: number;
+  onChange: (n: number) => void;
+}) {
   return (
     <li className={`pick ${count > 0 ? 'on' : ''}`}>
+      <Icon src={icon} size={40} className="pick-icon" />
       <div className="pick-text">
         <span className="pick-name">{p.name}</span>
         <span className="muted small">{p.description}</span>

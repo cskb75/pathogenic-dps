@@ -64,15 +64,55 @@ export interface PieceTypeDef extends PieceShape {
   addable: boolean;
 }
 
-export interface UpgradeDef {
+/** Slot types some bodies have built in (the same effects as grafts). */
+export type SpecialSlot = 'volatile' | 'conductive' | 'omni';
+
+export interface PlanSlot {
+  /** The game's slot name (ESlot1, ISlot2...): organelles keep their slot when you evolve. */
+  id: string;
+  kind: SlotKind;
+  special?: SpecialSlot;
+  /** Position in editor units (100 game pixels = 1), y pointing toward the tail. */
+  x: number;
+  y: number;
+  /** Direction the slot faces, in radians. */
+  r: number;
+  /** Mirrored twin of this slot on the other side: always holds a copy of its organelle. */
+  mirrorOf?: string;
+}
+
+/** A fixed body layout: a class's starting body or one of its evolutions. */
+export interface BodyPlan {
   id: string;
   name: string;
-  description: string;
-  maxStacks: number;
-  /** Extra damage (as a share of base damage) for weapons on these piece types, per stack. */
-  pieceDamage?: { pieceTypes: string[]; bonus: number };
-  /** Numbers not confirmed from the game files yet. */
-  unverified?: boolean;
+  /** 0 for the starting body, then the evolution tier. */
+  tier: number;
+  slots: PlanSlot[];
+  /** Connected slot pairs. */
+  links: [string, string][];
+  outline: [number, number][];
+  /** Body art, drawn with its top-left corner at (x, y). Paths are relative to the site root. */
+  sprite?: { src: string; x: number; y: number; w: number; h: number };
+  /** Share of base damage added to every attack from then on. */
+  bonusDamage?: number;
+  bonusHp?: number;
+  description?: string;
+}
+
+/** Nanobot-style bodies: modules attached edge to edge. */
+export interface ModularBody {
+  kind: 'modular';
+  corePiece: string;
+  pieceTypes: PieceTypeDef[];
+}
+
+/** Bodies with fixed layouts that change when you evolve. */
+export interface EvolvingBody {
+  kind: 'evolving';
+  /** Body plan ids. */
+  start: string;
+  /** Evolution choices at each level-up tier. */
+  tiers: string[][];
 }
 
 /**
@@ -96,18 +136,40 @@ export interface RunEffects {
   perBoss?: number;
   /** +bonus, minus perWeapon for each weapon equipped, never below floor. */
   focused?: { bonus: number; perWeapon: number; floor: number };
-  /** Weapons on one half of the body gain, the other half lose. */
-  chirality?: { side: 'left' | 'right'; bonus: number; penalty: number };
+  /** Organelles in one part of the body (Chirality, Dorsal Dominance...). */
+  zone?: ZoneEffect;
   /** Applies while at or below this HP. */
   lowHp?: { maxHp: number; damage: number; attackSpeed: number };
   /** Extra Overcharge strength for mitochondria (and Vesicles). */
   generatorStrength?: number;
+  /** Active organelles need this much less Overcharge to use (0.25 = 25% less). */
+  activeCost?: number;
   /** Extra stamina containers (100 stamina each). */
   staminaContainers?: number;
   /** Share of base damage per empty stamina container. */
   starvation?: number;
   /** Weapons stop costing stamina. */
   noStamina?: boolean;
+}
+
+/**
+ * An effect for organelles in one part of the body, measured from the body's
+ * centre with the front of the body up (the game uses the organelle's slot).
+ */
+export interface ZoneEffect {
+  side: 'left' | 'right' | 'top' | 'bottom';
+  /** How far from the centre line a slot must be to count (editor units: 0.15 = 15 game pixels). */
+  threshold: number;
+  /** Share of base damage for attacks from organelles in the zone. */
+  damage?: number;
+  /** Share of base damage for attacks from organelles on the opposite side. */
+  opposite?: number;
+  /** Only melee attacks. */
+  meleeOnly?: boolean;
+  /** Extra Overcharge strength for mitochondria in the zone. */
+  generatorStrength?: number;
+  /** Active organelles in the zone need this much less Overcharge. */
+  activeCost?: number;
 }
 
 export interface MutationDef {
@@ -133,10 +195,16 @@ export interface PlasmidDef {
 export interface ClassDef {
   id: string;
   name: string;
+  /** One-line summary shown in the class picker. */
+  tagline: string;
   description: string;
-  corePiece: string;
-  pieceTypes: PieceTypeDef[];
-  upgrades: UpgradeDef[];
+  /** Max HP at the start of a run. */
+  hp: number;
+  /** Portrait image, relative to the site root. */
+  portrait?: string;
+  /** Where the class's data comes from. */
+  source: string;
+  body: ModularBody | EvolvingBody;
   plasmids: PlasmidDef[];
 }
 
@@ -149,6 +217,7 @@ export interface GameData {
   grafts: GraftDef[];
   params: ParamDef[];
   mutations: MutationDef[];
+  bodies: Record<string, BodyPlan>;
   classes: ClassDef[];
 }
 
@@ -185,9 +254,11 @@ export interface Build {
   version: 2;
   name: string;
   classId: string;
+  /** Modular classes: the modules, in attachment order. */
   pieces: PieceInstance[];
+  /** Evolving classes: the evolution picked at each tier ('' = not yet, or skipped). */
+  evolutions: string[];
   slots: Record<string, SlotState>;
-  upgrades: Record<string, number>;
   /** Mutations picked this run (DNA upgrades): id -> times picked. */
   mutations: Record<string, number>;
   /** Plasmids bought: id -> number of nodes. */
