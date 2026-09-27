@@ -10,7 +10,7 @@ interface Props {
 }
 
 const KINDS: Record<CustomKind, { label: string; unit: 'percent' | 'mult'; initial: number }> = {
-  damage: { label: '+% of base damage (like plasmids)', unit: 'percent', initial: 0.1 },
+  damage: { label: '+% of base damage', unit: 'percent', initial: 0.1 },
   damageMult: { label: '× all damage', unit: 'mult', initial: 1.1 },
   attackSpeed: { label: '+% attack speed', unit: 'percent', initial: 0.1 },
   overchargeStrength: { label: '+% Overcharge strength', unit: 'percent', initial: 0.2 },
@@ -19,7 +19,7 @@ const KINDS: Record<CustomKind, { label: string; unit: 'percent' | 'mult'; initi
 const GROUPS: { title: string; ids: string[] }[] = [
   { title: 'Aim and positioning', ids: ['angledHit', 'pelletHit', 'sideHit', 'mineHit', 'orbContact', 'targetDistance', 'backstabChance', 'beatSync'] },
   { title: 'Mitochondria triggers', ids: ['roomLength', 'killRate', 'hitsTakenRate', 'dodgeRate', 'pickupRate', 'perfectRooms'] },
-  { title: 'Run state', ids: ['level', 'resonantStacks', 'phagosomeKills', 'staminaLimits', 'maxStamina'] },
+  { title: 'Stamina and stacking organelles', ids: ['staminaLimits', 'maxStamina', 'resonantStacks', 'phagosomeKills'] },
 ];
 
 export function BuildSettings({ data, build, dispatch }: Props) {
@@ -35,7 +35,7 @@ export function BuildSettings({ data, build, dispatch }: Props) {
 
       <div className="settings-grid">
         <fieldset>
-          <legend>{cls.name} upgrades</legend>
+          <legend>{cls.upgrades.length > 0 ? `${cls.name} upgrades` : 'Targets'}</legend>
           {cls.upgrades.map((u) => (
             <label key={u.id} className="check" title={u.description}>
               <input
@@ -70,7 +70,7 @@ export function BuildSettings({ data, build, dispatch }: Props) {
 
       <fieldset className="custom">
         <legend>Extra bonuses</legend>
-        <p className="muted small">For anything the calculator doesn't cover yet, like plasmid upgrades or mutations.</p>
+        <p className="muted small">For anything the calculator doesn't cover yet.</p>
         {build.custom.map((c) => {
           const kind = KINDS[c.kind];
           return (
@@ -114,7 +114,7 @@ export function BuildSettings({ data, build, dispatch }: Props) {
   );
 }
 
-function ParamInput({ param, value, onChange }: { param: ParamDef; value: number; onChange: (v: number) => void }) {
+export function ParamInput({ param, value, onChange }: { param: ParamDef; value: number; onChange: (v: number) => void }) {
   const shown = param.percent ? Math.round(value * 100) : value;
   return (
     <label className="number-row" title={param.description}>

@@ -5,6 +5,7 @@ import { emptyBuild, exampleBuild, loadInitialBuild, makeReducer, saveBuild, sha
 import { BodyEditor } from './BodyEditor';
 import { BuildSettings } from './BuildSettings';
 import { Results } from './Results';
+import { RunPanel } from './RunPanel';
 import { SlotInspector } from './SlotInspector';
 
 const reducer = makeReducer(gameData);
@@ -81,6 +82,7 @@ export function App() {
       <main className="layout">
         <div className="col-main">
           <BodyEditor data={gameData} build={build} result={result} selected={selectedSlot} onSelect={selectFromEditor} dispatch={dispatch} />
+          <RunPanel data={gameData} build={build} result={result} dispatch={dispatch} />
           <BuildSettings data={gameData} build={build} dispatch={dispatch} />
         </div>
         <div className="col-side">

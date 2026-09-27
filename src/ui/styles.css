@@ -260,8 +260,11 @@ input[type='range'] {
   .results {
     order: 3;
   }
-  .settings {
+  .run-panel {
     order: 4;
+  }
+  .settings {
+    order: 5;
   }
   .body-svg {
     height: auto;
@@ -886,4 +889,89 @@ summary {
 }
 .custom-row {
   grid-template-columns: minmax(100px, 1fr) minmax(160px, 1.4fr) 90px auto !important;
+}
+
+/* ---- This run: mutations and plasmids ---------------------------------- */
+
+.run-summary h3 {
+  margin-top: 0;
+}
+.run-summary ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+}
+.run-summary li + li {
+  margin-top: 2px;
+}
+.picker-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.picker-head h3 {
+  margin: 0;
+}
+.picker-tools {
+  display: flex;
+  gap: 6px;
+}
+.picker-tools input {
+  width: 180px;
+}
+.pick-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 6px;
+}
+.pick {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+.pick.on {
+  border-color: var(--accent);
+}
+.pick-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pick-name {
+  font-weight: 600;
+}
+.pick-note {
+  color: var(--grant);
+}
+.stepper {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+.stepper button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  line-height: 1;
+}
+.stepper output {
+  min-width: 26px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.stepper button:disabled {
+  opacity: 0.4;
+  cursor: default;
 }

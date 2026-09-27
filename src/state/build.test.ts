@@ -80,4 +80,28 @@ describe('build state', () => {
     expect(Object.keys(build.slots).some((id) => id.startsWith('p1.'))).toBe(false);
     expect(reducer(build, { type: 'removePiece', pieceId: 'core' })).toBe(build);
   });
+
+  it('counts mutation stacks and plasmid nodes, dropping them at zero', () => {
+    let build = emptyBuild(gameData, 'nanobot');
+    build = reducer(build, { type: 'setMutation', id: 'corrosive-acid', count: 2 });
+    build = reducer(build, { type: 'setPlasmid', id: 'nanobot-staminaplasmid', count: 1 });
+    expect(build.mutations).toEqual({ 'corrosive-acid': 2 });
+    expect(build.plasmids).toEqual({ 'nanobot-staminaplasmid': 1 });
+    build = reducer(build, { type: 'setMutation', id: 'corrosive-acid', count: 0 });
+    expect(build.mutations).toEqual({});
+    build = reducer(reducer(build, { type: 'setMutation', id: 'adrenaline', count: 1 }), { type: 'clearMutations' });
+    expect(build.mutations).toEqual({});
+    expect(build.plasmids).toEqual({ 'nanobot-staminaplasmid': 1 });
+  });
+
+  it('sanitises mutation and plasmid counts from links', () => {
+    const tampered = {
+      ...emptyBuild(gameData, 'nanobot'),
+      mutations: { 'corrosive-acid': 2.6, adrenaline: -3, 'no-such-mutation': 1, 'fast-twitch-fibers': 1e9 },
+      plasmids: { 'nanobot-staminaplasmid': 1, 'corrosive-acid': 1 },
+    };
+    const parsed = decodeBuild(encodeBuild(tampered as never), gameData)!;
+    expect(parsed.mutations).toEqual({ 'corrosive-acid': 3, 'fast-twitch-fibers': 99 });
+    expect(parsed.plasmids).toEqual({ 'nanobot-staminaplasmid': 1 });
+  });
 });
