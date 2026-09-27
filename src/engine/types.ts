@@ -75,6 +75,61 @@ export interface UpgradeDef {
   unverified?: boolean;
 }
 
+/**
+ * What a mutation (or a plasmid) does to damage. Values are per stack; the
+ * game adds most of them as a share of base damage to every attack.
+ */
+export interface RunEffects {
+  /** Share of base damage added to every attack. */
+  damage?: number;
+  /** Share of base damage added to melee attacks. */
+  meleeDamage?: number;
+  /** Attack speed bonus (adds with weapon infusers). */
+  attackSpeed?: number;
+  /** Share of base damage per core held. */
+  perCore?: number;
+  /** Share of base damage per empty internal slot. */
+  perEmptyInternal?: number;
+  /** Share of base damage per active mitochondrion. */
+  perActiveMito?: number;
+  /** Share of base damage per boss beaten this run. */
+  perBoss?: number;
+  /** +bonus, minus perWeapon for each weapon equipped, never below floor. */
+  focused?: { bonus: number; perWeapon: number; floor: number };
+  /** Weapons on one half of the body gain, the other half lose. */
+  chirality?: { side: 'left' | 'right'; bonus: number; penalty: number };
+  /** Applies while at or below this HP. */
+  lowHp?: { maxHp: number; damage: number; attackSpeed: number };
+  /** Extra Overcharge strength for mitochondria (and Vesicles). */
+  generatorStrength?: number;
+  /** Extra stamina containers (100 stamina each). */
+  staminaContainers?: number;
+  /** Share of base damage per empty stamina container. */
+  starvation?: number;
+  /** Weapons stop costing stamina. */
+  noStamina?: boolean;
+}
+
+export interface MutationDef {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  effects?: RunEffects;
+  /** How the calculator treats it, shown in the UI. */
+  notes?: string;
+}
+
+export interface PlasmidDef {
+  id: string;
+  name: string;
+  description: string;
+  effects?: RunEffects;
+  /** Start the run with this mutation (counts as one stack of it). */
+  mutation?: string;
+  notes?: string;
+}
+
 export interface ClassDef {
   id: string;
   name: string;
@@ -82,6 +137,7 @@ export interface ClassDef {
   corePiece: string;
   pieceTypes: PieceTypeDef[];
   upgrades: UpgradeDef[];
+  plasmids: PlasmidDef[];
 }
 
 export interface GameData {
@@ -92,6 +148,7 @@ export interface GameData {
   traits: TraitDef[];
   grafts: GraftDef[];
   params: ParamDef[];
+  mutations: MutationDef[];
   classes: ClassDef[];
 }
 
@@ -131,6 +188,10 @@ export interface Build {
   pieces: PieceInstance[];
   slots: Record<string, SlotState>;
   upgrades: Record<string, number>;
+  /** Mutations picked this run (DNA upgrades): id -> times picked. */
+  mutations: Record<string, number>;
+  /** Plasmids bought: id -> number of nodes. */
+  plasmids: Record<string, number>;
   params: Record<string, number>;
   /** Number of enemies in range, for multi-target DPS. */
   targets: number;

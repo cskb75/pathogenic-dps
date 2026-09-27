@@ -23,6 +23,8 @@ describe('game data', () => {
             pieces: [{ id: 'core', type: 'core' }],
             slots: { ...other, [slot]: { organelle: { id: o.id, rarity, traits: [] } } },
             upgrades: {},
+            mutations: {},
+            plasmids: {},
             params: {},
             targets: 3,
             custom: [],

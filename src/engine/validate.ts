@@ -19,6 +19,7 @@ export function validateData(data: GameData): string[] {
   dupes(data.traits.map((t) => t.id), 'trait');
   dupes(data.grafts.map((g) => g.id), 'graft');
   dupes(data.params.map((p) => p.id), 'param');
+  dupes(data.mutations.map((m) => m.id), 'mutation');
 
   const organelles = new Map(data.organelles.map((o) => [o.id, o]));
   const params = new Set(data.params.map((p) => p.id));
@@ -34,6 +35,10 @@ export function validateData(data: GameData): string[] {
   }
   for (const c of data.classes) {
     if (!c.pieceTypes.some((p) => p.id === c.corePiece)) problems.push(`Class "${c.id}": core piece "${c.corePiece}" is not a piece type`);
+    dupes(c.plasmids.map((p) => p.id), `${c.id} plasmid`);
+    for (const p of c.plasmids) {
+      if (p.mutation && !data.mutations.some((m) => m.id === p.mutation)) problems.push(`Plasmid "${p.id}": unknown mutation "${p.mutation}"`);
+    }
     for (const u of c.upgrades) {
       for (const t of u.pieceDamage?.pieceTypes ?? []) {
         if (!c.pieceTypes.some((p) => p.id === t)) problems.push(`Upgrade "${u.id}": unknown piece type "${t}"`);

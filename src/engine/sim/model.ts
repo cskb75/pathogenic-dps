@@ -134,8 +134,8 @@ export interface Ctx {
   works(item: Item): boolean;
   /** Records that an effect travelled from one slot to another, for the editor's arrows. */
   link(from: Item, to: Item, kind: 'attack' | 'gun' | 'overcharge'): void;
-  /** Share of base damage added to every attack the game announces (plasmids, custom bonuses). */
-  globalDamage: number;
+  /** Shares of base damage the game adds to an attack as it's fired (mutations, plasmids, custom bonuses). */
+  bonuses(a: Attack, emitter: Item): { source: string; share: number }[];
   gun: GunState | null;
   /** Marks a weapon's stamina as refunded (Glycogen Synthesizer). */
   refund(weapon: Item): void;
@@ -237,10 +237,10 @@ export function spawnOnHit(a: Attack, d: Deriver) {
   a.onHit.push(d);
 }
 
-/** Global and Volatile-slot bonuses the game applies to attacks it announces. */
+/** Volatile-slot and run bonuses the game applies to attacks it announces. */
 export function announce(ctx: Ctx, a: Attack, emitter: Item) {
   if (emitter.graft?.id === 'volatile') addDamage(a, 0.4, 'Volatile slot');
-  if (ctx.globalDamage) addDamage(a, ctx.globalDamage, 'Global bonuses');
+  for (const b of ctx.bonuses(a, emitter)) addDamage(a, b.share, b.source);
 }
 
 // ---------------------------------------------------------------------------

@@ -23,10 +23,12 @@ import {
   type Item,
   type TraceLine,
 } from './sim/model';
+import { runModel, type RunLine, type Share } from './run';
 import type { Build, ClassDef, GameData, OrganelleInfo, OrganelleInstance } from './types';
 import { RARITIES } from './types';
 
 export type { AttackNode, TraceLine } from './sim/model';
+export type { RunLine } from './run';
 
 const FALLBACK_SHAPE: PieceShape = { sides: 4, centerSlot: 'internal', edgeSlot: 'external' };
 const MAX_ENUMERATED_MITOS = 10;
@@ -36,6 +38,8 @@ const STAMINA_REGEN = 190;
 const STAMINA_DELAY = 1;
 /** Explosions scale with the level to keep up with enemy health. */
 const EXPLOSION_LEVEL_SCALING = 0.75;
+/** How far (in module sides) a slot must be from the middle to count as left or right (Chirality). */
+const SIDE_THRESHOLD = 0.15;
 
 export interface StateView {
   label: string;
@@ -98,6 +102,9 @@ export interface CalcResult {
   totalMultiDps: number;
   /** Share of time you can keep firing before stamina runs out (averaged). */
   staminaDuty: number;
+  maxStamina: number;
+  /** What each mutation and plasmid is doing. */
+  run: RunLine[];
   links: Link[];
   warnings: string[];
 }
@@ -158,9 +165,25 @@ export function calculate(build: Build, data: GameData): CalcResult {
   }
   const neighbours = (item: Item) => neighbourMap.get(item) ?? [];
 
+  // --- Mutations, plasmids and run state -------------------------------------------
+  const run = runModel(build, data, cls, {
+    cores: Math.max(0, param('cores')),
+    hp: param('hp'),
+    bossesBeaten: Math.max(0, param('bossesBeaten')),
+    weapons: [...items.values()].filter((i) => i.info.category === 'weapon' || i.behaviour.weapon).length,
+    emptyInternal: body.slots.filter((sl) => sl.kind === 'internal' && !items.has(sl.id)).length,
+  });
+  warnings.push(...run.warnings);
+  const maxStamina = Math.max(1, param('maxStamina') + run.extraStamina);
+  const sideOf = (item: Item): 'left' | 'right' | null => {
+    const x = body.slotById.get(item.slotId)?.position.x ?? 0;
+    return x < -SIDE_THRESHOLD ? 'left' : x > SIDE_THRESHOLD ? 'right' : null;
+  };
+
   // --- Overcharge ----------------------------------------------------------------
   const overchargeBonus = custom('overchargeStrength').reduce((s, c) => s + c.value, 0);
-  const strength = (item: Item) => (item.graft?.id === 'conductive' ? 0.4 : 0) + overchargeBonus;
+  const strength = (item: Item) =>
+    (item.graft?.id === 'conductive' ? 0.4 : 0) + overchargeBonus + (item.behaviour.mito || item.behaviour.conduit ? run.generatorStrength : 0);
   const mitos = [...items.values()].filter((i) => i.behaviour.mito);
   const mitoResults = new Map<Item, MitoResult>();
   for (const m of mitos) {
@@ -225,9 +248,15 @@ export function calculate(build: Build, data: GameData): CalcResult {
       const stacks = Math.min(build.upgrades[u.id] ?? 0, u.maxStacks);
       return u.pieceDamage && stacks > 0 && u.pieceDamage.pieceTypes.includes(item.pieceType) ? s + u.pieceDamage.bonus * stacks : s;
     }, 0);
-  const globalDamage = custom('damage').reduce((s, c) => s + c.value, 0);
+  const runDamage = run.damage.reduce((s, d) => s + d.share, 0);
+  const fixedShares: Share[] = [
+    { source: 'Mutations and plasmids', share: runDamage },
+    { source: 'Extra bonuses', share: custom('damage').reduce((s, c) => s + c.value, 0) },
+  ].filter((b) => Math.abs(b.share) > 1e-9);
   const damageMult = custom('damageMult').reduce((p, c) => p * c.value, 1);
-  const customSpeed = custom('attackSpeed').reduce((s, c) => s + c.value, 0);
+  const speedShares: Share[] = [...run.attackSpeed, { source: 'Extra bonuses', share: custom('attackSpeed').reduce((s, c) => s + c.value, 0) }].filter(
+    (b) => Math.abs(b.share) > 1e-9,
+  );
   const weaponItems = [...items.values()].filter((i) => i.behaviour.weapon);
 
   interface WeaponEval {
@@ -242,7 +271,42 @@ export function calculate(build: Build, data: GameData): CalcResult {
 
   function evaluateState(activity: Map<Item, number>, recordLinks: boolean) {
     const charges = chargesFor(activity);
+    const activeMitos = mitos.reduce((s, m) => s + (activity.get(m) ?? 0), 0);
+    if (recordLinks) {
+      for (const m of mitos) {
+        if (!activity.get(m)) continue;
+        for (const n of neighbours(m)) {
+          if (!n.behaviour.mito && isModeled(n.info.id)) linkSet.set(`overcharge:${m.slotId}>${n.slotId}`, { from: m.slotId, to: n.slotId, kind: 'overcharge' });
+        }
+      }
+    }
+    const first = fire(charges, activeMitos, 0, recordLinks);
+    // Starvation Reflex: while firing, stamina drains from full to empty, so on average half of it is missing.
+    const starving = run.starvation.length && first.use > 0 ? maxStamina / 2 / 100 : 0;
+    const { results, use, refunded } = starving ? fire(charges, activeMitos, starving, false) : first;
+    let duty = 1;
+    if (param('staminaLimits') && use > 0) {
+      const firing = maxStamina / use;
+      duty = firing / (firing + STAMINA_DELAY + maxStamina / STAMINA_REGEN);
+    }
+    return { results, duty, charges, refunded };
+  }
+
+  /** Fires every weapon once in an Overcharge state. `starving`: hundreds of stamina missing. */
+  function fire(charges: Map<Item, number>, activeMitos: number, starving: number, recordLinks: boolean) {
     const refunded = new Set<Item>();
+    const bonuses = (a: Attack, emitter: Item): Share[] => {
+      const out = [...fixedShares];
+      if (a.melee) out.push(...run.meleeDamage);
+      const side = sideOf(emitter);
+      for (const c of run.chirality) {
+        const share = side === c.side ? c.bonus : side ? c.penalty : 0;
+        if (share) out.push({ source: c.source, share });
+      }
+      if (activeMitos) for (const b of run.perActiveMito) out.push({ source: b.source, share: b.share * activeMitos });
+      if (starving) for (const b of run.starvation) out.push({ source: b.source, share: b.share * starving });
+      return out;
+    };
     const ctx: Ctx = {
       param,
       targets: Math.max(1, Math.floor(build.targets)),
@@ -252,19 +316,11 @@ export function calculate(build: Build, data: GameData): CalcResult {
       link: (from, to, kind) => {
         if (recordLinks) linkSet.set(`${kind}:${from.slotId}>${to.slotId}`, { from: from.slotId, to: to.slotId, kind });
       },
-      globalDamage,
+      bonuses,
       gun: null,
       refund: (w) => refunded.add(w),
       budget: { left: CHAIN_BUDGET, exhausted: false },
     };
-    if (recordLinks) {
-      for (const m of mitos) {
-        if (!activity.get(m)) continue;
-        for (const n of neighbours(m)) {
-          if (!n.behaviour.mito && isModeled(n.info.id)) ctx.link(m, n, 'overcharge');
-        }
-      }
-    }
 
     const results = new Map<Item, WeaponEval>();
     for (const w of weaponItems) {
@@ -276,8 +332,11 @@ export function calculate(build: Build, data: GameData): CalcResult {
         continue;
       }
       // Attack speed: weapon infusers add up, Overcharge multiplies.
-      const gun: GunState = { bonus: customSpeed, trace: [], interval: 0 };
-      if (customSpeed) gun.trace.push({ source: 'Global bonuses', text: `+${Math.round(customSpeed * 100)}% attack speed` });
+      const gun: GunState = { bonus: 0, trace: [], interval: 0 };
+      for (const b of speedShares) {
+        gun.bonus += b.share;
+        gun.trace.push({ source: b.source, text: `${b.share >= 0 ? '+' : ''}${Math.round(b.share * 100)}% attack speed` });
+      }
       for (const n of neighbours(w)) {
         if (n.behaviour.modifyGun && ctx.works(n)) {
           const before = gun.trace.length;
@@ -339,7 +398,7 @@ export function calculate(build: Build, data: GameData): CalcResult {
       const single = nodes.reduce((s, n) => s + n.single, 0) * rate * damageMult;
       const multi = nodes.reduce((s, n) => s + n.multi, 0) * rate * damageMult;
       if (ctx.budget.exhausted) chainsCut.add(w.info.name);
-      results.set(w, { single, multi, rate, stamina: prof.stamina * rate, nodes, gunTrace: gun.trace, charge: c });
+      results.set(w, { single, multi, rate, stamina: run.noStamina ? 0 : prof.stamina * rate, nodes, gunTrace: gun.trace, charge: c });
       ctx.gun = null;
     }
 
@@ -353,13 +412,7 @@ export function calculate(build: Build, data: GameData): CalcResult {
     for (const g of items.values()) {
       if (g.behaviour.staminaRefund) use -= g.behaviour.staminaRefund(g.r, ctx.charge(g));
     }
-    let duty = 1;
-    if (param('staminaLimits') && use > 0) {
-      const max = Math.max(1, param('maxStamina'));
-      const firing = max / use;
-      duty = firing / (firing + STAMINA_DELAY + max / STAMINA_REGEN);
-    }
-    return { results, duty, charges, refunded };
+    return { results, use, refunded };
   }
 
   // --- Averaging over states ----------------------------------------------------
@@ -441,6 +494,8 @@ export function calculate(build: Build, data: GameData): CalcResult {
     totalDps: counted.reduce((s, w) => s + w.dps, 0),
     totalMultiDps: counted.reduce((s, w) => s + w.multiDps, 0),
     staminaDuty: dutyAvg,
+    maxStamina,
+    run: run.summary,
     links: [...linkSet.values()],
     warnings: [
       ...new Set([

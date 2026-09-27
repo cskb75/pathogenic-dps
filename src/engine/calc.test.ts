@@ -23,6 +23,8 @@ function build(slots: Record<string, SlotState>, extra: Partial<Build> = {}): Bu
     ],
     slots,
     upgrades: {},
+    mutations: {},
+    plasmids: {},
     params: { staminaLimits: 0 },
     targets: 1,
     custom: [],
@@ -199,5 +201,102 @@ describe('stamina', () => {
   it('Glycogen Synthesizer refunds the stamina of weapons it touches', () => {
     const b = build({ 'core.e0': org('pressurized-spicule'), 'core.c': org('glycogen-synthesizer') }, { params: {} });
     expect(dps(b, 'core.e0')).toBeCloseTo(140 / 2.5);
+  });
+});
+
+describe('mutations, plasmids and run state', () => {
+  const caustic = (slot = 'core.e0') => ({ [slot]: org('caustic-secretor') });
+  const run = (slots: Record<string, SlotState>, extra: Partial<Build>) => build(slots, extra);
+
+  it('adds damage mutations per stack', () => {
+    // Corrosive Acid x2: +20% of base damage
+    expect(dps(run(caustic(), { mutations: { 'corrosive-acid': 2 } }), 'core.e0')).toBeCloseTo(72);
+  });
+
+  it('counts mutations granted by plasmids as extra stacks', () => {
+    // Fast Twitch Fibers: +15% attack speed, from the plasmid and picked once more
+    expect(dps(run(caustic(), { plasmids: { 'nanobot-startingmutationplasmid': 1 } }), 'core.e0')).toBeCloseTo(60 * 1.15);
+    const both = run(caustic(), { plasmids: { 'nanobot-startingmutationplasmid': 1 }, mutations: { 'fast-twitch-fibers': 1 } });
+    expect(dps(both, 'core.e0')).toBeCloseTo(60 * 1.3);
+  });
+
+  it('Argentic Coating: +0.5% damage per core held', () => {
+    expect(dps(run(caustic(), { mutations: { 'argentic-coating': 1 }, params: { staminaLimits: 0, cores: 50 } }), 'core.e0')).toBeCloseTo(75);
+  });
+
+  it('Prokaryotic Ancestry: +20% per empty internal slot', () => {
+    // core.c and s.c are both empty
+    expect(dps(run(caustic(), { mutations: { 'prokaryotic-ancestry': 1 } }), 'core.e0')).toBeCloseTo(84);
+    const filled = run({ ...caustic(), 'core.c': org('vesicle') }, { mutations: { 'prokaryotic-ancestry': 1 } });
+    expect(dps(filled, 'core.e0')).toBeCloseTo(72);
+  });
+
+  it('Focused Specialization: +200%, minus 50 points per weapon', () => {
+    expect(dps(run(caustic(), { mutations: { 'focused-specialization': 1 } }), 'core.e0')).toBeCloseTo(150);
+    const three = run({ ...caustic(), ...caustic('core.e2'), ...caustic('s.e2') }, { mutations: { 'focused-specialization': 1 } });
+    expect(dps(three, 'core.e0')).toBeCloseTo(90);
+  });
+
+  it('Chirality: weapons on one side gain, the other side lose, the middle is unaffected', () => {
+    const b = run({ ...caustic('core.e3'), ...caustic('s.e1'), ...caustic('core.e0') }, { mutations: { 'sinistral-chirality': 1 } });
+    expect(dps(b, 'core.e3')).toBeCloseTo(120);
+    expect(dps(b, 's.e1')).toBeCloseTo(30);
+    expect(dps(b, 'core.e0')).toBeCloseTo(60);
+  });
+
+  it('Adrenaline works at 2 HP or less', () => {
+    const b = run(caustic(), { mutations: { adrenaline: 1 }, params: { staminaLimits: 0, hp: 1 } });
+    expect(dps(b, 'core.e0')).toBeCloseTo(60 * 1.4 * 1.4);
+    b.params.hp = 3;
+    expect(dps(b, 'core.e0')).toBeCloseTo(60);
+  });
+
+  it('Mitochondrial Augmentation strengthens Overcharge from mitochondria', () => {
+    const b = run({ ...caustic(), 'core.c': { ...org('entrant-mitochondrion'), uptime: 1 } }, { mutations: { 'mitochondrial-augmentation': 1 } });
+    expect(dps(b, 'core.e0')).toBeCloseTo(60 * (1 + 0.3 * 1.15));
+  });
+
+  it('Respiratory Burst: +15% damage per active mitochondrion', () => {
+    const b = run({ ...caustic(), 'core.c': { ...org('entrant-mitochondrion'), uptime: 1 } }, { mutations: { 'respiratory-burst': 1 } });
+    expect(dps(b, 'core.e0')).toBeCloseTo(60 * 1.15 * 1.3);
+  });
+
+  it('Myofibrillar Hypertrophy boosts melee attacks only', () => {
+    const b = run({ ...caustic(), 'core.e2': org('tri-phase-tendril') }, { mutations: { 'myofibrillar-hypertrophy': 1 } });
+    expect(dps(b, 'core.e0')).toBeCloseTo(60);
+    expect(dps(b, 'core.e2')).toBeCloseTo(((30 * 5) / (3 * 0.6 + 0.4)) * 1.15);
+  });
+
+  it('Glycogen Reserve adds a stamina container', () => {
+    const b = run(caustic(), { mutations: { 'glycogen-reserve': 1 }, params: {} });
+    const firing = 200 / 5;
+    expect(dps(b, 'core.e0')).toBeCloseTo((60 * firing) / (firing + 1 + 200 / 190));
+    expect(calculate(b, gameData).maxStamina).toBe(200);
+  });
+
+  it('Starvation Reflex averages half a container missing while firing', () => {
+    const b = run(caustic(), { mutations: { 'starvation-reflex': 1 }, params: {} });
+    const firing = 100 / 5;
+    expect(dps(b, 'core.e0')).toBeCloseTo((60 * 1.075 * firing) / (firing + 1 + 100 / 190));
+  });
+
+  it('Glycogen Funnel: no stamina cost, less damage', () => {
+    const b = run(caustic(), { mutations: { 'glycogen-funnel': 1, 'starvation-reflex': 1 }, params: {} });
+    expect(dps(b, 'core.e0')).toBeCloseTo(42);
+  });
+
+  it('plasmids add damage per node, and Virulent Adaptation per boss', () => {
+    const b = run(caustic(), {
+      plasmids: { 'nanobot-damagelowerhpplasmid2': 2, 'nanobot-damageprogressionplasmid': 1 },
+      params: { staminaLimits: 0, bossesBeaten: 3 },
+    });
+    expect(dps(b, 'core.e0')).toBeCloseTo(60 * (1 + 0.3 + 0.15));
+  });
+
+  it('summarises what each pick does and warns about unknown ones', () => {
+    const r = calculate(run(caustic(), { mutations: { 'corrosive-acid': 1, 'cilium-growth': 1, nope: 1 } }), gameData);
+    expect(r.run).toContainEqual({ source: 'Corrosive Acid', text: '+10% damage', inactive: false });
+    expect(r.run.find((l) => l.source === 'Cilium Growth')?.inactive).toBe(true);
+    expect(r.warnings).toContain('Unknown mutation "nope"');
   });
 });

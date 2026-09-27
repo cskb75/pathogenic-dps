@@ -14,6 +14,8 @@ export function emptyBuild(data: GameData, classId = data.classes[0].id): Build 
     pieces: [{ id: 'core', type: cls.corePiece }],
     slots: {},
     upgrades: {},
+    mutations: {},
+    plasmids: {},
     params: {},
     targets: 1,
     custom: [],
@@ -59,6 +61,9 @@ export type Action =
   | { type: 'setOrganelle'; slotId: string; organelle: OrganelleInstance | undefined }
   | { type: 'setSlot'; slotId: string; patch: Partial<Omit<SlotState, 'organelle'>> }
   | { type: 'setUpgrade'; id: string; stacks: number }
+  | { type: 'setMutation'; id: string; count: number }
+  | { type: 'setPlasmid'; id: string; count: number }
+  | { type: 'clearMutations' }
   | { type: 'setParam'; id: string; value: number }
   | { type: 'setTargets'; targets: number }
   | { type: 'setCustom'; custom: CustomModifier[] };
@@ -68,6 +73,15 @@ function pruneSlots(build: Build, data: GameData): Build {
   const body = bodyFor(build, data);
   const slots = Object.fromEntries(Object.entries(build.slots).filter(([id]) => body.slotById.has(id)));
   return { ...build, slots };
+}
+
+/** Sets a counter, dropping it when it reaches zero. */
+function withCount(map: Record<string, number>, id: string, count: number): Record<string, number> {
+  const next = { ...map };
+  const n = Math.max(0, Math.min(99, Math.round(count) || 0));
+  if (n > 0) next[id] = n;
+  else delete next[id];
+  return next;
 }
 
 function nextPieceId(build: Build): string {
@@ -104,6 +118,12 @@ export function makeReducer(data: GameData) {
       }
       case 'setUpgrade':
         return { ...build, upgrades: { ...build.upgrades, [action.id]: action.stacks } };
+      case 'setMutation':
+        return { ...build, mutations: withCount(build.mutations, action.id, action.count) };
+      case 'setPlasmid':
+        return { ...build, plasmids: withCount(build.plasmids, action.id, action.count) };
+      case 'clearMutations':
+        return { ...build, mutations: {} };
       case 'setParam':
         return { ...build, params: { ...build.params, [action.id]: action.value } };
       case 'setTargets':
@@ -206,6 +226,10 @@ export function parseBuild(raw: unknown, data: GameData): Build | null {
   if (pieces.length === 0) return null;
   const numberMap = (v: unknown) =>
     isRecord(v) ? Object.fromEntries(Object.entries(v).filter(([, x]) => typeof x === 'number' && Number.isFinite(x))) : {};
+  // Counters keep known ids only, as whole numbers from 1 to 99.
+  const countMap = (v: unknown, ids: Set<string>) =>
+    Object.entries(numberMap(v) as Record<string, number>).reduce((m, [id, n]) => (ids.has(id) ? withCount(m, id, n) : m), {} as Record<string, number>);
+  const cls = findClass(data, base.classId);
   return pruneSlots(
     {
       ...base,
@@ -213,6 +237,8 @@ export function parseBuild(raw: unknown, data: GameData): Build | null {
       pieces,
       slots: parseSlots(raw.slots, known),
       upgrades: numberMap(raw.upgrades) as Record<string, number>,
+      mutations: countMap(raw.mutations, new Set(data.mutations.map((m) => m.id))),
+      plasmids: countMap(raw.plasmids, new Set(cls.plasmids.map((p) => p.id))),
       params: numberMap(raw.params) as Record<string, number>,
       targets: typeof raw.targets === 'number' ? raw.targets : 1,
       custom: Array.isArray(raw.custom) ? raw.custom.filter(isCustomModifier) : [],

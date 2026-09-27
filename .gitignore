@@ -2,3 +2,7 @@ node_modules
 dist
 *.log
 .DS_Store
+__pycache__/
+*.pyc
+# Extracted game data and decompiled code must stay out of the repo.
+tools/extract/out/
