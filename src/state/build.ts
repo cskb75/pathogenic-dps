@@ -2,29 +2,31 @@
 
 import { bodyFor, findClass } from '../engine/calc';
 import { removePieceTree } from '../engine/body';
-import type { Build, CustomModifier, CustomTarget, GameData, ModifierOp, OrganelleInstance, Rarity, SlotState, StatKey } from '../engine/types';
-import { RARITIES, STAT_KEYS } from '../engine/types';
+import type { Build, CustomKind, CustomModifier, GameData, OrganelleInstance, Rarity, SlotState } from '../engine/types';
+import { RARITIES } from '../engine/types';
 
 export function emptyBuild(data: GameData, classId = data.classes[0].id): Build {
   const cls = findClass(data, classId);
   return {
-    version: 1,
+    version: 2,
     name: `${cls.name} build`,
     classId: cls.id,
     pieces: [{ id: 'core', type: cls.corePiece }],
     slots: {},
     upgrades: {},
-    conditions: {},
     params: {},
     targets: 1,
     custom: [],
   };
 }
 
-/** A small starting build so first-time visitors see how things connect. */
+/**
+ * A starting build that shows chaining: a Vesicle in the core passes attacks
+ * and Overcharge between the modules around it.
+ */
 export function exampleBuild(data: GameData): Build {
   const build = emptyBuild(data, 'nanobot');
-  build.name = 'Example: infused secretors';
+  build.name = 'Example: Vesicle core';
   build.pieces = [
     { id: 'core', type: 'core' },
     { id: 'p1', type: 'square', attach: { to: 'core', edge: 0 } },
@@ -33,20 +35,19 @@ export function exampleBuild(data: GameData): Build {
   ];
   const org = (id: string, rarity: Rarity = 'common'): SlotState => ({ organelle: { id, rarity, traits: [] } });
   build.slots = {
-    'core.c': org('sample-mito-stationary', 'rare'),
-    'p1.c': org('sample-attack-infuser', 'rare'),
+    'core.c': org('vesicle', 'rare'),
+    'core.e2': org('thermal-lance', 'rare'),
+    'p1.c': org('pyrosome', 'rare'),
     'p1.e1': org('caustic-secretor', 'epic'),
     'p1.e2': org('caustic-secretor', 'rare'),
     'p1.e3': org('caustic-secretor', 'rare'),
-    'core.e2': org('thermal-lance'),
-    'p2.c': org('resonant-cavity'),
-    'p2.e1': org('katanosome', 'rare'),
-    'p2.e2': org('oxidator'),
-    'p3.c': org('sample-burn-infuser'),
-    'p3.e1': org('katanosome'),
-    'p3.e2': org('caustic-secretor'),
+    'p2.c': org('entrant-mitochondrion', 'rare'),
+    'p2.e1': org('rotary-extruder', 'rare'),
+    'p2.e2': org('pulsar-gland'),
+    'p3.c': org('oxysome', 'epic'),
+    'p3.e1': org('lacerator-tendril'),
+    'p3.e2': org('cluster-ejector'),
   };
-  build.upgrades = { 'triangle-damage': 1 };
   return build;
 }
 
@@ -58,7 +59,6 @@ export type Action =
   | { type: 'setOrganelle'; slotId: string; organelle: OrganelleInstance | undefined }
   | { type: 'setSlot'; slotId: string; patch: Partial<Omit<SlotState, 'organelle'>> }
   | { type: 'setUpgrade'; id: string; stacks: number }
-  | { type: 'setCondition'; id: string; on: boolean }
   | { type: 'setParam'; id: string; value: number }
   | { type: 'setTargets'; targets: number }
   | { type: 'setCustom'; custom: CustomModifier[] };
@@ -104,8 +104,6 @@ export function makeReducer(data: GameData) {
       }
       case 'setUpgrade':
         return { ...build, upgrades: { ...build.upgrades, [action.id]: action.stacks } };
-      case 'setCondition':
-        return { ...build, conditions: { ...build.conditions, [action.id]: action.on } };
       case 'setParam':
         return { ...build, params: { ...build.params, [action.id]: action.value } };
       case 'setTargets':
@@ -150,14 +148,14 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
 
-function parseSlots(raw: unknown): Build['slots'] {
+function parseSlots(raw: unknown, known: Set<string>): Build['slots'] {
   if (!isRecord(raw)) return {};
   const slots: Build['slots'] = {};
   for (const [id, v] of Object.entries(raw)) {
     if (!isRecord(v)) continue;
     const state: SlotState = {};
     const o = v.organelle;
-    if (isRecord(o) && typeof o.id === 'string') {
+    if (isRecord(o) && typeof o.id === 'string' && known.has(o.id)) {
       state.organelle = {
         id: o.id,
         rarity: RARITIES.includes(o.rarity as Rarity) ? (o.rarity as Rarity) : 'common',
@@ -167,29 +165,28 @@ function parseSlots(raw: unknown): Build['slots'] {
     if (typeof v.graft === 'string') state.graft = v.graft;
     if (typeof v.uptime === 'number' && Number.isFinite(v.uptime)) state.uptime = Math.min(1, Math.max(0, v.uptime));
     if (v.excluded === true) state.excluded = true;
-    slots[id] = state;
+    if (Object.keys(state).length) slots[id] = state;
   }
   return slots;
 }
 
-const CUSTOM_TARGETS: CustomTarget[] = ['attacks', 'projectiles', 'weapons', 'everything'];
-const OPS: ModifierOp[] = ['flat', 'percent', 'multiply'];
+const CUSTOM_KINDS: CustomKind[] = ['damage', 'damageMult', 'attackSpeed', 'overchargeStrength'];
 
 function isCustomModifier(v: unknown): v is CustomModifier {
   return (
     isRecord(v) &&
     typeof v.id === 'string' &&
     typeof v.label === 'string' &&
-    CUSTOM_TARGETS.includes(v.target as CustomTarget) &&
-    STAT_KEYS.includes(v.stat as StatKey) &&
-    OPS.includes(v.op as ModifierOp) &&
+    CUSTOM_KINDS.includes(v.kind as CustomKind) &&
     typeof v.value === 'number' &&
     Number.isFinite(v.value)
   );
 }
 
 export function parseBuild(raw: unknown, data: GameData): Build | null {
-  if (!isRecord(raw) || raw.version !== 1 || !Array.isArray(raw.pieces) || raw.pieces.length === 0) return null;
+  // Version 1 builds used made-up sample organelles: their layout carries over, unknown organelles are dropped.
+  if (!isRecord(raw) || (raw.version !== 1 && raw.version !== 2) || !Array.isArray(raw.pieces) || raw.pieces.length === 0) return null;
+  const known = new Set(data.organelles.map((o) => o.id));
   const base = emptyBuild(data, typeof raw.classId === 'string' ? raw.classId : undefined);
   const seen = new Set<string>();
   const pieces: Build['pieces'] = [];
@@ -209,15 +206,13 @@ export function parseBuild(raw: unknown, data: GameData): Build | null {
   if (pieces.length === 0) return null;
   const numberMap = (v: unknown) =>
     isRecord(v) ? Object.fromEntries(Object.entries(v).filter(([, x]) => typeof x === 'number' && Number.isFinite(x))) : {};
-  const boolMap = (v: unknown) => (isRecord(v) ? Object.fromEntries(Object.entries(v).filter(([, x]) => typeof x === 'boolean')) : {});
   return pruneSlots(
     {
       ...base,
       name: typeof raw.name === 'string' ? raw.name.slice(0, 80) : base.name,
       pieces,
-      slots: parseSlots(raw.slots),
+      slots: parseSlots(raw.slots, known),
       upgrades: numberMap(raw.upgrades) as Record<string, number>,
-      conditions: boolMap(raw.conditions) as Record<string, boolean>,
       params: numberMap(raw.params) as Record<string, number>,
       targets: typeof raw.targets === 'number' ? raw.targets : 1,
       custom: Array.isArray(raw.custom) ? raw.custom.filter(isCustomModifier) : [],

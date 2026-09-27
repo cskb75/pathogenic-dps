@@ -59,7 +59,6 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
   const body = result.body;
   const organelles = useMemo(() => new Map(data.organelles.map((o) => [o.id, o])), [data]);
   const rarityColor = useMemo(() => new Map(data.rarities.map((r) => [r.id, r.color])), [data]);
-  const grafts = useMemo(() => new Map(data.grafts.map((g) => [g.id, g])), [data]);
 
   const occupied = useMemo(
     () => new Set(Object.entries(build.slots).filter(([, s]) => s.organelle).map(([id]) => id)),
@@ -168,7 +167,7 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
 
       <svg className={`body-svg tool-${tool.kind}`} viewBox={viewBox} onClick={() => tool.kind === 'select' && onSelect(null)}>
         <defs>
-          {['grant', 'overcharge'].map((k) => (
+          {['attack', 'gun', 'overcharge'].map((k) => (
             <marker key={k} id={`arrow-${k}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
               <path d="M0,0 L10,5 L0,10 z" className={`arrowhead ${k}`} />
             </marker>
@@ -199,14 +198,14 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
           );
         })}
 
-        {result.interactions.map((i) => {
-          const dim = selected && i.from !== selected && i.to !== selected;
+        {result.links.map((l) => {
+          const dim = selected && l.from !== selected && l.to !== selected;
           return (
             <line
-              key={`${i.kind}:${i.from}>${i.to}`}
-              {...trimmedLine(body.slotById.get(i.from)!, body.slotById.get(i.to)!)}
-              className={`flow ${i.kind} ${dim ? 'dim' : ''}`}
-              markerEnd={`url(#arrow-${i.kind})`}
+              key={`${l.kind}:${l.from}>${l.to}`}
+              {...trimmedLine(body.slotById.get(l.from)!, body.slotById.get(l.to)!)}
+              className={`flow ${l.kind} ${dim ? 'dim' : ''}`}
+              markerEnd={`url(#arrow-${l.kind})`}
             />
           );
         })}
@@ -239,12 +238,13 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
           const def = inst ? organelles.get(inst.id) : undefined;
           const c = slotCenter(slot);
           const r = radius(slot);
-          const graft = state?.graft ? grafts.get(state.graft) : undefined;
+          const graft = state?.graft ? data.grafts.find((g) => g.id === state.graft) : undefined;
           const item = result.items.get(slot.id);
           const invalid = inst && !item;
-          const inactive = item?.requiresOvercharge && item.overcharge.uptime === 0;
+          const inactive = !!item?.weapon && item.weapon.dps === 0;
+          const unmodeled = item && !item.modeled;
           const label = `${slot.kind === 'internal' ? 'Internal' : 'External'} slot${graft ? ` (${graft.name})` : ''}: ${
-            def ? `${def.name}, ${inst!.rarity}` : 'empty'
+            def ? `${def.name}, ${inst!.rarity}${unmodeled ? ' (not modeled yet)' : ''}` : 'empty'
           }`;
           const select = () => tool.kind === 'select' && onSelect(slot.id);
           return (
@@ -252,7 +252,7 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
               key={slot.id}
               className={`slot slot-${slot.kind} ${def ? `filled cat-${def.category}` : 'empty'} ${selected === slot.id ? 'selected' : ''} ${
                 invalid ? 'invalid' : ''
-              } ${inactive ? 'inactive' : ''} ${state?.excluded ? 'excluded' : ''}`}
+              } ${inactive ? 'inactive' : ''} ${unmodeled ? 'unmodeled' : ''} ${state?.excluded ? 'excluded' : ''}`}
               style={def ? ({ '--rarity': rarityColor.get(inst!.rarity) } as CSSProperties) : undefined}
               role="button"
               tabIndex={tool.kind === 'select' ? 0 : -1}
@@ -265,7 +265,7 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
               onKeyDown={onActivate(select)}
             >
               <title>{label}</title>
-              {slot.facing && def?.attack && (
+              {slot.facing && def?.category === 'weapon' && (
                 <polygon
                   className="facing"
                   points={pts([
@@ -295,8 +295,12 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
           </li>
         ))}
         <li>
-          <span className="swatch line grant" />
-          Infuser effect
+          <span className="swatch line attack" />
+          Attack passes through
+        </li>
+        <li>
+          <span className="swatch line gun" />
+          Attack speed
         </li>
         <li>
           <span className="swatch line overcharge" />

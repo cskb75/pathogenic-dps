@@ -8,7 +8,6 @@ import { Results } from './Results';
 import { SlotInspector } from './SlotInspector';
 
 const reducer = makeReducer(gameData);
-const placeholderCount = gameData.organelles.filter((o) => o.placeholder).length;
 
 export function App() {
   const [build, dispatch] = useReducer(reducer, gameData, loadInitialBuild);
@@ -74,12 +73,10 @@ export function App() {
         </div>
       </header>
 
-      {placeholderCount > 0 && (
-        <p className="banner" role="note">
-          Sample data: {placeholderCount} of {gameData.organelles.length} organelles use placeholder numbers that haven't been checked
-          against the game yet. The mechanics are real; the values are not.
-        </p>
-      )}
+      <p className="banner" role="note">
+        Numbers come from the free demo build (January 2026), updated with official patch notes where they give exact values. The Nanobot
+        and some newer organelles aren't in the demo, so a few details are best guesses; each organelle says where its numbers come from.
+      </p>
 
       <main className="layout">
         <div className="col-main">
@@ -93,7 +90,7 @@ export function App() {
       </main>
 
       <footer className="app-footer muted small">
-        Fan-made tool, not affiliated with Aberrant Labs or Slug Disco. Game data version: {gameData.gameVersion}.
+        Fan-made tool, not affiliated with Aberrant Labs or Slug Disco. Data: {gameData.dataSource}.
       </footer>
     </div>
   );

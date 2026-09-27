@@ -1,17 +1,12 @@
-// Consistency checks for game data. Run by the test suite so a typo in a data
-// file (an unknown status id, a duplicate organelle id...) fails CI instead of
-// silently doing nothing in the calculator.
+// Consistency checks for game data, run by the test suite so a typo (an
+// organelle id with no catalogue entry, an unknown parameter...) fails CI
+// instead of silently doing nothing in the calculator.
 
-import type { GameData, GrantDef, ModifierDef, OnHitDef } from './types';
+import { behaviours } from './sim/behaviours';
+import type { GameData } from './types';
 
 export function validateData(data: GameData): string[] {
   const problems: string[] = [];
-  const statuses = new Set(data.statuses.map((s) => s.id));
-  const conditions = new Set(data.conditions.map((c) => c.id));
-  const params = new Set(data.params.map((p) => p.id));
-  const organelleIds = new Set(data.organelles.map((o) => o.id));
-  const pieceTypes = new Set(data.classes.flatMap((c) => c.pieceTypes.map((p) => p.id)));
-
   const dupes = (ids: string[], what: string) => {
     const seen = new Set<string>();
     for (const id of ids) {
@@ -20,41 +15,30 @@ export function validateData(data: GameData): string[] {
     }
   };
   dupes(data.organelles.map((o) => o.id), 'organelle');
+  dupes(data.organelles.filter((o) => o.demoId).map((o) => o.demoId!), 'demo');
   dupes(data.traits.map((t) => t.id), 'trait');
   dupes(data.grafts.map((g) => g.id), 'graft');
-  dupes(data.statuses.map((s) => s.id), 'status');
+  dupes(data.params.map((p) => p.id), 'param');
 
-  const checkModifier = (m: ModifierDef, where: string) => {
-    if (m.when && !conditions.has(m.when)) problems.push(`${where}: unknown condition "${m.when}"`);
-    if (m.per && !params.has(m.per.param)) problems.push(`${where}: unknown parameter "${m.per.param}"`);
-  };
-  const checkOnHit = (o: OnHitDef, where: string) => {
-    if (!statuses.has(o.status)) problems.push(`${where}: unknown status "${o.status}"`);
-  };
-  const checkGrant = (g: GrantDef, where: string) => {
-    if (g.when && !conditions.has(g.when)) problems.push(`${where}: unknown condition "${g.when}"`);
-    for (const t of g.to.pieceTypes ?? []) if (!pieceTypes.has(t)) problems.push(`${where}: unknown piece type "${t}"`);
-    g.modifiers?.forEach((m) => checkModifier(m, where));
-    g.onHit?.forEach((o) => checkOnHit(o, where));
-  };
-
-  for (const o of data.organelles) {
-    const where = `Organelle "${o.id}"`;
-    o.modifiers?.forEach((m) => checkModifier(m, where));
-    o.grants?.forEach((g) => checkGrant(g, where));
-    o.attack?.onHit?.forEach((h) => checkOnHit(h, where));
-    o.overcharge?.modifiers.forEach((m) => checkModifier(m, where));
-    if (o.mitochondrion && o.attack) problems.push(`${where}: mitochondria with attacks are not supported`);
+  const organelles = new Map(data.organelles.map((o) => [o.id, o]));
+  const params = new Set(data.params.map((p) => p.id));
+  for (const [id, b] of Object.entries(behaviours)) {
+    const info = organelles.get(id);
+    if (!info) {
+      problems.push(`Behaviour for "${id}" has no catalogue entry`);
+      continue;
+    }
+    if (b.weapon && info.category !== 'weapon') problems.push(`"${id}" has a weapon profile but is a ${info.category}`);
+    if (b.mito && info.category !== 'mitochondrion' && info.category !== 'active') problems.push(`"${id}" has a mitochondrion profile but is a ${info.category}`);
+    if (b.weapon?.aimParam && !params.has(b.weapon.aimParam)) problems.push(`"${id}" uses unknown parameter "${b.weapon.aimParam}"`);
   }
-  for (const t of data.traits) {
-    [...t.attackModifiers, ...t.otherModifiers].forEach((m) => checkModifier(m, `Trait "${t.id}"`));
-    for (const id of t.excludes ?? []) if (!organelleIds.has(id)) problems.push(`Trait "${t.id}": unknown organelle "${id}"`);
-  }
-  for (const g of data.grafts) g.modifiers.forEach((m) => checkModifier(m, `Graft "${g.id}"`));
   for (const c of data.classes) {
     if (!c.pieceTypes.some((p) => p.id === c.corePiece)) problems.push(`Class "${c.id}": core piece "${c.corePiece}" is not a piece type`);
-    c.passives.forEach((g) => checkGrant(g, `Class "${c.id}" passive`));
-    for (const u of c.upgrades) u.grants.forEach((g) => checkGrant(g, `Upgrade "${u.id}"`));
+    for (const u of c.upgrades) {
+      for (const t of u.pieceDamage?.pieceTypes ?? []) {
+        if (!c.pieceTypes.some((p) => p.id === t)) problems.push(`Upgrade "${u.id}": unknown piece type "${t}"`);
+      }
+    }
   }
   return problems;
 }

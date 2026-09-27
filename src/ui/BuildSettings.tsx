@@ -1,8 +1,7 @@
 import type { Dispatch } from 'react';
 import { findClass } from '../engine/calc';
-import { STAT_KEYS, type Build, type CustomModifier, type CustomTarget, type GameData, type ModifierOp } from '../engine/types';
+import type { Build, CustomKind, CustomModifier, GameData, ParamDef } from '../engine/types';
 import type { Action } from '../state/build';
-import { STAT_LABELS } from './format';
 
 interface Props {
   data: GameData;
@@ -10,26 +9,24 @@ interface Props {
   dispatch: Dispatch<Action>;
 }
 
-const TARGET_LABELS: Record<CustomTarget, string> = {
-  attacks: 'All attacks',
-  projectiles: 'Projectiles',
-  weapons: 'Weapons',
-  everything: 'Everything',
+const KINDS: Record<CustomKind, { label: string; unit: 'percent' | 'mult'; initial: number }> = {
+  damage: { label: '+% of base damage (like plasmids)', unit: 'percent', initial: 0.1 },
+  damageMult: { label: '× all damage', unit: 'mult', initial: 1.1 },
+  attackSpeed: { label: '+% attack speed', unit: 'percent', initial: 0.1 },
+  overchargeStrength: { label: '+% Overcharge strength', unit: 'percent', initial: 0.2 },
 };
 
-const OP_LABELS: Record<ModifierOp, string> = {
-  percent: '+% (additive)',
-  multiply: '× (multiplier)',
-  flat: '+ (flat)',
-};
-
-const OP_DEFAULTS: Record<ModifierOp, number> = { percent: 0.1, multiply: 1.1, flat: 1 };
+const GROUPS: { title: string; ids: string[] }[] = [
+  { title: 'Aim and positioning', ids: ['angledHit', 'pelletHit', 'sideHit', 'mineHit', 'orbContact', 'targetDistance', 'backstabChance', 'beatSync'] },
+  { title: 'Mitochondria triggers', ids: ['roomLength', 'killRate', 'hitsTakenRate', 'dodgeRate', 'pickupRate', 'perfectRooms'] },
+  { title: 'Run state', ids: ['level', 'resonantStacks', 'phagosomeKills', 'staminaLimits', 'maxStamina'] },
+];
 
 export function BuildSettings({ data, build, dispatch }: Props) {
   const cls = findClass(data, build.classId);
+  const params = new Map(data.params.map((p) => [p.id, p]));
   const setCustom = (custom: CustomModifier[]) => dispatch({ type: 'setCustom', custom });
-  const updateCustom = (id: string, patch: Partial<CustomModifier>) =>
-    setCustom(build.custom.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+  const updateCustom = (id: string, patch: Partial<CustomModifier>) => setCustom(build.custom.map((c) => (c.id === id ? { ...c, ...patch } : c)));
 
   return (
     <section className="panel settings" aria-label="Build settings">
@@ -39,136 +36,105 @@ export function BuildSettings({ data, build, dispatch }: Props) {
       <div className="settings-grid">
         <fieldset>
           <legend>{cls.name} upgrades</legend>
-          {cls.upgrades.map((u) =>
-            u.maxStacks === 1 ? (
-              <label key={u.id} className="check" title={u.description}>
-                <input
-                  type="checkbox"
-                  checked={(build.upgrades[u.id] ?? 0) > 0}
-                  onChange={(e) => dispatch({ type: 'setUpgrade', id: u.id, stacks: e.target.checked ? 1 : 0 })}
-                />
-                <span>
-                  {u.name} <span className="muted small">{u.description}</span>
-                </span>
-              </label>
-            ) : (
-              <label key={u.id} className="number-row" title={u.description}>
-                <span>
-                  {u.name} <span className="muted small">{u.description}</span>
-                </span>
-                <input
-                  type="number"
-                  min={0}
-                  max={u.maxStacks}
-                  value={build.upgrades[u.id] ?? 0}
-                  onChange={(e) =>
-                    dispatch({ type: 'setUpgrade', id: u.id, stacks: Math.max(0, Math.min(u.maxStacks, Number(e.target.value) || 0)) })
-                  }
-                />
-              </label>
-            ),
-          )}
-          {cls.upgrades.length === 0 && <p className="muted small">No upgrades in the data yet.</p>}
-        </fieldset>
-
-        <fieldset>
-          <legend>Fight</legend>
-          <label className="number-row">
-            <span>Enemies in range</span>
-            <input
-              type="number"
-              min={1}
-              max={50}
-              value={build.targets}
-              onChange={(e) => dispatch({ type: 'setTargets', targets: Number(e.target.value) })}
-            />
-          </label>
-          {data.params.map((p) => (
-            <label key={p.id} className="number-row" title={p.description}>
-              <span>{p.name}</span>
-              <input
-                type="number"
-                min={p.min}
-                max={p.max}
-                step={p.step}
-                value={build.params[p.id] ?? p.default}
-                onChange={(e) => dispatch({ type: 'setParam', id: p.id, value: Number(e.target.value) })}
-              />
-            </label>
-          ))}
-          {data.conditions.map((c) => (
-            <label key={c.id} className="check" title={c.description}>
+          {cls.upgrades.map((u) => (
+            <label key={u.id} className="check" title={u.description}>
               <input
                 type="checkbox"
-                checked={build.conditions[c.id] === true}
-                onChange={(e) => dispatch({ type: 'setCondition', id: c.id, on: e.target.checked })}
+                checked={(build.upgrades[u.id] ?? 0) > 0}
+                onChange={(e) => dispatch({ type: 'setUpgrade', id: u.id, stacks: e.target.checked ? 1 : 0 })}
               />
-              {c.name}
+              <span>
+                {u.name} <span className="muted small">{u.description}</span>
+              </span>
             </label>
           ))}
+          <label className="number-row">
+            <span>Enemies in range</span>
+            <input type="number" min={1} max={50} value={build.targets} onChange={(e) => dispatch({ type: 'setTargets', targets: Number(e.target.value) })} />
+          </label>
         </fieldset>
+      </div>
+
+      <h3>Fight assumptions</h3>
+      <p className="muted small">Things that depend on how you play. Hover a name for details.</p>
+      <div className="settings-grid">
+        {GROUPS.map((g) => (
+          <fieldset key={g.title}>
+            <legend>{g.title}</legend>
+            {g.ids.map((id) => params.get(id)).filter((p): p is ParamDef => !!p).map((p) => (
+              <ParamInput key={p.id} param={p} value={build.params[p.id] ?? p.default} onChange={(v) => dispatch({ type: 'setParam', id: p.id, value: v })} />
+            ))}
+          </fieldset>
+        ))}
       </div>
 
       <fieldset className="custom">
         <legend>Extra bonuses</legend>
-        <p className="muted small">For anything the data doesn't cover yet, like plasmid upgrades or temporary buffs.</p>
-        {build.custom.map((c) => (
-          <div key={c.id} className="custom-row">
-            <input aria-label="Name" placeholder="Name" value={c.label} onChange={(e) => updateCustom(c.id, { label: e.target.value })} />
-            <select aria-label="Applies to" value={c.target} onChange={(e) => updateCustom(c.id, { target: e.target.value as CustomTarget })}>
-              {Object.entries(TARGET_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
-            </select>
-            <select aria-label="Stat" value={c.stat} onChange={(e) => updateCustom(c.id, { stat: e.target.value as CustomModifier['stat'] })}>
-              {STAT_KEYS.map((k) => (
-                <option key={k} value={k}>
-                  {STAT_LABELS[k]}
-                </option>
-              ))}
-            </select>
-            <select
-              aria-label="Type"
-              value={c.op}
-              onChange={(e) => {
-                const op = e.target.value as ModifierOp;
-                updateCustom(c.id, { op, value: OP_DEFAULTS[op] });
-              }}
-            >
-              {Object.entries(OP_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
-            </select>
-            <input
-              aria-label={c.op === 'percent' ? 'Percent' : 'Value'}
-              type="number"
-              step="any"
-              value={c.op === 'percent' ? Number((c.value * 100).toFixed(4)) : c.value}
-              onChange={(e) => {
-                const n = Number(e.target.value) || 0;
-                updateCustom(c.id, { value: c.op === 'percent' ? n / 100 : n });
-              }}
-            />
-            <button className="ghost-button" aria-label={`Remove ${c.label || 'bonus'}`} onClick={() => setCustom(build.custom.filter((x) => x.id !== c.id))}>
-              ✕
-            </button>
-          </div>
-        ))}
-        <button
-          onClick={() =>
-            setCustom([
-              ...build.custom,
-              { id: `c${Date.now().toString(36)}`, label: '', target: 'attacks', stat: 'damage', op: 'percent', value: 0.1 },
-            ])
-          }
-        >
+        <p className="muted small">For anything the calculator doesn't cover yet, like plasmid upgrades or mutations.</p>
+        {build.custom.map((c) => {
+          const kind = KINDS[c.kind];
+          return (
+            <div key={c.id} className="custom-row">
+              <input aria-label="Name" placeholder="Name" value={c.label} onChange={(e) => updateCustom(c.id, { label: e.target.value })} />
+              <select
+                aria-label="Type"
+                value={c.kind}
+                onChange={(e) => {
+                  const k = e.target.value as CustomKind;
+                  updateCustom(c.id, { kind: k, value: KINDS[k].initial });
+                }}
+              >
+                {Object.entries(KINDS).map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v.label}
+                  </option>
+                ))}
+              </select>
+              <input
+                aria-label={kind.unit === 'percent' ? 'Percent' : 'Multiplier'}
+                type="number"
+                step="any"
+                value={kind.unit === 'percent' ? Number((c.value * 100).toFixed(4)) : c.value}
+                onChange={(e) => {
+                  const n = Number(e.target.value) || 0;
+                  updateCustom(c.id, { value: kind.unit === 'percent' ? n / 100 : n });
+                }}
+              />
+              <button className="ghost-button" aria-label={`Remove ${c.label || 'bonus'}`} onClick={() => setCustom(build.custom.filter((x) => x.id !== c.id))}>
+                ✕
+              </button>
+            </div>
+          );
+        })}
+        <button onClick={() => setCustom([...build.custom, { id: `c${Date.now().toString(36)}`, label: '', kind: 'damage', value: KINDS.damage.initial }])}>
           Add bonus
         </button>
       </fieldset>
     </section>
+  );
+}
+
+function ParamInput({ param, value, onChange }: { param: ParamDef; value: number; onChange: (v: number) => void }) {
+  const shown = param.percent ? Math.round(value * 100) : value;
+  return (
+    <label className="number-row" title={param.description}>
+      <span>{param.name}</span>
+      <span className="param-input">
+        <input
+          type="number"
+          min={param.percent ? param.min * 100 : param.min}
+          max={param.percent ? param.max * 100 : param.max}
+          step={param.percent ? param.step * 100 : param.step}
+          value={shown}
+          onChange={(e) => {
+            const n = Number(e.target.value);
+            if (!Number.isFinite(n)) return;
+            const v = param.percent ? n / 100 : n;
+            onChange(Math.min(param.max, Math.max(param.min, v)));
+          }}
+        />
+        {param.percent && <span className="muted">%</span>}
+      </span>
+    </label>
   );
 }

@@ -1,10 +1,10 @@
 // The Nanobot pathogen.
 //
-// The body is built from square and triangle modules. Each module has an
-// internal slot in its centre and an external slot on every free edge.
+// Not in the demo build, so these details come from public sources. The body
+// is built from square and triangle modules: each has an internal slot in its
+// centre and an external slot on every free edge.
 
 import type { ClassDef } from '../engine/types';
-import { pct } from './helpers';
 
 export const nanobot: ClassDef = {
   id: 'nanobot',
@@ -21,11 +21,10 @@ export const nanobot: ClassDef = {
     {
       id: 'triangle-damage',
       name: 'Triangle damage',
-      description: 'Organelles on triangle modules deal +40% damage.',
+      description: 'Weapons on triangle modules deal +40% damage (from player guides; not yet confirmed in game files).',
       maxStacks: 1,
-      grants: [{ scope: 'global', to: { pieceTypes: ['triangle'], tags: ['attack'] }, modifiers: [pct('damage', 0.4)] }],
-      placeholder: true,
+      pieceDamage: { pieceTypes: ['triangle'], bonus: 0.4 },
+      unverified: true,
     },
   ],
-  passives: [],
 };

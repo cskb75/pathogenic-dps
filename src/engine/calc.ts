@@ -1,179 +1,105 @@
-// The DPS engine.
+// The DPS calculator.
 //
-// Model (averages + toggles):
-//   * Every stat is (base + flats) x (1 + sum of percents) x product of multipliers.
-//   * Infusers and other "connected" effects reach only the organelles directly
-//     connected to them. An effect that targets infusers (e.g. +30% potency)
-//     makes that infuser's own effects stronger, which is how chains work.
-//   * Mitochondria give Overcharge to directly connected organelles. Each has
-//     an uptime (share of the fight its trigger is active). An organelle's
-//     damage is averaged over its time spent Overcharged vs not.
-//   * Random effects (crits, on-hit chances) are averaged; conditions are
-//     on/off toggles and parameters are numbers set by the user.
+// For every weapon we build its attack, let connected organelles modify it
+// (following chains the way the game does, see sim/model.ts), and turn the
+// result into damage per second.
+//
+// Mitochondria are either active or not at any moment. We evaluate every
+// on/off combination, weighted by each one's uptime, and average. That keeps
+// thresholds exact (the Rotary Extruder only fires with ~1 Overcharge).
 
-import { buildBody, type Body, type PieceShape, type Slot } from './body';
-import type {
-  Build,
-  ByRarity,
-  ClassDef,
-  CustomTarget,
-  GameData,
-  GrantDef,
-  GraftDef,
-  ModifierDef,
-  ModifierOp,
-  OrganelleDef,
-  OrganelleInstance,
-  SlotState,
-  StatKey,
-  TargetFilter,
-  TraitDef,
-} from './types';
-import { RARITIES, STAT_KEYS } from './types';
+import { buildBody, type Body, type PieceShape } from './body';
+import { behaviourFor, isModeled } from './sim/behaviours';
+import {
+  addDamage,
+  announce,
+  applyModifiers,
+  evaluateRoot,
+  newAttack,
+  type Attack,
+  type AttackNode,
+  type Ctx,
+  type GunState,
+  type Item,
+  type TraceLine,
+} from './sim/model';
+import type { Build, ClassDef, GameData, OrganelleInfo, OrganelleInstance } from './types';
+import { RARITIES } from './types';
 
-export interface Contribution {
-  source: string;
-  op: ModifierOp;
-  value: number;
-}
+export type { AttackNode, TraceLine } from './sim/model';
 
-export interface StatLine {
-  base: number;
-  contributions: Contribution[];
-  value: number;
-}
+const FALLBACK_SHAPE: PieceShape = { sides: 4, centerSlot: 'internal', edgeSlot: 'external' };
+const MAX_ENUMERATED_MITOS = 10;
+/** Modifier applications per weapon per Overcharge state before we stop following chains. */
+const CHAIN_BUDGET = 4000;
+const STAMINA_REGEN = 190;
+const STAMINA_DELAY = 1;
+/** Explosions scale with the level to keep up with enemy health. */
+const EXPLOSION_LEVEL_SCALING = 0.75;
 
-export type Stats = Record<StatKey, StatLine>;
-
-export interface StatusLine {
-  status: string;
-  name: string;
-  applicationsPerSecond: number;
-  /** Average stacks kept on the target (for refresh-only statuses, the share of time it is up). */
-  stacks: number;
+export interface StateView {
+  label: string;
   dps: number;
-  sources: string[];
+  multiDps: number;
+  attacksPerSecond: number;
+  charge: number;
+  gunTrace: TraceLine[];
+  nodes: AttackNode[];
 }
 
-export interface StateResult {
-  stats: Stats;
-  /** Average damage per hit, crits included. */
-  hitDamage: number;
-  hitsPerSecond: number;
-  directDps: number;
-  statuses: StatusLine[];
-  /** Single-target DPS. */
+export interface WeaponResult {
+  slotId: string;
+  info: OrganelleInfo;
+  instance: OrganelleInstance;
+  /** Single-target DPS averaged over Overcharge states and stamina. */
   dps: number;
-  /** Enemies each hit reaches, given the build's target count. */
-  targetsHit: number;
-  multiTargetDps: number;
-}
-
-export interface OverchargeSupply {
-  /** Share of the fight with at least one active mitochondrion connected. */
-  uptime: number;
-  /** Average charges held while Overcharged. */
-  charges: number;
-  sources: { slotId: string; name: string; uptime: number; charges: number }[];
-}
-
-export interface AttackResult {
-  normal: StateResult | null;
-  charged: StateResult | null;
-  /** Single-target DPS averaged over Overcharge uptime. */
-  dps: number;
-  multiTargetDps: number;
+  multiDps: number;
+  attacksPerSecond: number;
+  staminaPerSecond: number;
+  /** Breakdowns with no mitochondria active and with all of them active. */
+  idle: StateView;
+  charged: StateView | null;
+  notes: string[];
   excluded: boolean;
+}
+
+export interface MitoResult {
+  uptime: number;
+  estimated: number;
+  overridden: boolean;
+  charge: number;
+  duration?: number;
+  trigger: string;
 }
 
 export interface ItemResult {
   slotId: string;
-  def: OrganelleDef;
+  info: OrganelleInfo;
   instance: OrganelleInstance;
-  requiresOvercharge: boolean;
-  overcharge: OverchargeSupply;
-  /** Organelles that give effects to others: how strong those effects are. */
-  potency?: { normal: number; charged: number; average: number };
-  /** Mitochondria: Overcharge charges given to each connected organelle. */
-  mitoOutput?: { uptime: number; charges: number };
-  attack?: AttackResult;
+  modeled: boolean;
   notes: string[];
+  /** Average Overcharge held. */
+  charge: number;
+  mito?: MitoResult;
+  weapon?: WeaponResult;
 }
 
-export interface Interaction {
+export interface Link {
   from: string;
   to: string;
-  kind: 'grant' | 'overcharge';
+  kind: 'attack' | 'gun' | 'overcharge';
 }
 
 export interface CalcResult {
   body: Body;
   items: Map<string, ItemResult>;
-  /** Organelles with an attack, highest DPS first. */
-  sources: ItemResult[];
+  weapons: WeaponResult[];
   totalDps: number;
-  totalMultiTargetDps: number;
-  interactions: Interaction[];
+  totalMultiDps: number;
+  /** Share of time you can keep firing before stamina runs out (averaged). */
+  staminaDuty: number;
+  links: Link[];
   warnings: string[];
-}
-
-interface Item {
-  slot: Slot;
-  state: SlotState;
-  def: OrganelleDef;
-  inst: OrganelleInstance;
-  rarity: number;
-  traits: TraitDef[];
-  graft?: GraftDef;
-  tags: Set<string>;
-  requiresOvercharge: boolean;
-}
-
-interface GlobalGrant {
-  grant: GrantDef;
-  label: string;
-  rarity: number;
-  scale: () => number;
-}
-
-const CUSTOM_FILTERS: Record<CustomTarget, TargetFilter> = {
-  attacks: { tags: ['attack'] },
-  projectiles: { tags: ['projectile'] },
-  weapons: { categories: ['weapon'] },
-  everything: {},
-};
-
-const FALLBACK_SHAPE: PieceShape = { sides: 4, centerSlot: 'internal', edgeSlot: 'external' };
-
-export function atRarity(value: ByRarity, rarity: number): number {
-  if (typeof value === 'number') return value;
-  if (value.length === 0) return 0;
-  return value[Math.min(rarity, value.length - 1)];
-}
-
-/** Applies a scale (potency, stacks, charges...) to a modifier value. */
-export function scaleValue(op: ModifierOp, value: number, scale: number): number {
-  return op === 'multiply' ? 1 + (value - 1) * scale : value * scale;
-}
-
-export function finalValue(line: Pick<StatLine, 'base' | 'contributions'>): number {
-  let flat = 0;
-  let percent = 0;
-  let multiply = 1;
-  for (const c of line.contributions) {
-    if (c.op === 'flat') flat += c.value;
-    else if (c.op === 'percent') percent += c.value;
-    else multiply *= c.value;
-  }
-  return (line.base + flat) * (1 + percent) * multiply;
-}
-
-export function matchesFilter(filter: TargetFilter, target: { category: string; tags: Set<string>; pieceType: string; slotKind: string }) {
-  if (filter.categories && !filter.categories.includes(target.category as never)) return false;
-  if (filter.tags && !filter.tags.some((t) => target.tags.has(t))) return false;
-  if (filter.pieceTypes && !filter.pieceTypes.includes(target.pieceType)) return false;
-  if (filter.slotKinds && !filter.slotKinds.includes(target.slotKind as never)) return false;
-  return true;
 }
 
 export function findClass(data: GameData, classId: string): ClassDef {
@@ -189,303 +115,338 @@ export function bodyFor(build: Build, data: GameData): Body {
 export function calculate(build: Build, data: GameData): CalcResult {
   const cls = findClass(data, build.classId);
   const body = bodyFor(build, data);
-  const warnings: string[] = [];
-  for (const e of body.errors) warnings.push(`Piece ${e.pieceId}: ${e.reason}`);
-
-  const organelles = new Map(data.organelles.map((o) => [o.id, o]));
+  const warnings: string[] = body.errors.map((e) => `Piece ${e.pieceId}: ${e.reason}`);
+  const infos = new Map(data.organelles.map((o) => [o.id, o]));
   const traits = new Map(data.traits.map((t) => [t.id, t]));
   const grafts = new Map(data.grafts.map((g) => [g.id, g]));
-  const statuses = new Map(data.statuses.map((s) => [s.id, s]));
   const params = new Map(data.params.map((p) => [p.id, p]));
+  const param = (id: string) => build.params[id] ?? params.get(id)?.default ?? 0;
+  const custom = (kind: string) => build.custom.filter((c) => c.kind === kind);
 
-  const conditionOn = (id: string | undefined) => !id || build.conditions[id] === true;
-  const paramValue = (id: string) => build.params[id] ?? params.get(id)?.default ?? 0;
-
-  // --- Items: organelles actually sitting in valid slots -------------------
+  // --- Organelles in valid slots ---------------------------------------------
   const items = new Map<string, Item>();
   for (const slot of body.slots) {
     const state = build.slots[slot.id];
     if (!state?.organelle) continue;
-    const def = organelles.get(state.organelle.id);
-    if (!def) {
+    const info = infos.get(state.organelle.id);
+    if (!info) {
       warnings.push(`Unknown organelle "${state.organelle.id}" in slot ${slot.id}`);
       continue;
     }
-    const graft = state.graft ? grafts.get(state.graft) : undefined;
-    const accepts = graft?.accepts ?? [slot.kind];
-    if (!accepts.includes(def.slot)) {
-      warnings.push(`${def.name} is ${def.slot} but slot ${slot.id} only accepts ${accepts.join('/')}`);
+    const graft = state.graft ? grafts.get(state.graft as 'volatile') : undefined;
+    const accepts = graft?.id === 'omni' ? ['internal', 'external'] : [slot.kind];
+    if (!accepts.includes(info.slot)) {
+      warnings.push(`${info.name} is ${info.slot} but slot ${slot.id} is ${slot.kind}`);
       continue;
     }
-    const itemTraits = state.organelle.traits
-      .map((id) => traits.get(id))
-      .filter((t): t is TraitDef => !!t && !t.excludes?.includes(def.id));
-    const tags = new Set([...(def.tags ?? []), ...(def.attack ? ['attack', ...def.attack.tags] : [])]);
+    const itemTraits = state.organelle.traits.map((t) => traits.get(t)).filter((t) => !!t);
+    const rarityIndex = Math.max(0, RARITIES.indexOf(state.organelle.rarity));
     items.set(slot.id, {
-      slot,
-      state,
-      def,
-      inst: state.organelle,
-      rarity: Math.max(0, RARITIES.indexOf(state.organelle.rarity)),
+      slotId: slot.id,
+      pieceType: slot.pieceType,
+      info,
+      r: rarityIndex + itemTraits.reduce((s, t) => s + t.tiers, 0),
       traits: itemTraits,
       graft,
-      tags,
-      requiresOvercharge: !!def.requiresOvercharge || itemTraits.some((t) => t.requiresOvercharge),
+      state,
+      behaviour: behaviourFor(info.id),
     });
   }
-
-  const neighbours = (item: Item): Item[] =>
-    (body.connections.get(item.slot.id) ?? []).map((id) => items.get(id)).filter((i): i is Item => !!i);
-
-  const matches = (filter: TargetFilter, item: Item) =>
-    matchesFilter(filter, { category: item.def.category, tags: item.tags, pieceType: item.slot.pieceType, slotKind: item.slot.kind });
-
-  // --- Memoised, cycle-safe lookups ----------------------------------------
-  const memo = new Map<string, unknown>();
-  const inProgress = new Set<string>();
-  function guarded<T>(key: string, fallback: T, fn: () => T): T {
-    if (memo.has(key)) return memo.get(key) as T;
-    if (inProgress.has(key)) return fallback; // a loop of effects feeding each other
-    inProgress.add(key);
-    try {
-      const value = fn();
-      memo.set(key, value);
-      return value;
-    } finally {
-      inProgress.delete(key);
-    }
-  }
-
-  // --- Global effects: class passives, upgrades, custom bonuses, global grants
-  const globalGrants: GlobalGrant[] = [];
-  for (const grant of cls.passives) globalGrants.push({ grant, label: cls.name, rarity: 0, scale: () => 1 });
-  for (const up of cls.upgrades) {
-    const stacks = Math.min(build.upgrades[up.id] ?? 0, up.maxStacks);
-    if (stacks > 0) for (const grant of up.grants) globalGrants.push({ grant, label: up.name, rarity: 0, scale: () => stacks });
-  }
-  for (const c of build.custom) {
-    globalGrants.push({
-      grant: { scope: 'global', to: CUSTOM_FILTERS[c.target], modifiers: [{ stat: c.stat, op: c.op, value: c.value }] },
-      label: c.label || 'Custom bonus',
-      rarity: 0,
-      scale: () => 1,
-    });
-  }
+  const neighbourMap = new Map<Item, Item[]>();
   for (const item of items.values()) {
-    for (const grant of item.def.grants ?? []) {
-      if (grant.scope === 'global') {
-        globalGrants.push({ grant, label: item.def.name, rarity: item.rarity, scale: () => potencyOf(item).average });
-      }
-    }
+    neighbourMap.set(item, (body.connections.get(item.slotId) ?? []).map((id) => items.get(id)).filter((i): i is Item => !!i));
   }
+  const neighbours = (item: Item) => neighbourMap.get(item) ?? [];
 
-  function resolve(mod: ModifierDef, rarity: number, scale: number, charges = 0): number | null {
-    if (!conditionOn(mod.when)) return null;
-    let k = scale;
-    if (mod.per) {
-      const p = paramValue(mod.per.param);
-      k *= mod.per.max === undefined ? p : Math.min(p, mod.per.max);
-    }
-    if (mod.perCharge) k *= charges;
-    return scaleValue(mod.op, atRarity(mod.value, rarity), k);
-  }
-
-  function baseStats(item: Item): Stats {
-    const a = item.def.attack;
-    const r = item.rarity;
-    const base: Record<StatKey, number> = {
-      damage: a ? atRarity(a.damage, r) : 0,
-      attackSpeed: a ? atRarity(a.attackSpeed, r) : 0,
-      projectiles: a?.projectiles !== undefined ? atRarity(a.projectiles, r) : 1,
-      hits: a?.hits !== undefined ? atRarity(a.hits, r) : 1,
-      critChance: a?.critChance !== undefined ? atRarity(a.critChance, r) : 0,
-      critMultiplier: a?.critMultiplier !== undefined ? atRarity(a.critMultiplier, r) : data.constants.baseCritMultiplier,
-      pierce: a?.pierce !== undefined ? atRarity(a.pierce, r) : 0,
-      forks: a?.forks !== undefined ? atRarity(a.forks, r) : 0,
-      potency: 1,
-      overchargeStrength: 1,
-    };
-    const stats = {} as Stats;
-    for (const k of STAT_KEYS) stats[k] = { base: base[k], contributions: [], value: base[k] };
-    return stats;
-  }
-
-  function computeStats(item: Item, charged: boolean, charges: number): Stats {
-    const stats = baseStats(item);
-    const push = (mod: ModifierDef, rarity: number, scale: number, source: string, c = 0) => {
-      const value = resolve(mod, rarity, scale, c);
-      if (value !== null) stats[mod.stat].contributions.push({ source, op: mod.op, value });
-    };
-
-    for (const m of item.def.modifiers ?? []) push(m, item.rarity, 1, item.def.name);
-    for (const t of item.traits) {
-      for (const m of item.def.attack ? t.attackModifiers : t.otherModifiers) push(m, item.rarity, 1, `${t.name} trait`);
-    }
-    for (const m of item.graft?.modifiers ?? []) push(m, 0, 1, `${item.graft!.name} slot`);
-    for (const g of globalGrants) {
-      if (!conditionOn(g.grant.when) || !matches(g.grant.to, item) || !g.grant.modifiers?.length) continue;
-      const scale = g.scale();
-      for (const m of g.grant.modifiers) push(m, g.rarity, scale, g.label);
-    }
-    for (const n of neighbours(item)) {
-      for (const grant of n.def.grants ?? []) {
-        if (grant.scope !== 'connected' || !conditionOn(grant.when) || !matches(grant.to, item) || !grant.modifiers?.length) continue;
-        const scale = potencyOf(n).average;
-        for (const m of grant.modifiers) push(m, n.rarity, scale, n.def.name);
-      }
-    }
-    if (charged && item.def.overcharge) {
-      const strength = finalValue(stats.overchargeStrength);
-      for (const m of item.def.overcharge.modifiers) push(m, item.rarity, strength, 'Overcharge', charges);
-    }
-    for (const k of STAT_KEYS) stats[k].value = finalValue(stats[k]);
-    return stats;
-  }
-
-  function mitoOutput(item: Item): { uptime: number; charges: number } {
-    return guarded(`mito:${item.slot.id}`, { uptime: 0, charges: 0 }, () => {
-      const m = item.def.mitochondrion!;
-      if (item.requiresOvercharge) return { uptime: 0, charges: 0 }; // it can't Overcharge itself
-      const uptime = Math.min(1, Math.max(0, item.state.uptime ?? m.defaultUptime));
-      const stats = computeStats(item, false, 0);
-      return { uptime, charges: atRarity(m.charges, item.rarity) * stats.potency.value * stats.overchargeStrength.value };
+  // --- Overcharge ----------------------------------------------------------------
+  const overchargeBonus = custom('overchargeStrength').reduce((s, c) => s + c.value, 0);
+  const strength = (item: Item) => (item.graft?.id === 'conductive' ? 0.4 : 0) + overchargeBonus;
+  const mitos = [...items.values()].filter((i) => i.behaviour.mito);
+  const mitoResults = new Map<Item, MitoResult>();
+  for (const m of mitos) {
+    const p = m.behaviour.mito!;
+    const estimated = Math.min(1, Math.max(0, p.uptime({ param }, m.r)));
+    const overridden = m.state.uptime !== undefined;
+    mitoResults.set(m, {
+      uptime: overridden ? Math.min(1, Math.max(0, m.state.uptime!)) : estimated,
+      estimated,
+      overridden,
+      charge: p.charge(m.r),
+      duration: p.duration?.(m.r),
+      trigger: p.trigger,
     });
   }
 
-  function supplyOf(item: Item): OverchargeSupply {
-    return guarded(`supply:${item.slot.id}`, { uptime: 0, charges: 0, sources: [] }, () => {
-      if (item.def.mitochondrion) return { uptime: 0, charges: 0, sources: [] };
-      const sources = neighbours(item)
-        .filter((n) => n.def.mitochondrion)
-        .map((n) => ({ slotId: n.slot.id, name: n.def.name, ...mitoOutput(n) }))
-        .filter((s) => s.uptime > 0 && s.charges > 0);
-      const uptime = 1 - sources.reduce((p, s) => p * (1 - s.uptime), 1);
-      const expected = sources.reduce((sum, s) => sum + s.uptime * s.charges, 0);
-      return { uptime, charges: uptime > 0 ? expected / uptime : 0, sources };
-    });
-  }
-
-  function potencyOf(item: Item): { normal: number; charged: number; average: number } {
-    return guarded(`potency:${item.slot.id}`, { normal: 1, charged: 1, average: 1 }, () => {
-      const supply = supplyOf(item);
-      const normal = item.requiresOvercharge ? 0 : computeStats(item, false, 0).potency.value;
-      const charged = supply.uptime > 0 ? computeStats(item, true, supply.charges).potency.value : normal;
-      return { normal, charged, average: supply.uptime * charged + (1 - supply.uptime) * normal };
-    });
-  }
-
-  function evaluateAttack(item: Item, charged: boolean, charges: number): StateResult {
-    const stats = computeStats(item, charged, charges);
-    const v = (k: StatKey) => Math.max(0, stats[k].value);
-    const critChance = Math.min(1, v('critChance'));
-    const hitDamage = v('damage') * (1 + critChance * (v('critMultiplier') - 1));
-    const hitsPerSecond = v('attackSpeed') * v('projectiles') * v('hits');
-    const directDps = hitDamage * hitsPerSecond;
-
-    // On-hit statuses from the attack itself, connected infusers and global grants.
-    const onHits: { status: string; chance: number; potency: number; source: string }[] = [];
-    const addOnHit = (list: GrantDef['onHit'], rarity: number, potencyScale: number, source: string) => {
-      for (const o of list ?? []) {
-        onHits.push({
-          status: o.status,
-          chance: Math.min(1, atRarity(o.chance, rarity)),
-          potency: (o.potency === undefined ? 1 : atRarity(o.potency, rarity)) * potencyScale,
-          source,
-        });
+  /** Overcharge held by every organelle when each mitochondrion is at `activity` (0..1). */
+  function chargesFor(activity: Map<Item, number>): Map<Item, number> {
+    const provided = new Map<Item, number>();
+    for (const m of mitos) provided.set(m, (activity.get(m) ?? 0) * mitoResults.get(m)!.charge);
+    const incoming = (x: Item) =>
+      neighbours(x).reduce((s, n) => s + (provided.get(n) ?? 0) * (1 + strength(n) + strength(x)), 0);
+    // Vesicles pass on up to what their non-Vesicle neighbours provide.
+    const conduits = [...items.values()].filter((i) => i.behaviour.conduit);
+    for (let pass = 0; pass < 2; pass++) {
+      for (const v of conduits) {
+        const cap = neighbours(v)
+          .filter((n) => !n.behaviour.conduit)
+          .reduce((s, n) => s + (provided.get(n) ?? 0), 0);
+        provided.set(v, Math.min(cap, incoming(v)));
       }
+    }
+    const charges = new Map<Item, number>();
+    for (const item of items.values()) charges.set(item, incoming(item));
+    return charges;
+  }
+
+  // Which on/off combinations to evaluate.
+  const states: { activity: Map<Item, number>; p: number }[] = [];
+  if (mitos.length <= MAX_ENUMERATED_MITOS) {
+    for (let mask = 0; mask < 1 << mitos.length; mask++) {
+      let p = 1;
+      const activity = new Map<Item, number>();
+      mitos.forEach((m, i) => {
+        const on = (mask >> i) & 1;
+        const u = mitoResults.get(m)!.uptime;
+        p *= on ? u : 1 - u;
+        activity.set(m, on);
+      });
+      if (p > 0) states.push({ activity, p });
+    }
+  } else {
+    warnings.push(`More than ${MAX_ENUMERATED_MITOS} mitochondria: Overcharge is averaged instead of evaluated per combination.`);
+    states.push({ activity: new Map(mitos.map((m) => [m, mitoResults.get(m)!.uptime])), p: 1 });
+  }
+
+  // --- Evaluating a state ----------------------------------------------------------
+  const linkSet = new Map<string, Link>();
+  const chainsCut = new Set<string>();
+  const upgradeBonus = (item: Item) =>
+    cls.upgrades.reduce((s, u) => {
+      const stacks = Math.min(build.upgrades[u.id] ?? 0, u.maxStacks);
+      return u.pieceDamage && stacks > 0 && u.pieceDamage.pieceTypes.includes(item.pieceType) ? s + u.pieceDamage.bonus * stacks : s;
+    }, 0);
+  const globalDamage = custom('damage').reduce((s, c) => s + c.value, 0);
+  const damageMult = custom('damageMult').reduce((p, c) => p * c.value, 1);
+  const customSpeed = custom('attackSpeed').reduce((s, c) => s + c.value, 0);
+  const weaponItems = [...items.values()].filter((i) => i.behaviour.weapon);
+
+  interface WeaponEval {
+    single: number;
+    multi: number;
+    rate: number;
+    stamina: number;
+    nodes: AttackNode[];
+    gunTrace: TraceLine[];
+    charge: number;
+  }
+
+  function evaluateState(activity: Map<Item, number>, recordLinks: boolean) {
+    const charges = chargesFor(activity);
+    const refunded = new Set<Item>();
+    const ctx: Ctx = {
+      param,
+      targets: Math.max(1, Math.floor(build.targets)),
+      charge: (i) => charges.get(i) ?? 0,
+      neighbours,
+      works: (i) => !i.traits.some((t) => t.requiresCharge) || (charges.get(i) ?? 0) > 0,
+      link: (from, to, kind) => {
+        if (recordLinks) linkSet.set(`${kind}:${from.slotId}>${to.slotId}`, { from: from.slotId, to: to.slotId, kind });
+      },
+      globalDamage,
+      gun: null,
+      refund: (w) => refunded.add(w),
+      budget: { left: CHAIN_BUDGET, exhausted: false },
     };
-    addOnHit(item.def.attack?.onHit, item.rarity, 1, item.def.name);
-    for (const n of neighbours(item)) {
-      for (const grant of n.def.grants ?? []) {
-        if (grant.scope === 'connected' && conditionOn(grant.when) && matches(grant.to, item)) {
-          addOnHit(grant.onHit, n.rarity, potencyOf(n).average, n.def.name);
+    if (recordLinks) {
+      for (const m of mitos) {
+        if (!activity.get(m)) continue;
+        for (const n of neighbours(m)) {
+          if (!n.behaviour.mito && isModeled(n.info.id)) ctx.link(m, n, 'overcharge');
         }
       }
     }
-    for (const g of globalGrants) {
-      if (conditionOn(g.grant.when) && matches(g.grant.to, item)) addOnHit(g.grant.onHit, g.rarity, g.scale(), g.label);
-    }
 
-    const statusLines: StatusLine[] = [];
-    for (const id of new Set(onHits.map((o) => o.status))) {
-      const def = statuses.get(id);
-      const entries = onHits.filter((o) => o.status === id);
-      if (!def) {
-        warnings.push(`Unknown status "${id}" on ${item.def.name}`);
+    const results = new Map<Item, WeaponEval>();
+    for (const w of weaponItems) {
+      const prof = w.behaviour.weapon!;
+      const c = ctx.charge(w);
+      const zero: WeaponEval = { single: 0, multi: 0, rate: 0, stamina: 0, nodes: [], gunTrace: [], charge: c };
+      if (!ctx.works(w) || (prof.minCharge && c < prof.minCharge)) {
+        results.set(w, zero);
         continue;
       }
-      const apps = entries.reduce((s, o) => s + hitsPerSecond * o.chance, 0);
-      const potency = apps > 0 ? entries.reduce((s, o) => s + hitsPerSecond * o.chance * o.potency, 0) / apps : 0;
-      const perStack = (def.dpsFlat + def.dpsFromHit * hitDamage) * potency;
-      const stacks = Math.min(Math.max(1, def.maxStacks), apps * def.duration);
-      statusLines.push({
-        status: id,
-        name: def.name,
-        applicationsPerSecond: apps,
-        stacks,
-        dps: perStack * stacks,
-        sources: [...new Set(entries.map((e) => e.source))],
-      });
-    }
-    const statusDps = statusLines.reduce((s, l) => s + l.dps, 0);
-
-    const targets = Math.max(1, Math.floor(build.targets));
-    const isArea = !!item.def.attack?.area;
-    const pierced = isArea ? targets : Math.min(targets, 1 + Math.floor(v('pierce')));
-    const forked = Math.min(targets - pierced, Math.floor(v('forks')));
-    const targetsHit = pierced + Math.max(0, forked);
-    const dps = directDps + statusDps;
-
-    return { stats, hitDamage, hitsPerSecond, directDps, statuses: statusLines, dps, targetsHit, multiTargetDps: dps * targetsHit };
-  }
-
-  // --- Results --------------------------------------------------------------
-  const results = new Map<string, ItemResult>();
-  for (const item of items.values()) {
-    const supply = supplyOf(item);
-    const notes: string[] = [];
-    const result: ItemResult = {
-      slotId: item.slot.id,
-      def: item.def,
-      instance: item.inst,
-      requiresOvercharge: item.requiresOvercharge,
-      overcharge: supply,
-      notes,
-    };
-    if (item.def.grants?.length || item.def.mitochondrion) result.potency = potencyOf(item);
-    if (item.def.mitochondrion) result.mitoOutput = mitoOutput(item);
-    if (item.requiresOvercharge && supply.uptime === 0) notes.push('Needs Overcharge: connect a mitochondrion.');
-    if (item.def.attack) {
-      const normal = item.requiresOvercharge ? null : evaluateAttack(item, false, 0);
-      const charged = supply.uptime > 0 ? evaluateAttack(item, true, supply.charges) : null;
-      const u = charged ? supply.uptime : 0;
-      const blend = (k: 'dps' | 'multiTargetDps') => u * (charged?.[k] ?? 0) + (1 - u) * (normal?.[k] ?? 0);
-      result.attack = { normal, charged, dps: blend('dps'), multiTargetDps: blend('multiTargetDps'), excluded: !!item.state.excluded };
-    }
-    results.set(item.slot.id, result);
-  }
-
-  // Which connections actually do something, for highlighting in the editor.
-  const interactions: Interaction[] = [];
-  for (const item of items.values()) {
-    for (const n of neighbours(item)) {
-      const grants = (n.def.grants ?? []).some((g) => g.scope === 'connected' && conditionOn(g.when) && matches(g.to, item));
-      if (grants) interactions.push({ from: n.slot.id, to: item.slot.id, kind: 'grant' });
-      if (n.def.mitochondrion && !item.def.mitochondrion && (item.def.overcharge || item.requiresOvercharge)) {
-        interactions.push({ from: n.slot.id, to: item.slot.id, kind: 'overcharge' });
+      // Attack speed: weapon infusers add up, Overcharge multiplies.
+      const gun: GunState = { bonus: customSpeed, trace: [], interval: 0 };
+      if (customSpeed) gun.trace.push({ source: 'Global bonuses', text: `+${Math.round(customSpeed * 100)}% attack speed` });
+      for (const n of neighbours(w)) {
+        if (n.behaviour.modifyGun && ctx.works(n)) {
+          const before = gun.trace.length;
+          n.behaviour.modifyGun(ctx, n, gun, 1);
+          if (gun.trace.length > before) ctx.link(n, w, 'gun');
+        }
       }
+      const chargeSpeed = (prof.chargeAttackSpeed ?? 0.3) * c;
+      if (chargeSpeed) gun.trace.push({ source: 'Overcharge', text: `x${(1 + chargeSpeed).toFixed(2)} attack speed` });
+      let interval = prof.interval(w.r) / ((1 + chargeSpeed) * (1 + gun.bonus));
+      if (prof.spinUp) interval = Math.max(1 / 60, interval - prof.spinUp * Math.max(0, 1 - 0.1 * w.r));
+      if (prof.extraDelay) interval += prof.extraDelay;
+      let rate = 1 / interval;
+      let comboMult = 1;
+      if (prof.combo) {
+        // Hits 1 and 2 normal, hit 3 deals 3x and comes 0.4s later.
+        rate = 3 / (3 * interval + 0.4);
+        comboMult = 5 / 3;
+        gun.trace.push({ source: w.info.name, text: 'every 3rd strike deals 3x damage, 0.4s later' });
+      }
+      gun.interval = 1 / rate;
+      ctx.gun = gun;
+      ctx.budget = { left: CHAIN_BUDGET, exhausted: false };
+
+      const shots = prof.shots ? prof.shots(w.r, c) : 1;
+      const base = prof.base * (prof.damageMult ? prof.damageMult(w.r) : 1 + 0.4 * w.r);
+      const root: Attack = newAttack({
+        kind: prof.kind,
+        label: `${w.info.name}${shots !== 1 ? ` x${Number(shots.toFixed(2))}` : ''}`,
+        base,
+        copies: shots,
+        aim: prof.aimParam ? param(prof.aimParam) : 1,
+        hits: prof.hits ? prof.hits(ctx) : 1,
+        reach: prof.reach,
+        bullet: prof.kind === 'bullet',
+        melee: prof.kind === 'slash',
+        speed: prof.speed ?? 0,
+      });
+      root.trace.push({ source: w.info.name, text: `${prof.base} base x${(base / prof.base).toFixed(2)} rarity = ${base.toFixed(1)}` });
+      const upgrade = upgradeBonus(w);
+      if (upgrade) addDamage(root, upgrade, `${cls.name} upgrade`);
+      announce(ctx, root, w);
+      applyModifiers(ctx, root, [w], neighbours(w), 1);
+
+      let attack = root;
+      if (prof.explodes) {
+        // The shell hands its damage to the explosion, which also re-runs on-hit effects.
+        const level = Math.max(1, param('level'));
+        const scale = 1 + (level - 1) * EXPLOSION_LEVEL_SCALING;
+        attack = { ...root, kind: 'explosion', label: `${w.info.name} explosion`, reach: 'area', damage: root.damage * scale, onHitDamage: 0 };
+        attack.onHit = root.onHit.map((d) => ({ ...d, perHit: d.perHit * 2 }));
+        attack.trace = [...root.trace, ...(scale !== 1 ? [{ source: 'Level', text: `x${scale.toFixed(2)} explosion damage` }] : [])];
+      }
+      if (comboMult !== 1) {
+        attack.damage *= comboMult;
+        attack.onHitDamage *= comboMult;
+      }
+      const nodes = evaluateRoot(ctx, attack, param('angledHit'));
+      const single = nodes.reduce((s, n) => s + n.single, 0) * rate * damageMult;
+      const multi = nodes.reduce((s, n) => s + n.multi, 0) * rate * damageMult;
+      if (ctx.budget.exhausted) chainsCut.add(w.info.name);
+      results.set(w, { single, multi, rate, stamina: prof.stamina * rate, nodes, gunTrace: gun.trace, charge: c });
+      ctx.gun = null;
+    }
+
+    // Stamina: all weapons fire together and share one pool.
+    let use = 0;
+    for (const w of weaponItems) {
+      // Excluded weapons still fire (they just miss), so they still use stamina.
+      if (refunded.has(w)) continue;
+      use += results.get(w)!.stamina;
+    }
+    for (const g of items.values()) {
+      if (g.behaviour.staminaRefund) use -= g.behaviour.staminaRefund(g.r, ctx.charge(g));
+    }
+    let duty = 1;
+    if (param('staminaLimits') && use > 0) {
+      const max = Math.max(1, param('maxStamina'));
+      const firing = max / use;
+      duty = firing / (firing + STAMINA_DELAY + max / STAMINA_REGEN);
+    }
+    return { results, duty, charges, refunded };
+  }
+
+  // --- Averaging over states ----------------------------------------------------
+  const avg = new Map<Item, { single: number; multi: number; rate: number; stamina: number; charge: number }>();
+  const chargeAvg = new Map<Item, number>();
+  let dutyAvg = 0;
+  for (const { activity, p } of states) {
+    const { results, duty, charges } = evaluateState(activity, false);
+    dutyAvg += p * duty;
+    for (const [item, c] of charges) chargeAvg.set(item, (chargeAvg.get(item) ?? 0) + p * c);
+    for (const [w, r] of results) {
+      const a = avg.get(w) ?? { single: 0, multi: 0, rate: 0, stamina: 0, charge: 0 };
+      a.single += p * r.single * duty;
+      a.multi += p * r.multi * duty;
+      a.rate += p * r.rate * duty;
+      a.stamina += p * r.stamina;
+      a.charge += p * r.charge;
+      avg.set(w, a);
     }
   }
 
-  const sources = [...results.values()].filter((r) => r.attack).sort((a, b) => b.attack!.dps - a.attack!.dps);
-  const counted = sources.filter((s) => !s.attack!.excluded);
+  // Breakdowns for the two extremes; links from the all-on state.
+  const idleState = evaluateState(new Map(mitos.map((m) => [m, 0])), false);
+  const hasCharge = mitos.length > 0;
+  const chargedState = hasCharge ? evaluateState(new Map(mitos.map((m) => [m, 1])), true) : evaluateState(new Map(), true);
+
+  const view = (label: string, s: ReturnType<typeof evaluateState>, w: Item): StateView => {
+    const r = s.results.get(w)!;
+    return { label, dps: r.single * s.duty, multiDps: r.multi * s.duty, attacksPerSecond: r.rate * s.duty, charge: r.charge, gunTrace: r.gunTrace, nodes: r.nodes };
+  };
+
+  // --- Results ----------------------------------------------------------------
+  const itemResults = new Map<string, ItemResult>();
+  const weapons: WeaponResult[] = [];
+  for (const item of items.values()) {
+    const notes: string[] = [];
+    if (item.behaviour.notes) notes.push(item.behaviour.notes);
+    const modeled = isModeled(item.info.id);
+    const result: ItemResult = {
+      slotId: item.slotId,
+      info: item.info,
+      instance: item.state.organelle!,
+      modeled,
+      notes,
+      charge: chargeAvg.get(item) ?? 0,
+      mito: mitoResults.get(item),
+    };
+    if (item.traits.some((t) => t.requiresCharge) && (chargeAvg.get(item) ?? 0) === 0) notes.push('Excitable: needs Overcharge to work.');
+    if (item.behaviour.weapon) {
+      const a = avg.get(item)!;
+      const idle = view('No Overcharge', idleState, item);
+      const charged = hasCharge ? view('All mitochondria active', chargedState, item) : null;
+      const charges = charged && charged.charge > 0 ? charged : null;
+      if (item.behaviour.weapon.minCharge && a.single === 0) notes.push('Needs Overcharge: put a mitochondrion (or a Vesicle fed by one) next to it.');
+      const wr: WeaponResult = {
+        slotId: item.slotId,
+        info: item.info,
+        instance: item.state.organelle!,
+        dps: a.single,
+        multiDps: a.multi,
+        attacksPerSecond: a.rate,
+        staminaPerSecond: a.stamina,
+        idle,
+        charged: charges,
+        notes,
+        excluded: !!item.state.excluded,
+      };
+      result.weapon = wr;
+      weapons.push(wr);
+    }
+    itemResults.set(item.slotId, result);
+  }
+  weapons.sort((a, b) => b.dps - a.dps);
+  const counted = weapons.filter((w) => !w.excluded);
   return {
     body,
-    items: results,
-    sources,
-    totalDps: counted.reduce((s, r) => s + r.attack!.dps, 0),
-    totalMultiTargetDps: counted.reduce((s, r) => s + r.attack!.multiTargetDps, 0),
-    interactions,
-    warnings: [...new Set(warnings)],
+    items: itemResults,
+    weapons,
+    totalDps: counted.reduce((s, w) => s + w.dps, 0),
+    totalMultiDps: counted.reduce((s, w) => s + w.multiDps, 0),
+    staminaDuty: dutyAvg,
+    links: [...linkSet.values()],
+    warnings: [
+      ...new Set([
+        ...warnings,
+        ...[...chainsCut].map((n) => `${n}: too many chain paths to follow them all; its DPS is an underestimate.`),
+      ]),
+    ],
   };
 }
