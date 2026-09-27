@@ -1,356 +1,203 @@
 import { describe, expect, it } from 'vitest';
-import { flat, mul, pct } from '../data/helpers';
+import { gameData } from '../data';
 import { calculate } from './calc';
-import type { Build, GameData, OrganelleDef, SlotState } from './types';
+import type { Build, Rarity, SlotState } from './types';
 
-// Engine tests use their own small data set so they don't depend on the
-// placeholder numbers in src/data.
-const organelles: OrganelleDef[] = [
-  {
-    id: 'gun',
-    name: 'Gun',
-    slot: 'external',
-    category: 'weapon',
-    description: '',
-    attack: { tags: ['projectile'], damage: [100, 200], attackSpeed: 1 },
-    overcharge: { description: '', modifiers: [mul('damage', 1.65)] },
-  },
-  { id: 'beam', name: 'Beam', slot: 'external', category: 'weapon', description: '', attack: { tags: ['beam'], damage: 10, attackSpeed: 10 } },
-  {
-    id: 'blade',
-    name: 'Blade',
-    slot: 'external',
-    category: 'weapon',
-    description: '',
-    attack: { tags: ['melee'], damage: 100, attackSpeed: 1, critChance: 0.1 },
-    overcharge: { description: '', modifiers: [flat('critChance', 0.1, { perCharge: true })] },
-  },
-  {
-    id: 'extruder',
-    name: 'Extruder',
-    slot: 'external',
-    category: 'weapon',
-    description: '',
-    attack: { tags: ['projectile'], damage: 10, attackSpeed: 10 },
-    requiresOvercharge: true,
-  },
-  {
-    id: 'torch',
-    name: 'Torch',
-    slot: 'external',
-    category: 'weapon',
-    description: '',
-    attack: { tags: ['projectile'], damage: 10, attackSpeed: 2, onHit: [{ status: 'burn', chance: 1 }] },
-  },
-  {
-    id: 'infuser',
-    name: 'Infuser',
-    slot: 'internal',
-    category: 'infuser',
-    description: '',
-    grants: [{ scope: 'connected', to: { tags: ['attack'] }, modifiers: [pct('damage', 0.25)] }],
-  },
-  {
-    id: 'proj-infuser',
-    name: 'Projectile Infuser',
-    slot: 'internal',
-    category: 'infuser',
-    description: '',
-    grants: [{ scope: 'connected', to: { tags: ['projectile'] }, modifiers: [pct('damage', 0.5), flat('forks', 1)] }],
-  },
-  {
-    id: 'hot-infuser',
-    name: 'Hot Infuser',
-    slot: 'internal',
-    category: 'infuser',
-    description: '',
-    grants: [{ scope: 'connected', to: { tags: ['attack'] }, modifiers: [pct('damage', 0.2, { when: 'burning' })] }],
-  },
-  {
-    id: 'amp',
-    name: 'Amp',
-    slot: 'internal',
-    category: 'support',
-    description: '',
-    grants: [{ scope: 'connected', to: { categories: ['infuser'] }, modifiers: [pct('potency', 0.3)] }],
-  },
-  {
-    id: 'capacitor',
-    name: 'Capacitor',
-    slot: 'internal',
-    category: 'support',
-    description: '',
-    grants: [{ scope: 'global', to: { tags: ['attack'] }, modifiers: [pct('damage', 0.04, { per: { param: 'armor' } })] }],
-  },
-  {
-    id: 'mito',
-    name: 'Mito',
-    slot: 'internal',
-    category: 'mitochondrion',
-    description: '',
-    mitochondrion: { trigger: 'test', defaultUptime: 0.5, charges: 1 },
-  },
-];
+// Every expected value below is worked out by hand from the game's formulas
+// (see src/engine/sim/behaviours.ts).
+//
+// Layout: the core square plus square "s" on the core's right edge (edge 1).
+// Core edges 0 top, 2 bottom, 3 left are free; s.e1..s.e3 are free. A weapon
+// on an edge connects only to its own module's centre; core.c and s.c connect.
 
-const data: GameData = {
-  gameVersion: 'test',
-  rarities: [],
-  organelles,
-  traits: [
-    { id: 'excitable', name: 'Excitable', description: '', attackModifiers: [pct('damage', 0.5)], otherModifiers: [], requiresOvercharge: true },
-  ],
-  grafts: [
-    { id: 'volatile', name: 'Volatile', description: '', modifiers: [pct('damage', 0.4)] },
-    { id: 'conductive', name: 'Conductive', description: '', modifiers: [pct('overchargeStrength', 0.4)] },
-    { id: 'omni', name: 'Omni', description: '', accepts: ['internal', 'external'], modifiers: [] },
-  ],
-  statuses: [{ id: 'burn', name: 'Burn', description: '', dpsFlat: 5, dpsFromHit: 0.5, duration: 2, maxStacks: 1 }],
-  conditions: [{ id: 'burning', name: 'Burning', description: '' }],
-  params: [{ id: 'armor', name: 'Armor', description: '', default: 5, min: 0, max: 10, step: 1 }],
-  classes: [
-    {
-      id: 'nano',
-      name: 'Nano',
-      description: '',
-      corePiece: 'core',
-      pieceTypes: [
-        { id: 'core', name: 'Core', sides: 4, centerSlot: 'internal', edgeSlot: 'external', addable: false },
-        { id: 'square', name: 'Square', sides: 4, centerSlot: 'internal', edgeSlot: 'external', addable: true },
-        { id: 'triangle', name: 'Triangle', sides: 3, centerSlot: 'internal', edgeSlot: 'external', addable: true },
-      ],
-      upgrades: [
-        {
-          id: 'tri',
-          name: 'Triangle damage',
-          description: '',
-          maxStacks: 1,
-          grants: [{ scope: 'global', to: { pieceTypes: ['triangle'], tags: ['attack'] }, modifiers: [pct('damage', 0.4)] }],
-        },
-      ],
-      passives: [],
-    },
-  ],
-  constants: { baseCritMultiplier: 2 },
-};
+const org = (id: string, rarity: Rarity = 'common', traits: string[] = []): SlotState => ({ organelle: { id, rarity, traits } });
 
-const org = (id: string, rarity: 'common' | 'rare' = 'common', traits: string[] = []): SlotState => ({
-  organelle: { id, rarity, traits },
-});
-
-// Layout used below: core square, plus square "s" on the core's right edge
-// (core edge 1). Core edges: 0 top, 1 right, 2 bottom, 3 left. Edge 0 of an
-// attached piece is always the shared edge, so s.e1..s.e3 are free.
 function build(slots: Record<string, SlotState>, extra: Partial<Build> = {}): Build {
   return {
-    version: 1,
+    version: 2,
     name: 'test',
-    classId: 'nano',
+    classId: 'nanobot',
     pieces: [
       { id: 'core', type: 'core' },
       { id: 's', type: 'square', attach: { to: 'core', edge: 1 } },
     ],
     slots,
     upgrades: {},
-    conditions: {},
-    params: {},
+    params: { staminaLimits: 0 },
     targets: 1,
     custom: [],
     ...extra,
   };
 }
 
-const dpsOf = (b: Build, slot: string) => calculate(b, data).items.get(slot)!.attack!.dps;
+const dps = (b: Build, slot: string) => calculate(b, gameData).items.get(slot)!.weapon!.dps;
 
-describe('damage pipeline', () => {
-  it('uses the rarity-specific base damage', () => {
-    expect(dpsOf(build({ 'core.e0': org('gun') }), 'core.e0')).toBeCloseTo(100);
-    expect(dpsOf(build({ 'core.e0': org('gun', 'rare') }), 'core.e0')).toBeCloseTo(200);
+describe('weapons', () => {
+  it('Caustic Secretor: 6 damage every 0.1s, scaling with rarity', () => {
+    expect(dps(build({ 'core.e0': org('caustic-secretor') }), 'core.e0')).toBeCloseTo(60);
+    // Rare: 6 x 1.4 damage every 0.1 x 0.9 seconds
+    expect(dps(build({ 'core.e0': org('caustic-secretor', 'rare') }), 'core.e0')).toBeCloseTo((6 * 1.4) / 0.09);
   });
 
-  it('matches the 100 -> 125 -> 206 infuser + overcharge example', () => {
-    const b = build({ 'core.e0': org('gun'), 'core.c': org('infuser') });
-    expect(dpsOf(b, 'core.e0')).toBeCloseTo(125);
-    // Mitochondrion on the neighbouring centre can't reach the gun on the core's edge...
-    const withMito = build({ 'core.e0': org('gun'), 'core.c': org('infuser'), 's.c': org('mito', 'common'), 's.e1': org('gun') });
-    withMito.slots['s.c'].uptime = 1;
-    const r = calculate(withMito, data);
-    expect(r.items.get('core.e0')!.attack!.dps).toBeCloseTo(125);
-    // ...but it does reach the gun on its own edge: 100 x 1.65
-    expect(r.items.get('s.e1')!.attack!.dps).toBeCloseTo(165);
+  it('Tri-phase Tendril: every third strike deals 3x but comes 0.4s later', () => {
+    expect(dps(build({ 'core.e0': org('tri-phase-tendril') }), 'core.e0')).toBeCloseTo((30 * 5) / (3 * 0.6 + 0.4));
   });
 
-  it('multiplies overcharge on top of percent bonuses', () => {
-    // An edge weapon touches only one centre slot, so a global +25% stands in
-    // for the infuser here.
-    const b = build({ 's.e1': org('gun'), 's.c': org('mito') });
-    b.slots['s.c'].uptime = 1;
-    b.custom = [{ id: 'x', label: 'Infuser-like', target: 'attacks', stat: 'damage', op: 'percent', value: 0.25 }];
-    expect(dpsOf(b, 's.e1')).toBeCloseTo(206.25);
+  it('Blastocyst Mortar: the explosion deals the shell damage and scales with level', () => {
+    expect(dps(build({ 'core.e0': org('blastocyst-mortar') }), 'core.e0')).toBeCloseTo(200 / 1.7);
+    const level3 = build({ 'core.e0': org('blastocyst-mortar') }, { params: { staminaLimits: 0, level: 3 } });
+    expect(dps(level3, 'core.e0')).toBeCloseTo((200 * 2.5) / 1.7);
   });
 
-  it('adds percents together and multiplies multipliers', () => {
-    const b = build({ 'core.e0': { ...org('gun'), graft: 'volatile' }, 'core.c': org('infuser') });
-    // (1 + 0.25 + 0.4) = 1.65
-    expect(dpsOf(b, 'core.e0')).toBeCloseTo(165);
+  it('Rotary Extruder only fires with Overcharge', () => {
+    const r = calculate(build({ 'core.e0': org('rotary-extruder') }), gameData).items.get('core.e0')!;
+    expect(r.weapon!.dps).toBe(0);
+    expect(r.notes.join(' ')).toMatch(/Needs Overcharge/);
+    // Entrant Mitochondrion: 15s per 30s room = 50% uptime, 1 Overcharge -> x1.3 attack speed
+    const withMito = build({ 'core.e0': org('rotary-extruder'), 'core.c': org('entrant-mitochondrion') });
+    expect(dps(withMito, 'core.e0')).toBeCloseTo(0.5 * (8 / 0.04) * 1.3);
+  });
+
+  it('counts pellets that hit for shotguns', () => {
+    // Cluster Ejector: 5 pellets x 19 every 1.5s, 70% of pellets land
+    expect(dps(build({ 'core.e0': org('cluster-ejector') }), 'core.e0')).toBeCloseTo((5 * 19 * 0.7) / 1.5);
   });
 });
 
-describe('connections', () => {
-  it('only lets an infuser reach organelles directly connected to it', () => {
-    // Infuser in the core centre; gun on s's edge connects to s.c only.
-    const b = build({ 'core.c': org('infuser'), 's.e1': org('gun') });
-    expect(dpsOf(b, 's.e1')).toBeCloseTo(100);
+describe('infusers and chains', () => {
+  it('Oxysome adds 25% of base damage to a connected weapon', () => {
+    expect(dps(build({ 'core.e0': org('caustic-secretor'), 'core.c': org('oxysome') }), 'core.e0')).toBeCloseTo(75);
   });
 
-  it('lets a support boost a connected infuser, which then boosts its weapon', () => {
-    // amp (core.c) -> infuser (s.c) -> gun (s.e1)
-    const b = build({ 'core.c': org('amp'), 's.c': org('infuser'), 's.e1': org('gun') });
-    const r = calculate(b, data);
-    expect(r.items.get('s.c')!.potency!.average).toBeCloseTo(1.3);
-    expect(r.items.get('s.e1')!.attack!.dps).toBeCloseTo(100 * (1 + 0.25 * 1.3));
-    expect(r.interactions).toEqual(
-      expect.arrayContaining([
-        { from: 'core.c', to: 's.c', kind: 'grant' },
-        { from: 's.c', to: 's.e1', kind: 'grant' },
-      ]),
-    );
-    // amp's +potency does nothing for the gun directly (it only targets infusers)
-    expect(r.interactions).not.toContainEqual({ from: 'core.c', to: 's.e1', kind: 'grant' });
+  it('does not reach a weapon on another module', () => {
+    expect(dps(build({ 's.e1': org('caustic-secretor'), 'core.c': org('oxysome') }), 's.e1')).toBeCloseTo(60);
   });
 
-  it('respects projectile-only infusers', () => {
-    const b = build({ 'core.c': org('proj-infuser'), 'core.e0': org('gun'), 'core.e2': org('beam') });
-    const r = calculate(b, data);
-    expect(r.items.get('core.e0')!.attack!.dps).toBeCloseTo(150);
-    expect(r.items.get('core.e2')!.attack!.dps).toBeCloseTo(100);
+  it('Vesicle passes the attack on to the next module, and can double up from Rare', () => {
+    const b = build({ 's.e1': org('caustic-secretor'), 's.c': org('vesicle'), 'core.c': org('oxysome') });
+    expect(dps(b, 's.e1')).toBeCloseTo(75);
+    b.slots['s.c'] = org('vesicle', 'rare');
+    // 20% chance to trigger Oxysome twice: +25% x 1.2
+    expect(dps(b, 's.e1')).toBeCloseTo(78);
+    const links = calculate(b, gameData).links;
+    expect(links).toContainEqual({ from: 's.e1', to: 's.c', kind: 'attack' });
+    expect(links).toContainEqual({ from: 's.c', to: 'core.c', kind: 'attack' });
   });
 
-  it('rejects an organelle in the wrong kind of slot unless the slot is Omni', () => {
-    const wrong = calculate(build({ 'core.c': org('gun') }), data);
-    expect(wrong.items.size).toBe(0);
-    expect(wrong.warnings[0]).toMatch(/only accepts internal/);
-    const omni = calculate(build({ 'core.c': { ...org('gun'), graft: 'omni' } }), data);
-    expect(omni.totalDps).toBeCloseTo(100);
-  });
-});
-
-describe('overcharge', () => {
-  it('averages DPS over mitochondrion uptime', () => {
-    const b = build({ 's.c': org('mito'), 's.e1': org('gun') }); // default uptime 0.5
-    expect(dpsOf(b, 's.e1')).toBeCloseTo(0.5 * 165 + 0.5 * 100);
+  it('Pyrosome burn pools and halves each second: about 2x its amount per hit', () => {
+    // 6 bullet + 2 x 5 burn per hit, 10 hits a second
+    expect(dps(build({ 'core.e0': org('caustic-secretor'), 'core.c': org('pyrosome') }), 'core.e0')).toBeCloseTo(160);
   });
 
-  it('scales overcharge effects with Overcharge Strength', () => {
-    const b = build({ 's.c': org('mito'), 's.e1': { ...org('gun'), graft: 'conductive' } });
-    b.slots['s.c'].uptime = 1;
-    // x1.65 becomes x(1 + 0.65 * 1.4)
-    expect(dpsOf(b, 's.e1')).toBeCloseTo(100 * (1 + 0.65 * 1.4));
+  it('passes the burn down the chain, so a chained Oxysome boosts the burn only', () => {
+    const b = build({ 'core.e0': org('caustic-secretor'), 'core.c': org('pyrosome'), 's.c': org('oxysome') });
+    // bullet 6 (Oxysome is not connected to the weapon) + burn 2 x (5 x 1.25)
+    expect(dps(b, 'core.e0')).toBeCloseTo(10 * (6 + 2 * 6.25));
   });
 
-  it('combines several mitochondria into uptime and average charges', () => {
-    const one = calculate(build({ 'core.c': org('mito'), 's.c': org('amp') }), data).items.get('s.c')!.overcharge;
-    expect(one.uptime).toBeCloseTo(0.5);
-    expect(one.charges).toBeCloseTo(1);
-
-    // Squares on the core's right and bottom edges: the core centre touches both.
-    const ring = build(
-      { 'r.c': org('mito'), 'd.c': org('mito'), 'core.c': org('amp') },
-      {
-        pieces: [
-          { id: 'core', type: 'core' },
-          { id: 'r', type: 'square', attach: { to: 'core', edge: 1 } },
-          { id: 'd', type: 'square', attach: { to: 'core', edge: 2 } },
-        ],
-      },
-    );
-    // Two independent 50% triggers: up 75% of the time, 1 charge expected
-    // overall, so 1/0.75 charges on average while up.
-    const two = calculate(ring, data).items.get('core.c')!.overcharge;
-    expect(two.uptime).toBeCloseTo(0.75);
-    expect(two.charges).toBeCloseTo(1 / 0.75);
+  it('Triosome side shots land half the time, or always with Attractor down the chain', () => {
+    const b = build({ 'core.e0': org('caustic-secretor'), 'core.c': org('triosome') });
+    // 2 side shots x 25% damage, 50% land
+    expect(dps(b, 'core.e0')).toBeCloseTo(10 * (6 + 2 * 1.5 * 0.5));
+    b.slots['s.c'] = org('attractor');
+    expect(dps(b, 'core.e0')).toBeCloseTo(10 * (6 + 2 * 1.5));
   });
 
-  it('gives per-charge bonuses for each charge held', () => {
-    const b = build({ 's.c': { ...org('mito'), uptime: 1 }, 's.e1': org('blade') });
-    // 10% base + 10% per charge (1 charge) = 20% crit, x2 crit damage => x1.2
-    expect(dpsOf(b, 's.e1')).toBeCloseTo(120);
+  it('only links attack-speed effects that actually apply', () => {
+    // A Vesicle with no weapon infuser behind it does nothing for attack speed.
+    const plain = calculate(build({ 's.e1': org('caustic-secretor'), 's.c': org('vesicle'), 'core.c': org('oxysome') }), gameData);
+    expect(plain.links.filter((l) => l.kind === 'gun')).toEqual([]);
+    // Resonant Cavity behind a Vesicle speeds up the weapon (not doubled: Vesicle only doubles attack effects).
+    const b = build({ 's.e1': org('caustic-secretor'), 's.c': org('vesicle', 'legendary'), 'core.c': org('resonant-cavity') });
+    const r = calculate(b, gameData);
+    // Common secretor: 60 DPS x (1 + 0.01 x 20 stacks)
+    expect(r.items.get('s.e1')!.weapon!.dps).toBeCloseTo(60 * 1.2);
+    expect(r.links).toContainEqual({ from: 'core.c', to: 's.c', kind: 'gun' });
+    expect(r.links).toContainEqual({ from: 's.c', to: 's.e1', kind: 'gun' });
   });
 
-  it('gives zero DPS to organelles that need Overcharge when none is connected', () => {
-    const r = calculate(build({ 'core.e0': org('extruder') }), data);
-    expect(r.items.get('core.e0')!.attack!.dps).toBe(0);
-    expect(r.items.get('core.e0')!.notes[0]).toMatch(/Needs Overcharge/);
+  it('Resonant Cavity adds attack speed at max stacks', () => {
+    // (0.01 per hit) x 20 hits = +20%
+    expect(dps(build({ 'core.e0': org('caustic-secretor'), 'core.c': org('resonant-cavity') }), 'core.e0')).toBeCloseTo(72);
   });
 
-  it('runs Overcharge-only organelles for the uptime share of the fight', () => {
-    const b = build({ 's.c': org('mito'), 's.e1': org('extruder') });
-    expect(dpsOf(b, 's.e1')).toBeCloseTo(0.5 * 100);
-  });
-
-  it('treats the Excitable trait as needing Overcharge', () => {
-    const b = build({ 's.c': org('mito'), 's.e1': org('gun', 'common', ['excitable']) });
-    // Only charged half the time: 100 x 1.5 (trait) x 1.65 (overcharge)
-    expect(dpsOf(b, 's.e1')).toBeCloseTo(0.5 * 100 * 1.5 * 1.65);
+  it('Echosome splash only adds multi-target damage', () => {
+    const b = build({ 'core.e0': org('caustic-secretor'), 'core.c': org('echosome') }, { targets: 3 });
+    const w = calculate(b, gameData).items.get('core.e0')!.weapon!;
+    expect(w.dps).toBeCloseTo(60);
+    // each hit splashes 40% of 6 onto the 2 other enemies
+    expect(w.multiDps).toBeCloseTo(60 + 10 * 2.4 * 2);
   });
 });
 
-describe('global effects, conditions and parameters', () => {
-  it('applies class upgrades to organelles on matching pieces only', () => {
-    const b = build(
-      { 't.e1': org('gun'), 'core.e0': org('gun') },
-      {
-        pieces: [
-          { id: 'core', type: 'core' },
-          { id: 't', type: 'triangle', attach: { to: 'core', edge: 1 } },
-        ],
-        upgrades: { tri: 1 },
-      },
-    );
-    const r = calculate(b, data);
-    expect(r.items.get('t.e1')!.attack!.dps).toBeCloseTo(140);
-    expect(r.items.get('core.e0')!.attack!.dps).toBeCloseTo(100);
+describe('slots, traits and Overcharge', () => {
+  it('Volatile slots add 40% of base damage', () => {
+    expect(dps(build({ 'core.e0': { ...org('caustic-secretor'), graft: 'volatile' } }), 'core.e0')).toBeCloseTo(84);
   });
 
-  it('scales per-parameter bonuses with the build parameter', () => {
-    const b = build({ 'core.c': org('capacitor'), 's.e1': org('gun') });
-    expect(dpsOf(b, 's.e1')).toBeCloseTo(120); // default armor 5 -> +20%
-    b.params = { armor: 10 };
-    expect(dpsOf(b, 's.e1')).toBeCloseTo(140);
+  it('treats a trait as extra rarity steps', () => {
+    expect(dps(build({ 'core.e0': org('caustic-secretor', 'common', ['cancerous']) }), 'core.e0')).toBeCloseTo((6 * 1.4) / 0.09);
   });
 
-  it('only applies conditional bonuses while the condition is on', () => {
-    const b = build({ 'core.c': org('hot-infuser'), 'core.e0': org('gun') });
-    expect(dpsOf(b, 'core.e0')).toBeCloseTo(100);
-    b.conditions = { burning: true };
-    expect(dpsOf(b, 'core.e0')).toBeCloseTo(120);
+  it('Excitable needs Overcharge', () => {
+    expect(dps(build({ 'core.e0': org('caustic-secretor', 'common', ['excitable']) }), 'core.e0')).toBe(0);
+  });
+
+  it('averages over mitochondrion uptime', () => {
+    // Entrant: active half the time, x1.3 attack speed while active
+    const b = build({ 'core.e0': org('caustic-secretor'), 'core.c': org('entrant-mitochondrion') });
+    expect(dps(b, 'core.e0')).toBeCloseTo(0.5 * 60 + 0.5 * 78);
+    b.slots['core.c'].uptime = 1;
+    expect(dps(b, 'core.e0')).toBeCloseTo(78);
+  });
+
+  it('adds Conductive Overcharge bonuses together', () => {
+    const b = build({ 'core.e0': { ...org('caustic-secretor'), graft: 'conductive' }, 'core.c': { ...org('entrant-mitochondrion'), graft: 'conductive', uptime: 1 } });
+    // 1 Overcharge x (1 + 0.4 + 0.4) = 1.8 -> x(1 + 0.3 x 1.8) attack speed
+    expect(dps(b, 'core.e0')).toBeCloseTo(60 * (1 + 0.3 * 1.8));
+  });
+
+  it('relays Overcharge through a Vesicle', () => {
+    const b = build({ 's.e1': org('caustic-secretor'), 's.c': org('vesicle'), 'core.c': { ...org('entrant-mitochondrion'), uptime: 1 } });
+    expect(dps(b, 's.e1')).toBeCloseTo(78);
   });
 });
 
-describe('crits, statuses and multiple targets', () => {
-  it('averages crits into hit damage', () => {
-    expect(dpsOf(build({ 'core.e0': org('blade') }), 'core.e0')).toBeCloseTo(110);
+describe('performance', () => {
+  it('stays fast on a dense web of Vesicles and chainable infusers', () => {
+    // 3x3 grid of squares with a Vesicle or chainable infuser in every centre.
+    const pieces: Build['pieces'] = [{ id: 'core', type: 'core' }];
+    const add = (id: string, to: string, edge: number) => pieces.push({ id, type: 'square', attach: { to, edge } });
+    add('r', 'core', 1);
+    add('l', 'core', 3);
+    add('u', 'core', 0);
+    add('d', 'core', 2);
+    const slots: Record<string, SlotState> = {};
+    slots['core.c'] = org('vesicle', 'legendary');
+    slots['r.c'] = org('pyrosome', 'legendary');
+    slots['l.c'] = org('vesicle', 'legendary');
+    slots['u.c'] = org('echosome', 'legendary');
+    slots['d.c'] = org('entrant-mitochondrion', 'legendary');
+    for (const p of ['r', 'l', 'u', 'd']) for (const e of [1, 2, 3]) slots[`${p}.e${e}`] = org('caustic-secretor');
+    const start = performance.now();
+    const r = calculate(build(slots, { pieces, targets: 4 }), gameData);
+    expect(performance.now() - start).toBeLessThan(2000);
+    expect(r.warnings).toEqual([]);
+    expect(r.weapons).toHaveLength(12);
+    expect(Number.isFinite(r.totalMultiDps)).toBe(true);
+  });
+});
+
+describe('stamina', () => {
+  it('pauses about 1.5s after draining 100 stamina', () => {
+    const b = build({ 'core.e0': org('caustic-secretor') }, { params: {} });
+    // 0.5 stamina x 10 shots/s: 20s of firing, then 1s + 100/190s refilling
+    const firing = 100 / 5;
+    expect(dps(b, 'core.e0')).toBeCloseTo((60 * firing) / (firing + 1 + 100 / 190));
   });
 
-  it('adds burn damage over time from on-hit statuses', () => {
-    const r = calculate(build({ 'core.e0': org('torch') }), data).items.get('core.e0')!.attack!;
-    const burn = r.normal!.statuses[0];
-    // 2 applications/s x 2 s duration >= 1: always up. (5 + 0.5 x 10) per second.
-    expect(burn.stacks).toBeCloseTo(1);
-    expect(burn.dps).toBeCloseTo(10);
-    expect(r.dps).toBeCloseTo(20 + 10);
-  });
-
-  it('counts pierce and forks against several targets', () => {
-    const b = build({ 'core.c': org('proj-infuser'), 'core.e0': org('gun') }, { targets: 3 });
-    const r = calculate(b, data);
-    const gun = r.items.get('core.e0')!.attack!;
-    expect(gun.normal!.targetsHit).toBe(2); // 1 + 1 fork
-    expect(gun.multiTargetDps).toBeCloseTo(300);
-    expect(r.totalMultiTargetDps).toBeCloseTo(300);
-  });
-
-  it('leaves excluded organelles out of the total', () => {
-    const b = build({ 'core.e0': org('gun'), 'core.e2': { ...org('gun'), excluded: true } });
-    expect(calculate(b, data).totalDps).toBeCloseTo(100);
+  it('Glycogen Synthesizer refunds the stamina of weapons it touches', () => {
+    const b = build({ 'core.e0': org('pressurized-spicule'), 'core.c': org('glycogen-synthesizer') }, { params: {} });
+    expect(dps(b, 'core.e0')).toBeCloseTo(140 / 2.5);
   });
 });

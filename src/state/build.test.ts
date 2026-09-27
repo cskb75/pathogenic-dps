@@ -49,6 +49,22 @@ describe('build state', () => {
     ]);
   });
 
+  it('migrates old version 1 links, dropping the made-up sample organelles', () => {
+    const v1 = {
+      version: 1,
+      name: 'old',
+      classId: 'nanobot',
+      pieces: [{ id: 'core', type: 'core' }],
+      slots: { 'core.c': { organelle: { id: 'sample-attack-infuser', rarity: 'rare', traits: [] } }, 'core.e0': { organelle: { id: 'caustic-secretor', rarity: 'rare', traits: [] } } },
+      conditions: { targetBurning: true },
+      custom: [{ id: 'x', label: 'old', target: 'attacks', stat: 'damage', op: 'percent', value: 0.1 }],
+    };
+    const parsed = decodeBuild(encodeBuild(v1 as never), gameData)!;
+    expect(parsed.version).toBe(2);
+    expect(Object.keys(parsed.slots)).toEqual(['core.e0']);
+    expect(parsed.custom).toEqual([]);
+  });
+
   it('adds pieces with fresh ids and drops slots covered by them', () => {
     let build = emptyBuild(gameData);
     build = reducer(build, { type: 'setOrganelle', slotId: 'core.e1', organelle: { id: 'caustic-secretor', rarity: 'common', traits: [] } });

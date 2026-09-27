@@ -11,6 +11,7 @@
   --danger: #fb7185;
   --warn: #fbbf24;
   --grant: #2dd4bf;
+  --gun: #a78bfa;
   --overcharge: #f59e0b;
   --piece: #1c2c35;
   --piece-core: #24404a;
@@ -40,6 +41,7 @@
     --danger: #be123c;
     --warn: #b45309;
     --grant: #0d9488;
+    --gun: #7c3aed;
     --overcharge: #d97706;
     --piece: #dfe9ee;
     --piece-core: #c5dde3;
@@ -353,8 +355,11 @@ input[type='range'] {
   stroke-linecap: round;
   transition: opacity 0.15s;
 }
-.flow.grant {
+.flow.attack {
   stroke: var(--grant);
+}
+.flow.gun {
+  stroke: var(--gun);
 }
 .flow.overcharge {
   stroke: var(--overcharge);
@@ -362,8 +367,11 @@ input[type='range'] {
 .flow.dim {
   opacity: 0.2;
 }
-.arrowhead.grant {
+.arrowhead.attack {
   fill: var(--grant);
+}
+.arrowhead.gun {
+  fill: var(--gun);
 }
 .arrowhead.overcharge {
   fill: var(--overcharge);
@@ -433,6 +441,9 @@ input[type='range'] {
 .slot.excluded {
   opacity: 0.5;
 }
+.slot.unmodeled .slot-body {
+  stroke-dasharray: 5 3;
+}
 .slot-label {
   fill: var(--text);
   font-weight: 700;
@@ -491,9 +502,13 @@ input[type='range'] {
   height: 3px;
   border-radius: 2px;
 }
-.swatch.line.grant,
-.dot.grant {
+.swatch.line.attack,
+.dot.attack {
   background: var(--grant);
+}
+.swatch.line.gun,
+.dot.gun {
+  background: var(--gun);
 }
 .swatch.line.overcharge,
 .dot.overcharge {
@@ -830,4 +845,45 @@ summary {
   .custom-row {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+/* ---- Attack breakdown tree -------------------------------------------- */
+
+.attack-tree {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.attack-tree.nested {
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 2px solid var(--border);
+}
+.attack-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-weight: 600;
+}
+.trace {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  font-size: 12.5px;
+}
+.trace .op {
+  color: var(--grant);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.param-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.custom-row {
+  grid-template-columns: minmax(100px, 1fr) minmax(160px, 1.4fr) 90px auto !important;
 }

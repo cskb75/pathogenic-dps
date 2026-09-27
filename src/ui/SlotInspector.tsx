@@ -1,10 +1,10 @@
 import { useMemo, type CSSProperties, type Dispatch } from 'react';
-import type { CalcResult } from '../engine/calc';
+import type { CalcResult, Link, MitoResult } from '../engine/calc';
 import { findClass } from '../engine/calc';
-import type { Build, Category, GameData, OrganelleDef, Rarity } from '../engine/types';
+import type { Build, GameData, Rarity } from '../engine/types';
 import type { Action } from '../state/build';
-import { AttackBreakdown } from './Breakdown';
-import { CATEGORY_LABELS, fmtNum, fmtPct, fmtStat } from './format';
+import { WeaponBreakdown } from './Breakdown';
+import { CATEGORY_LABELS, CATEGORY_ORDER, fmtNum, fmtPct } from './format';
 
 interface Props {
   data: GameData;
@@ -15,10 +15,14 @@ interface Props {
   dispatch: Dispatch<Action>;
 }
 
-const CATEGORY_ORDER: Category[] = ['weapon', 'flagellum', 'infuser', 'mitochondrion', 'support', 'consumer'];
+const LINK_TEXT: Record<Link['kind'], { in: string; out: string }> = {
+  attack: { in: 'Receives attacks from', out: 'Passes attacks to' },
+  gun: { in: 'Attack speed from', out: 'Speeds up' },
+  overcharge: { in: 'Overcharged by', out: 'Overcharges' },
+};
 
 export function SlotInspector({ data, build, result, slotId, onSelect, dispatch }: Props) {
-  const organelles = useMemo(() => new Map(data.organelles.map((o) => [o.id, o])), [data]);
+  const infos = useMemo(() => new Map(data.organelles.map((o) => [o.id, o])), [data]);
   const slot = slotId ? result.body.slotById.get(slotId) : undefined;
 
   if (!slot) {
@@ -33,20 +37,19 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
   const cls = findClass(data, build.classId);
   const state = build.slots[slot.id] ?? {};
   const inst = state.organelle;
-  const def = inst ? organelles.get(inst.id) : undefined;
-  const graft = state.graft ? data.grafts.find((g) => g.id === state.graft) : undefined;
-  const accepts = graft?.accepts ?? [slot.kind];
+  const info = inst ? infos.get(inst.id) : undefined;
+  const accepts = state.graft === 'omni' ? ['internal', 'external'] : [slot.kind];
   const item = result.items.get(slot.id);
   const pieceName = cls.pieceTypes.find((p) => p.id === slot.pieceType)?.name ?? slot.pieceType;
   const choices = data.organelles.filter((o) => accepts.includes(o.slot));
   const nameOf = (id: string) => {
     const other = build.slots[id]?.organelle;
-    return other ? (organelles.get(other.id)?.name ?? other.id) : 'empty slot';
+    return other ? (infos.get(other.id)?.name ?? other.id) : 'empty slot';
   };
 
-  const incoming = result.interactions.filter((i) => i.to === slot.id);
-  const outgoing = result.interactions.filter((i) => i.from === slot.id);
-  const linked = new Set([...incoming.map((i) => i.from), ...outgoing.map((i) => i.to)]);
+  const incoming = result.links.filter((l) => l.to === slot.id);
+  const outgoing = result.links.filter((l) => l.from === slot.id);
+  const linked = new Set([...incoming.map((l) => l.from), ...outgoing.map((l) => l.to)]);
   const idle = (result.body.connections.get(slot.id) ?? []).filter((id) => build.slots[id]?.organelle && !linked.has(id));
 
   const setOrganelle = (id: string) => {
@@ -55,12 +58,7 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
   };
   const setRarity = (rarity: Rarity) => inst && dispatch({ type: 'setOrganelle', slotId: slot.id, organelle: { ...inst, rarity } });
   const toggleTrait = (id: string, on: boolean) =>
-    inst &&
-    dispatch({
-      type: 'setOrganelle',
-      slotId: slot.id,
-      organelle: { ...inst, traits: on ? [...inst.traits, id] : inst.traits.filter((t) => t !== id) },
-    });
+    inst && dispatch({ type: 'setOrganelle', slotId: slot.id, organelle: { ...inst, traits: on ? [...inst.traits, id] : inst.traits.filter((t) => t !== id) } });
 
   return (
     <section id="inspector" className="panel inspector" aria-label="Slot">
@@ -90,18 +88,14 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
               </optgroup>
             );
           })}
-          {inst && !def && <option value={inst.id}>Unknown: {inst.id}</option>}
-          {def && !accepts.includes(def.slot) && <option value={def.id}>{def.name} (wrong slot type)</option>}
+          {info && !accepts.includes(info.slot) && <option value={info.id}>{info.name} (wrong slot type)</option>}
+          {inst && !info && <option value={inst.id}>Unknown: {inst.id}</option>}
         </select>
       </div>
 
       <div className="field-row">
         <label htmlFor="graft">Graft</label>
-        <select
-          id="graft"
-          value={state.graft ?? ''}
-          onChange={(e) => dispatch({ type: 'setSlot', slotId: slot.id, patch: { graft: e.target.value || undefined } })}
-        >
+        <select id="graft" value={state.graft ?? ''} onChange={(e) => dispatch({ type: 'setSlot', slotId: slot.id, patch: { graft: e.target.value || undefined } })}>
           <option value="">None</option>
           {data.grafts.map((g) => (
             <option key={g.id} value={g.id}>
@@ -111,12 +105,19 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
         </select>
       </div>
 
-      {def && inst && (
+      {info && inst && (
         <>
           <p className="description">
-            {def.description}
-            {def.placeholder && <span className="badge warn" title="Numbers not yet checked against the game">placeholder stats</span>}
+            {info.description}
+            {item && !item.modeled && <span className="badge warn">not modeled yet</span>}
+            {item?.modeled && !info.demoId && <span className="badge warn">patch notes only</span>}
           </p>
+          {item?.notes.map((n) => (
+            <p key={n} className="note">
+              {n}
+            </p>
+          ))}
+          {!item && <p className="note warn">{info.name} goes in {info.slot} slots. Graft this slot as Omni or move it.</p>}
 
           <fieldset className="rarity-picker">
             <legend>Rarity</legend>
@@ -135,75 +136,36 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
 
           <fieldset className="traits">
             <legend>Traits</legend>
-            {data.traits.map((t) => {
-              const blocked = t.excludes?.includes(def.id);
-              return (
-                <label key={t.id} className={blocked ? 'disabled' : ''} title={t.description}>
-                  <input
-                    type="checkbox"
-                    disabled={blocked}
-                    checked={inst.traits.includes(t.id)}
-                    onChange={(e) => toggleTrait(t.id, e.target.checked)}
-                  />
-                  {t.name}
-                </label>
-              );
-            })}
+            {data.traits.map((t) => (
+              <label key={t.id} title={t.description}>
+                <input type="checkbox" checked={inst.traits.includes(t.id)} onChange={(e) => toggleTrait(t.id, e.target.checked)} />
+                {t.name}
+              </label>
+            ))}
           </fieldset>
 
-          {def.mitochondrion && <MitoControls def={def} uptime={state.uptime} dispatch={dispatch} slotId={slot.id} result={result} />}
-
-          {def.overcharge && !def.mitochondrion && <p className="muted small">Overcharge: {def.overcharge.description}</p>}
-
-          {item && (item.overcharge.uptime > 0 || item.requiresOvercharge) && (
-            <p className="small">
-              Overcharged {fmtPct(item.overcharge.uptime)} of the time, holding {fmtNum(item.overcharge.charges)} charge
-              {item.overcharge.charges === 1 ? '' : 's'} on average.
-            </p>
-          )}
-
-          {item?.potency && !def.mitochondrion && (
-            <p className="small">
-              Potency {fmtStat('potency', item.potency.average)} on average
-              {item.potency.charged !== item.potency.normal && (
-                <span className="muted">
-                  {' '}
-                  ({fmtStat('potency', item.potency.normal)} normally, {fmtStat('potency', item.potency.charged)} Overcharged)
-                </span>
-              )}
-            </p>
-          )}
-
-          {item?.notes.map((n) => (
-            <p key={n} className="note warn">
-              {n}
-            </p>
-          ))}
-          {!item && (
-            <p className="note warn">
-              {def.name} goes in {def.slot} slots. Graft this slot as Omni or move it.
-            </p>
-          )}
+          {item?.mito && <MitoControls mito={item.mito} slotId={slot.id} dispatch={dispatch} />}
+          {item && !item.mito && item.charge > 0 && <p className="small">Holds {fmtNum(item.charge)} Overcharge on average.</p>}
 
           {(incoming.length > 0 || outgoing.length > 0 || idle.length > 0) && (
             <div className="connections">
               <h3>Connections</h3>
               <ul>
-                {incoming.map((i) => (
-                  <li key={`in-${i.kind}-${i.from}`}>
-                    <span className={`dot ${i.kind}`} />
-                    {i.kind === 'overcharge' ? 'Overcharged by' : 'Boosted by'}{' '}
-                    <button className="link" onClick={() => onSelect(i.from)}>
-                      {nameOf(i.from)}
+                {incoming.map((l) => (
+                  <li key={`in-${l.kind}-${l.from}`}>
+                    <span className={`dot ${l.kind}`} />
+                    {LINK_TEXT[l.kind].in}{' '}
+                    <button className="link" onClick={() => onSelect(l.from)}>
+                      {nameOf(l.from)}
                     </button>
                   </li>
                 ))}
-                {outgoing.map((i) => (
-                  <li key={`out-${i.kind}-${i.to}`}>
-                    <span className={`dot ${i.kind}`} />
-                    {i.kind === 'overcharge' ? 'Overcharges' : 'Boosts'}{' '}
-                    <button className="link" onClick={() => onSelect(i.to)}>
-                      {nameOf(i.to)}
+                {outgoing.map((l) => (
+                  <li key={`out-${l.kind}-${l.to}`}>
+                    <span className={`dot ${l.kind}`} />
+                    {LINK_TEXT[l.kind].out}{' '}
+                    <button className="link" onClick={() => onSelect(l.to)}>
+                      {nameOf(l.to)}
                     </button>
                   </li>
                 ))}
@@ -221,7 +183,7 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
             </div>
           )}
 
-          {item?.attack && (
+          {item?.weapon && (
             <>
               <label className="check">
                 <input
@@ -229,14 +191,14 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
                   checked={!state.excluded}
                   onChange={(e) => dispatch({ type: 'setSlot', slotId: slot.id, patch: { excluded: !e.target.checked || undefined } })}
                 />
-                Count toward total DPS <span className="muted">(untick if it faces away from the target)</span>
+                Count toward total DPS <span className="muted">(untick if it can't aim at the target)</span>
               </label>
-              <AttackBreakdown attack={item.attack} />
+              <WeaponBreakdown weapon={item.weapon} />
             </>
           )}
 
           <button className="danger wide" onClick={() => setOrganelle('')}>
-            Remove {def.name}
+            Remove {info.name}
           </button>
         </>
       )}
@@ -244,26 +206,16 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
   );
 }
 
-function MitoControls({
-  def,
-  uptime,
-  slotId,
-  result,
-  dispatch,
-}: {
-  def: OrganelleDef;
-  uptime: number | undefined;
-  slotId: string;
-  result: CalcResult;
-  dispatch: Dispatch<Action>;
-}) {
-  const m = def.mitochondrion!;
-  const value = uptime ?? m.defaultUptime;
-  const output = result.items.get(slotId)?.mitoOutput;
+function MitoControls({ mito, slotId, dispatch }: { mito: MitoResult; slotId: string; dispatch: Dispatch<Action> }) {
   return (
     <div className="field-stack">
+      <p className="small">
+        <strong>{mito.trigger}</strong>: {fmtNum(mito.charge)} Overcharge
+        {mito.duration !== undefined && <> for {fmtNum(mito.duration)}s</>}
+      </p>
       <label htmlFor="uptime">
-        Trigger: <strong>{m.trigger}</strong>. Active {fmtPct(value)} of the fight
+        Active {fmtPct(mito.uptime)} of the fight{' '}
+        <span className="muted">{mito.overridden ? `(estimate: ${fmtPct(mito.estimated)})` : '(estimated from your fight assumptions)'}</span>
       </label>
       <input
         id="uptime"
@@ -271,13 +223,13 @@ function MitoControls({
         min={0}
         max={1}
         step={0.05}
-        value={value}
+        value={mito.uptime}
         onChange={(e) => dispatch({ type: 'setSlot', slotId, patch: { uptime: Number(e.target.value) } })}
       />
-      {output && (
-        <p className="small muted">
-          Gives {fmtNum(output.charges)} charge{output.charges === 1 ? '' : 's'} to each connected organelle while active.
-        </p>
+      {mito.overridden && (
+        <button className="link small" onClick={() => dispatch({ type: 'setSlot', slotId, patch: { uptime: undefined } })}>
+          Use the estimate
+        </button>
       )}
     </div>
   );
