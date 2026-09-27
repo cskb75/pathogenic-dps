@@ -1,10 +1,12 @@
-import { useMemo, type CSSProperties, type Dispatch } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type Dispatch } from 'react';
 import type { CalcResult, Link, MitoResult } from '../engine/calc';
-import { findClass } from '../engine/calc';
-import type { Build, GameData, Rarity } from '../engine/types';
+import { findClass, slotState } from '../engine/calc';
+import type { Build, GameData, Rarity, SlotKind } from '../engine/types';
 import type { Action } from '../state/build';
+import { Icon, organelleIcon } from './art';
 import { WeaponBreakdown } from './Breakdown';
-import { CATEGORY_LABELS, CATEGORY_ORDER, fmtNum, fmtPct } from './format';
+import { OrganellePicker } from './OrganellePicker';
+import { CATEGORY_LABELS, fmtNum, fmtPct } from './format';
 
 interface Props {
   data: GameData;
@@ -23,6 +25,8 @@ const LINK_TEXT: Record<Link['kind'], { in: string; out: string }> = {
 
 export function SlotInspector({ data, build, result, slotId, onSelect, dispatch }: Props) {
   const infos = useMemo(() => new Map(data.organelles.map((o) => [o.id, o])), [data]);
+  const [picking, setPicking] = useState(false);
+  useEffect(() => setPicking(false), [slotId]);
   const slot = slotId ? result.body.slotById.get(slotId) : undefined;
 
   if (!slot) {
@@ -35,83 +39,118 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
   }
 
   const cls = findClass(data, build.classId);
-  const state = build.slots[slot.id] ?? {};
+  const body = result.body;
+  const own = build.slots[slot.id] ?? {};
+  const state = slotState(build, body, slot.id) ?? {};
+  const source = slot.mirrorOf;
   const inst = state.organelle;
   const info = inst ? infos.get(inst.id) : undefined;
-  const accepts = state.graft === 'omni' ? ['internal', 'external'] : [slot.kind];
+  const effectiveGraft = own.graft ?? slot.special;
+  const accepts: SlotKind[] = effectiveGraft === 'omni' ? ['internal', 'external'] : [slot.kind];
   const item = result.items.get(slot.id);
-  const pieceName = cls.pieceTypes.find((p) => p.id === slot.pieceType)?.name ?? slot.pieceType;
-  const choices = data.organelles.filter((o) => accepts.includes(o.slot));
+  const where =
+    cls.body.kind === 'modular' ? (cls.body.pieceTypes.find((p) => p.id === slot.pieceType)?.name ?? slot.pieceType) : (body.plan?.name ?? '');
   const nameOf = (id: string) => {
-    const other = build.slots[id]?.organelle;
+    const other = slotState(build, body, id)?.organelle;
     return other ? (infos.get(other.id)?.name ?? other.id) : 'empty slot';
   };
+  const special = slot.special ? data.grafts.find((g) => g.id === slot.special) : undefined;
 
   const incoming = result.links.filter((l) => l.to === slot.id);
   const outgoing = result.links.filter((l) => l.from === slot.id);
   const linked = new Set([...incoming.map((l) => l.from), ...outgoing.map((l) => l.to)]);
-  const idle = (result.body.connections.get(slot.id) ?? []).filter((id) => build.slots[id]?.organelle && !linked.has(id));
+  const idle = (body.connections.get(slot.id) ?? []).filter((id) => slotState(build, body, id)?.organelle && !linked.has(id));
 
+  // A mirrored slot's organelle is edited on its twin.
+  const target = source ?? slot.id;
   const setOrganelle = (id: string) => {
-    if (!id) return dispatch({ type: 'setOrganelle', slotId: slot.id, organelle: undefined });
-    dispatch({ type: 'setOrganelle', slotId: slot.id, organelle: { id, rarity: inst?.rarity ?? 'common', traits: [] } });
+    setPicking(false);
+    if (!id) return dispatch({ type: 'setOrganelle', slotId: target, organelle: undefined });
+    dispatch({ type: 'setOrganelle', slotId: target, organelle: { id, rarity: inst?.rarity ?? 'common', traits: [] } });
   };
-  const setRarity = (rarity: Rarity) => inst && dispatch({ type: 'setOrganelle', slotId: slot.id, organelle: { ...inst, rarity } });
+  const setRarity = (rarity: Rarity) => inst && dispatch({ type: 'setOrganelle', slotId: target, organelle: { ...inst, rarity } });
   const toggleTrait = (id: string, on: boolean) =>
-    inst && dispatch({ type: 'setOrganelle', slotId: slot.id, organelle: { ...inst, traits: on ? [...inst.traits, id] : inst.traits.filter((t) => t !== id) } });
+    inst && dispatch({ type: 'setOrganelle', slotId: target, organelle: { ...inst, traits: on ? [...inst.traits, id] : inst.traits.filter((t) => t !== id) } });
 
   return (
     <section id="inspector" className="panel inspector" aria-label="Slot">
       <div className="panel-head">
         <h2>
-          {slot.kind === 'internal' ? 'Internal' : 'External'} slot <span className="muted">· {pieceName}</span>
+          {slot.kind === 'internal' ? 'Internal' : 'External'} slot {where && <span className="muted">· {where}</span>}
         </h2>
         <button className="ghost-button" onClick={() => onSelect(null)} aria-label="Close slot">
           ✕
         </button>
       </div>
 
-      <div className="field-row">
-        <label htmlFor="organelle">Organelle</label>
-        <select id="organelle" value={inst?.id ?? ''} onChange={(e) => setOrganelle(e.target.value)}>
-          <option value="">— Empty —</option>
-          {CATEGORY_ORDER.map((cat) => {
-            const list = choices.filter((o) => o.category === cat);
-            if (!list.length) return null;
-            return (
-              <optgroup key={cat} label={CATEGORY_LABELS[cat]}>
-                {list.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.name}
-                  </option>
-                ))}
-              </optgroup>
-            );
-          })}
-          {info && !accepts.includes(info.slot) && <option value={info.id}>{info.name} (wrong slot type)</option>}
-          {inst && !info && <option value={inst.id}>Unknown: {inst.id}</option>}
-        </select>
-      </div>
+      {source && (
+        <p className="note">
+          Mirrored slot: it always holds a copy of the organelle in the matching slot on the other side.{' '}
+          <button className="link" onClick={() => onSelect(source)}>
+            Edit that slot
+          </button>
+        </p>
+      )}
 
-      <div className="field-row">
-        <label htmlFor="graft">Graft</label>
-        <select id="graft" value={state.graft ?? ''} onChange={(e) => dispatch({ type: 'setSlot', slotId: slot.id, patch: { graft: e.target.value || undefined } })}>
-          <option value="">None</option>
-          {data.grafts.map((g) => (
-            <option key={g.id} value={g.id}>
-              {g.name}: {g.description}
-            </option>
+      <fieldset className="graft-picker">
+        <legend>Slot type</legend>
+        <button className={`chip ${!own.graft ? 'active' : ''}`} aria-pressed={!own.graft} onClick={() => dispatch({ type: 'setSlot', slotId: slot.id, patch: { graft: undefined } })}>
+          {special ? `Built-in ${special.name}` : 'Plain'}
+        </button>
+        {data.grafts
+          .filter((g) => g.id !== slot.special)
+          .map((g) => (
+            <button
+              key={g.id}
+              className={`chip graft-chip graft-${g.id} ${own.graft === g.id ? 'active' : ''}`}
+              aria-pressed={own.graft === g.id}
+              title={g.description}
+              onClick={() => dispatch({ type: 'setSlot', slotId: slot.id, patch: { graft: g.id } })}
+            >
+              {g.name}
+            </button>
           ))}
-        </select>
-      </div>
+        {effectiveGraft && <p className="muted small">{data.grafts.find((g) => g.id === effectiveGraft)?.description}</p>}
+      </fieldset>
 
-      {info && inst && (
+      {info && inst && !picking ? (
+        <div className="organelle-card" style={{ '--rarity': data.rarities.find((r) => r.id === inst.rarity)?.color } as CSSProperties}>
+          <Icon src={organelleIcon(info.id)} size={64} className="organelle-card-icon" />
+          <div className="organelle-card-text">
+            <strong>{info.name}</strong>
+            <span className="muted small">
+              {CATEGORY_LABELS[info.category]} · {info.slot}
+            </span>
+            <span className="small">{info.description}</span>
+            <span>
+              {item && !item.modeled && <span className="badge warn">not counted in DPS</span>}
+              {item?.modeled && !info.demoId && <span className="badge warn">patch notes only</span>}
+            </span>
+          </div>
+          {!source && (
+            <div className="organelle-card-actions">
+              <button onClick={() => setPicking(true)}>Change</button>
+              <button className="danger" onClick={() => setOrganelle('')}>
+                Remove
+              </button>
+            </div>
+          )}
+        </div>
+      ) : source ? (
+        <p className="muted">The other side is empty.</p>
+      ) : (
         <>
-          <p className="description">
-            {info.description}
-            {item && !item.modeled && <span className="badge warn">not modeled yet</span>}
-            {item?.modeled && !info.demoId && <span className="badge warn">patch notes only</span>}
-          </p>
+          {picking && (
+            <button className="link small" onClick={() => setPicking(false)}>
+              Keep {info?.name ?? 'the current organelle'}
+            </button>
+          )}
+          <OrganellePicker data={data} accepts={accepts} current={inst?.id} onPick={setOrganelle} />
+        </>
+      )}
+
+      {info && inst && !picking && (
+        <>
           {item?.notes.map((n) => (
             <p key={n} className="note">
               {n}
@@ -119,7 +158,7 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
           ))}
           {!item && <p className="note warn">{info.name} goes in {info.slot} slots. Graft this slot as Omni or move it.</p>}
 
-          <fieldset className="rarity-picker">
+          <fieldset className="rarity-picker" disabled={!!source}>
             <legend>Rarity</legend>
             {data.rarities.map((r) => (
               <button
@@ -134,7 +173,7 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
             ))}
           </fieldset>
 
-          <fieldset className="traits">
+          <fieldset className="traits" disabled={!!source}>
             <legend>Traits</legend>
             {data.traits.map((t) => (
               <label key={t.id} title={t.description}>
@@ -144,7 +183,7 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
             ))}
           </fieldset>
 
-          {item?.mito && <MitoControls mito={item.mito} slotId={slot.id} dispatch={dispatch} />}
+          {item?.mito && <MitoControls mito={item.mito} slotId={target} dispatch={dispatch} />}
           {item && !item.mito && item.charge > 0 && <p className="small">Holds {fmtNum(item.charge)} Overcharge on average.</p>}
 
           {(incoming.length > 0 || outgoing.length > 0 || idle.length > 0) && (
@@ -189,17 +228,14 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
                 <input
                   type="checkbox"
                   checked={!state.excluded}
-                  onChange={(e) => dispatch({ type: 'setSlot', slotId: slot.id, patch: { excluded: !e.target.checked || undefined } })}
+                  disabled={!!source}
+                  onChange={(e) => dispatch({ type: 'setSlot', slotId: target, patch: { excluded: !e.target.checked || undefined } })}
                 />
                 Count toward total DPS <span className="muted">(untick if it can't aim at the target)</span>
               </label>
               <WeaponBreakdown weapon={item.weapon} />
             </>
           )}
-
-          <button className="danger wide" onClick={() => setOrganelle('')}>
-            Remove {info.name}
-          </button>
         </>
       )}
     </section>

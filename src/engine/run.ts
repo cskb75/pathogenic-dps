@@ -6,7 +6,7 @@
 // share of the attack's base damage, so they stack additively with each other
 // and with infusers. Each stack of a mutation is its own hook.
 
-import type { Build, ClassDef, GameData, RunEffects } from './types';
+import type { Build, ClassDef, GameData, RunEffects, ZoneEffect } from './types';
 
 /** Where a mutation stack came from. */
 export interface RunSource {
@@ -48,8 +48,8 @@ export interface RunModel {
   damage: Share[];
   /** Added to melee attacks. */
   meleeDamage: Share[];
-  /** Weapons on one side of the body. */
-  chirality: { source: string; side: 'left' | 'right'; bonus: number; penalty: number }[];
+  /** Effects for one part of the body, already multiplied by stacks. */
+  zones: (ZoneEffect & { source: string })[];
   /** Per active mitochondrion. */
   perActiveMito: Share[];
   /** Per 100 stamina missing. */
@@ -57,6 +57,8 @@ export interface RunModel {
   attackSpeed: Share[];
   /** Extra Overcharge strength for mitochondria and Vesicles. */
   generatorStrength: number;
+  /** Share less Overcharge that actives need. */
+  activeCost: number;
   /** Stamina added to the pool. */
   extraStamina: number;
   noStamina: boolean;
@@ -82,11 +84,12 @@ export function runModel(build: Build, data: GameData, cls: ClassDef, state: Run
     sources: [],
     damage: [],
     meleeDamage: [],
-    chirality: [],
+    zones: [],
     perActiveMito: [],
     starvation: [],
     attackSpeed: [],
     generatorStrength: 0,
+    activeCost: 0,
     extraStamina: 0,
     noStamina: false,
     summary: [],
@@ -142,10 +145,24 @@ export function runModel(build: Build, data: GameData, cls: ClassDef, state: Run
       model.meleeDamage.push({ source: s.name, share: e.meleeDamage * n });
       lines.push(`${pct(e.meleeDamage * n)} melee damage`);
     }
-    if (e.chirality) {
-      const c = e.chirality;
-      model.chirality.push({ source: s.name, side: c.side, bonus: c.bonus * n, penalty: c.penalty * n });
-      lines.push(`${pct(c.bonus * n)} damage for ${c.side} weapons, ${pct(c.penalty * n)} for ${c.side === 'left' ? 'right' : 'left'}`);
+    if (e.zone) {
+      const z = e.zone;
+      const scaled = {
+        ...z,
+        source: s.name,
+        damage: (z.damage ?? 0) * n,
+        opposite: (z.opposite ?? 0) * n,
+        generatorStrength: (z.generatorStrength ?? 0) * n,
+        activeCost: (z.activeCost ?? 0) * n,
+      };
+      model.zones.push(scaled);
+      const where = { left: 'on the left', right: 'on the right', top: 'in front', bottom: 'at the back' };
+      const other = { left: 'right', right: 'left', top: 'bottom', bottom: 'top' } as const;
+      const what = z.meleeOnly ? 'melee attacks' : 'damage';
+      if (scaled.damage) lines.push(`${pct(scaled.damage)} ${what} ${where[z.side]}`);
+      if (scaled.opposite) lines.push(`${pct(scaled.opposite)} ${what} ${where[other[z.side]]}`);
+      if (scaled.generatorStrength) lines.push(`${pct(scaled.generatorStrength)} Overcharge strength for mitochondria ${where[z.side]}`);
+      if (scaled.activeCost) lines.push(`actives ${where[z.side]} need ${pct(scaled.activeCost).replace('+', '')} less Overcharge`);
     }
     if (e.perActiveMito) {
       model.perActiveMito.push({ source: s.name, share: e.perActiveMito * n });
@@ -162,6 +179,10 @@ export function runModel(build: Build, data: GameData, cls: ClassDef, state: Run
     if (e.generatorStrength) {
       model.generatorStrength += e.generatorStrength * n;
       lines.push(`${pct(e.generatorStrength * n)} Overcharge strength from mitochondria`);
+    }
+    if (e.activeCost) {
+      model.activeCost += e.activeCost * n;
+      lines.push(`actives need ${pct(e.activeCost * n).replace('+', '')} less Overcharge`);
     }
     if (e.staminaContainers) {
       model.extraStamina += 100 * e.staminaContainers * n;

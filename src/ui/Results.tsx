@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { CalcResult } from '../engine/calc';
 import type { Build, GameData } from '../engine/types';
+import { Icon, organelleIcon } from './art';
 import { fmtNum, fmtPct } from './format';
 
 interface Props {
@@ -59,8 +60,11 @@ export function Results({ data, build, result, selected, onSelect }: Props) {
                 <tr key={w.slotId} className={`${selected === w.slotId ? 'selected' : ''} ${w.excluded ? 'excluded' : ''}`} onClick={() => onSelect(w.slotId)}>
                   <th scope="row">
                     <button className="link source-name" onClick={() => onSelect(w.slotId)}>
-                      <span className="rarity-dot" style={{ background: rarityColor.get(w.instance.rarity) }} />
-                      {w.info.name}
+                      <Icon src={organelleIcon(w.info.id)} size={28} className="row-icon" style={{ borderColor: rarityColor.get(w.instance.rarity) }} />
+                      <span>
+                        {w.info.name}
+                        {result.body.slotById.get(w.slotId)?.mirrorOf && <span className="muted small"> (mirror)</span>}
+                      </span>
                     </button>
                     <span className="tags">
                       {charge > 0 && <span className="badge overcharge">OC {fmtNum(charge)}</span>}

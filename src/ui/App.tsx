@@ -4,6 +4,7 @@ import { calculate } from '../engine/calc';
 import { emptyBuild, exampleBuild, loadInitialBuild, makeReducer, saveBuild, shareUrl } from '../state/build';
 import { BodyEditor } from './BodyEditor';
 import { BuildSettings } from './BuildSettings';
+import { ClassPicker } from './ClassPicker';
 import { Results } from './Results';
 import { RunPanel } from './RunPanel';
 import { SlotInspector } from './SlotInspector';
@@ -48,7 +49,7 @@ export function App() {
 
   function startOver(example: boolean) {
     if (!window.confirm(example ? 'Replace this build with the example build?' : 'Start a new empty build?')) return;
-    dispatch({ type: 'load', build: example ? exampleBuild(gameData) : emptyBuild(gameData, 'nanobot') });
+    dispatch({ type: 'load', build: example ? exampleBuild(gameData) : emptyBuild(gameData, build.classId) });
     setSelected(null);
     window.history.replaceState(null, '', window.location.pathname);
   }
@@ -57,8 +58,8 @@ export function App() {
     <div className="app">
       <header className="app-header">
         <div className="brand">
+          <img className="brand-mark" src={`${import.meta.env.BASE_URL}art/organelles/vesicle.webp`} alt="" width={36} height={36} />
           <h1>Pathogenic DPS</h1>
-          <span className="class-chip">Nanobot</span>
         </div>
         <input
           className="build-name"
@@ -74,9 +75,12 @@ export function App() {
         </div>
       </header>
 
+      <ClassPicker data={gameData} build={build} dispatch={dispatch} onSwitched={() => setSelected(null)} />
+
       <p className="banner" role="note">
-        Numbers come from the free demo build (January 2026), updated with official patch notes where they give exact values. The Nanobot
-        and some newer organelles aren't in the demo, so a few details are best guesses; each organelle says where its numbers come from.
+        Numbers and body plans come from the free demo build (January 2026), updated with official patch notes where they give exact values. The
+        Nanobot, the Diatom and some newer organelles aren't in the demo, so a few details are best guesses; each organelle says where its numbers come
+        from.
       </p>
 
       <main className="layout">
@@ -92,7 +96,8 @@ export function App() {
       </main>
 
       <footer className="app-footer muted small">
-        Fan-made tool, not affiliated with Aberrant Labs or Slug Disco. Data: {gameData.dataSource}.
+        Fan-made tool, not affiliated with Aberrant Labs or Slug Disco. Game art © its creators, via the demo build and pathogenic.wiki. Data:{' '}
+        {gameData.dataSource}.
       </footer>
     </div>
   );

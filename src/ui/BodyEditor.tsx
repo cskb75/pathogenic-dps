@@ -1,11 +1,11 @@
 import { useMemo, useState, type CSSProperties, type Dispatch, type KeyboardEvent } from 'react';
 import { placementOptions, removePieceTree, type PlacementOption, type Slot } from '../engine/body';
 import type { CalcResult } from '../engine/calc';
-import { findClass } from '../engine/calc';
+import { evolutionPath, findClass, slotState } from '../engine/calc';
 import type { Vec } from '../engine/geometry';
-import type { Build, GameData } from '../engine/types';
+import type { BodyPlan, Build, EvolvingBody, GameData, ModularBody } from '../engine/types';
 import type { Action } from '../state/build';
-import { abbreviate } from './format';
+import { art, organelleIcon, PlanThumb } from './art';
 
 type Tool = { kind: 'select' } | { kind: 'add'; pieceType: string } | { kind: 'remove' };
 
@@ -18,32 +18,14 @@ interface Props {
   dispatch: Dispatch<Action>;
 }
 
-// Drawing scale: one piece edge = 100 SVG units.
+// Drawing scale: one editor unit (a Nanobot module side, or 100 game pixels) = 100 SVG units.
 const S = 100;
 const R_INTERNAL = 0.17;
-const R_EXTERNAL = 0.12;
+const R_EXTERNAL = { modular: 0.12, fixed: 0.145 };
+/** Nanobot edge slots sit slightly outside the module. */
 const EXTERNAL_OFFSET = 0.08;
 
 const pts = (vs: Vec[]) => vs.map((v) => `${v.x * S},${v.y * S}`).join(' ');
-
-function slotCenter(slot: Slot): Vec {
-  if (!slot.facing) return slot.position;
-  return { x: slot.position.x + slot.facing.x * EXTERNAL_OFFSET, y: slot.position.y + slot.facing.y * EXTERNAL_OFFSET };
-}
-
-const radius = (slot: Slot) => (slot.kind === 'internal' ? R_INTERNAL : R_EXTERNAL);
-
-/** Line between two slots, trimmed so it starts and ends at their edges. */
-function trimmedLine(a: Slot, b: Slot) {
-  const p = slotCenter(a);
-  const q = slotCenter(b);
-  const d = Math.hypot(q.x - p.x, q.y - p.y) || 1;
-  const ux = (q.x - p.x) / d;
-  const uy = (q.y - p.y) / d;
-  const ra = radius(a) + 0.02;
-  const rb = radius(b) + 0.03;
-  return { x1: (p.x + ux * ra) * S, y1: (p.y + uy * ra) * S, x2: (q.x - ux * rb) * S, y2: (q.y - uy * rb) * S };
-}
 
 const onActivate = (fn: () => void) => (e: KeyboardEvent) => {
   if (e.key === 'Enter' || e.key === ' ') {
@@ -57,40 +39,67 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
   const [hoverPiece, setHoverPiece] = useState<string | null>(null);
   const cls = findClass(data, build.classId);
   const body = result.body;
+  const plan = body.plan;
+  const modular = cls.body.kind === 'modular' ? cls.body : null;
   const organelles = useMemo(() => new Map(data.organelles.map((o) => [o.id, o])), [data]);
   const rarityColor = useMemo(() => new Map(data.rarities.map((r) => [r.id, r.color])), [data]);
+  const rExternal = plan ? R_EXTERNAL.fixed : R_EXTERNAL.modular;
+  const radius = (slot: Slot) => (slot.kind === 'internal' ? R_INTERNAL : rExternal);
+  const slotCenter = (slot: Slot): Vec =>
+    plan || !slot.facing ? slot.position : { x: slot.position.x + slot.facing.x * EXTERNAL_OFFSET, y: slot.position.y + slot.facing.y * EXTERNAL_OFFSET };
+
+  /** Line between two slots, trimmed so it starts and ends at their edges. */
+  function trimmedLine(a: Slot, b: Slot) {
+    const p = slotCenter(a);
+    const q = slotCenter(b);
+    const d = Math.hypot(q.x - p.x, q.y - p.y) || 1;
+    const ux = (q.x - p.x) / d;
+    const uy = (q.y - p.y) / d;
+    const ra = radius(a) + 0.02;
+    const rb = radius(b) + 0.03;
+    return { x1: (p.x + ux * ra) * S, y1: (p.y + uy * ra) * S, x2: (q.x - ux * rb) * S, y2: (q.y - uy * rb) * S };
+  }
 
   const occupied = useMemo(
     () => new Set(Object.entries(build.slots).filter(([, s]) => s.organelle).map(([id]) => id)),
     [build.slots],
   );
 
-  const addType = tool.kind === 'add' ? cls.pieceTypes.find((p) => p.id === tool.pieceType) : undefined;
+  const activeTool = modular ? tool : ({ kind: 'select' } as Tool);
+  const addType = activeTool.kind === 'add' && modular ? modular.pieceTypes.find((p) => p.id === activeTool.pieceType) : undefined;
   const ghosts = useMemo(
     () => (addType ? placementOptions(body, addType.sides, occupied).filter((o) => o.valid) : []),
     [addType, body, occupied],
   );
 
-  // Frame the body plus room for one more square on every side, so the view
-  // doesn't jump when switching tools.
   const viewBox = useMemo(() => {
-    const frame = placementOptions(body, 4, new Set()).filter((o) => o.valid);
-    const all = [...body.placed.flatMap((p) => p.vertices), ...frame.flatMap((o) => o.vertices)];
+    let all: Vec[];
+    let pad: number;
+    if (plan) {
+      // Frame the slots: long tails and wide lobes can run off the edges.
+      all = body.slots.map((s) => s.position);
+      pad = 0.55;
+    } else {
+      // Frame the body plus room for one more square on every side, so the view
+      // doesn't jump when switching tools.
+      const frame = placementOptions(body, 4, new Set()).filter((o) => o.valid);
+      all = [...body.placed.flatMap((p) => p.vertices), ...frame.flatMap((o) => o.vertices)];
+      pad = 0.35;
+    }
     const xs = all.map((v) => v.x);
     const ys = all.map((v) => v.y);
-    const pad = 0.35;
     const minX = Math.min(...xs) - pad;
     const minY = Math.min(...ys) - pad;
     const w = Math.max(...xs) + pad - minX;
     const h = Math.max(...ys) + pad - minY;
-    return `${minX * S} ${minY * S} ${w * S} ${h * S}`;
-  }, [body]);
+    return { box: `${minX * S} ${minY * S} ${w * S} ${h * S}`, aspect: w / h };
+  }, [body, plan]);
 
   const removal = useMemo(() => {
-    if (tool.kind !== 'remove' || !hoverPiece || hoverPiece === build.pieces[0]?.id) return new Set<string>();
+    if (activeTool.kind !== 'remove' || !hoverPiece || hoverPiece === build.pieces[0]?.id) return new Set<string>();
     const kept = new Set(removePieceTree(build.pieces, hoverPiece).map((p) => p.id));
     return new Set(build.pieces.filter((p) => !kept.has(p.id)).map((p) => p.id));
-  }, [tool.kind, hoverPiece, build.pieces]);
+  }, [activeTool.kind, hoverPiece, build.pieces]);
 
   const selectedLinks = useMemo(() => {
     if (!selected) return new Set<string>();
@@ -116,9 +125,7 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
     if (pieceId === build.pieces[0]?.id) return;
     const kept = new Set(removePieceTree(build.pieces, pieceId).map((p) => p.id));
     const doomed = build.pieces.filter((p) => !kept.has(p.id));
-    const lost = Object.entries(build.slots).filter(
-      ([id, s]) => s.organelle && doomed.some((p) => id.startsWith(`${p.id}.`)),
-    ).length;
+    const lost = Object.entries(build.slots).filter(([id, s]) => s.organelle && doomed.some((p) => id.startsWith(`${p.id}.`))).length;
     const what = `${doomed.length} module${doomed.length > 1 ? 's' : ''}`;
     if (lost > 0 && !window.confirm(`Remove ${what} and the ${lost} organelle${lost > 1 ? 's' : ''} on them?`)) return;
     dispatch({ type: 'removePiece', pieceId });
@@ -126,46 +133,29 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
     if (selected && doomed.some((p) => selected.startsWith(`${p.id}.`))) onSelect(null);
   }
 
-  const addablePieces = cls.pieceTypes.filter((p) => p.addable);
-  const isTool = (t: Tool) => t.kind === tool.kind && (t.kind !== 'add' || (tool.kind === 'add' && tool.pieceType === t.pieceType));
-
+  const hasMirrors = body.slots.some((s) => s.mirrorOf);
   const hint =
-    tool.kind === 'select'
-      ? 'Click a slot to equip it. Circles are internal slots; small nodes on the edges are external slots.'
-      : tool.kind === 'add'
+    activeTool.kind === 'select'
+      ? `Click a slot to equip it. Large circles are internal slots, small ones external.${hasMirrors ? ' Dashed slots copy the organelle from the matching slot on the other side.' : ''}`
+      : activeTool.kind === 'add'
         ? `Click a dashed outline to attach a ${addType?.name.toLowerCase() ?? 'module'}. Orange outlines cover an equipped organelle, which gets removed.`
         : 'Click a module to remove it and everything attached to it. The core stays.';
 
   return (
     <section className="panel editor" aria-label="Body editor">
-      <div className="toolbar" role="toolbar" aria-label="Editing tools" onKeyDown={(e) => e.key === 'Escape' && setTool({ kind: 'select' })}>
-        <button className={isTool({ kind: 'select' }) ? 'active' : ''} aria-pressed={isTool({ kind: 'select' })} onClick={() => setTool({ kind: 'select' })}>
-          Select
-        </button>
-        {addablePieces.map((p) => (
-          <button
-            key={p.id}
-            className={isTool({ kind: 'add', pieceType: p.id }) ? 'active' : ''}
-            aria-pressed={isTool({ kind: 'add', pieceType: p.id })}
-            onClick={() => setTool({ kind: 'add', pieceType: p.id })}
-          >
-            <svg className="tool-icon" viewBox="-6 -6 12 12" aria-hidden="true">
-              {p.sides === 3 ? <polygon points="0,-5 5,4 -5,4" /> : <rect x="-4.5" y="-4.5" width="9" height="9" />}
-            </svg>
-            Add {p.name.replace(/ module$/i, '').toLowerCase()}
-          </button>
-        ))}
-        <button
-          className={`danger ${isTool({ kind: 'remove' }) ? 'active' : ''}`}
-          aria-pressed={isTool({ kind: 'remove' })}
-          onClick={() => setTool({ kind: 'remove' })}
-        >
-          Remove module
-        </button>
-      </div>
+      {modular ? (
+        <ModularToolbar body={modular} tool={tool} setTool={setTool} />
+      ) : (
+        <EvolutionPicker data={data} build={build} body={cls.body as EvolvingBody} dispatch={dispatch} />
+      )}
       <p className="hint">{hint}</p>
 
-      <svg className={`body-svg tool-${tool.kind}`} viewBox={viewBox} onClick={() => tool.kind === 'select' && onSelect(null)}>
+      <svg
+        className={`body-svg tool-${activeTool.kind} ${plan ? 'fixed' : 'modular'}`}
+        viewBox={viewBox.box}
+        style={plan ? { aspectRatio: String(viewBox.aspect) } : undefined}
+        onClick={() => activeTool.kind === 'select' && onSelect(null)}
+      >
         <defs>
           {['attack', 'gun', 'overcharge'].map((k) => (
             <marker key={k} id={`arrow-${k}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
@@ -173,6 +163,8 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
             </marker>
           ))}
         </defs>
+
+        {plan && <BodyArt plan={plan} />}
 
         {body.placed.map((piece) => (
           <polygon
@@ -182,20 +174,18 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
             onMouseEnter={() => setHoverPiece(piece.id)}
             onMouseLeave={() => setHoverPiece(null)}
             onClick={(e) => {
-              if (tool.kind !== 'remove') return;
+              if (activeTool.kind !== 'remove') return;
               e.stopPropagation();
               removePiece(piece.id);
             }}
           >
-            <title>{cls.pieceTypes.find((t) => t.id === piece.type)?.name ?? piece.type}</title>
+            <title>{modular?.pieceTypes.find((t) => t.id === piece.type)?.name ?? piece.type}</title>
           </polygon>
         ))}
 
         {body.links.map(([a, b]) => {
           const key = [a, b].sort().join('|');
-          return (
-            <line key={key} {...trimmedLine(body.slotById.get(a)!, body.slotById.get(b)!)} className={`connector ${selectedLinks.has(key) ? 'near' : ''}`} />
-          );
+          return <line key={key} {...trimmedLine(body.slotById.get(a)!, body.slotById.get(b)!)} className={`connector ${selectedLinks.has(key) ? 'near' : ''}`} />;
         })}
 
         {result.links.map((l) => {
@@ -233,29 +223,32 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
         })}
 
         {body.slots.map((slot) => {
-          const state = build.slots[slot.id];
+          const state = slotState(build, body, slot.id);
           const inst = state?.organelle;
           const def = inst ? organelles.get(inst.id) : undefined;
           const c = slotCenter(slot);
           const r = radius(slot);
-          const graft = state?.graft ? data.grafts.find((g) => g.id === state.graft) : undefined;
+          const graftId = state?.graft ?? slot.special;
+          const graft = graftId ? data.grafts.find((g) => g.id === graftId) : undefined;
           const item = result.items.get(slot.id);
           const invalid = inst && !item;
           const inactive = !!item?.weapon && item.weapon.dps === 0;
           const unmodeled = item && !item.modeled;
-          const label = `${slot.kind === 'internal' ? 'Internal' : 'External'} slot${graft ? ` (${graft.name})` : ''}: ${
-            def ? `${def.name}, ${inst!.rarity}${unmodeled ? ' (not modeled yet)' : ''}` : 'empty'
-          }`;
-          const select = () => tool.kind === 'select' && onSelect(slot.id);
+          const kind = slot.kind === 'internal' ? 'Internal' : 'External';
+          const label = `${kind} slot${graft ? ` (${graft.name}${slot.special && !state?.graft ? ', built in' : ''})` : ''}${
+            slot.mirrorOf ? `, copy of ${slot.mirrorOf}` : ''
+          }: ${def ? `${def.name}, ${inst!.rarity}${unmodeled ? ' (not modeled yet)' : ''}` : 'empty'}`;
+          const select = () => activeTool.kind === 'select' && onSelect(slot.id);
+          const iconSize = r * 1.55;
           return (
             <g
               key={slot.id}
               className={`slot slot-${slot.kind} ${def ? `filled cat-${def.category}` : 'empty'} ${selected === slot.id ? 'selected' : ''} ${
                 invalid ? 'invalid' : ''
-              } ${inactive ? 'inactive' : ''} ${unmodeled ? 'unmodeled' : ''} ${state?.excluded ? 'excluded' : ''}`}
+              } ${inactive ? 'inactive' : ''} ${unmodeled ? 'unmodeled' : ''} ${state?.excluded ? 'excluded' : ''} ${slot.mirrorOf ? 'mirror' : ''}`}
               style={def ? ({ '--rarity': rarityColor.get(inst!.rarity) } as CSSProperties) : undefined}
               role="button"
-              tabIndex={tool.kind === 'select' ? 0 : -1}
+              tabIndex={activeTool.kind === 'select' ? 0 : -1}
               aria-label={label}
               aria-pressed={selected === slot.id}
               onClick={(e) => {
@@ -275,44 +268,145 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
                   ])}
                 />
               )}
-              {graft && <circle className={`graft graft-${graft.id}`} cx={c.x * S} cy={c.y * S} r={(r + 0.045) * S} />}
+              {graft && <circle className={`graft graft-${graft.id} ${slot.special && !state?.graft ? 'built-in' : ''}`} cx={c.x * S} cy={c.y * S} r={(r + 0.045) * S} />}
               <circle className="slot-body" cx={c.x * S} cy={c.y * S} r={r * S} />
               {def && (
-                <text x={c.x * S} y={c.y * S} className="slot-label" dominantBaseline="central" textAnchor="middle" fontSize={slot.kind === 'internal' ? 13 : 9.5}>
-                  {abbreviate(def.name)}
-                </text>
+                <image
+                  href={organelleIcon(def.id)}
+                  x={(c.x - iconSize / 2) * S}
+                  y={(c.y - iconSize / 2) * S}
+                  width={iconSize * S}
+                  height={iconSize * S}
+                  preserveAspectRatio="xMidYMid meet"
+                  className="slot-icon"
+                />
               )}
             </g>
           );
         })}
       </svg>
 
-      <ul className="legend" aria-label="Legend">
-        {data.rarities.map((r) => (
-          <li key={r.id}>
-            <span className="swatch ring" style={{ borderColor: r.color }} />
-            {r.name}
-          </li>
-        ))}
-        <li>
-          <span className="swatch line attack" />
-          Attack passes through
-        </li>
-        <li>
-          <span className="swatch line gun" />
-          Attack speed
-        </li>
-        <li>
-          <span className="swatch line overcharge" />
-          Overcharge
-        </li>
-        {data.grafts.map((g) => (
-          <li key={g.id}>
-            <span className={`swatch ring graft-${g.id}`} />
-            {g.name} slot
-          </li>
-        ))}
-      </ul>
+      <Legend data={data} mirrors={hasMirrors} />
     </section>
+  );
+}
+
+function BodyArt({ plan }: { plan: BodyPlan }) {
+  if (plan.sprite) {
+    const s = plan.sprite;
+    return <image href={art(s.src)} x={s.x * S} y={s.y * S} width={s.w * S} height={s.h * S} className="body-art" preserveAspectRatio="none" />;
+  }
+  if (plan.outline.length > 2) return <polygon className="piece" points={plan.outline.map(([x, y]) => `${x * S},${y * S}`).join(' ')} />;
+  return null;
+}
+
+function ModularToolbar({ body, tool, setTool }: { body: ModularBody; tool: Tool; setTool: (t: Tool) => void }) {
+  const isTool = (t: Tool) => t.kind === tool.kind && (t.kind !== 'add' || (tool.kind === 'add' && tool.pieceType === t.pieceType));
+  return (
+    <div className="toolbar" role="toolbar" aria-label="Editing tools" onKeyDown={(e) => e.key === 'Escape' && setTool({ kind: 'select' })}>
+      <button className={isTool({ kind: 'select' }) ? 'active' : ''} aria-pressed={isTool({ kind: 'select' })} onClick={() => setTool({ kind: 'select' })}>
+        Select
+      </button>
+      {body.pieceTypes
+        .filter((p) => p.addable)
+        .map((p) => (
+          <button
+            key={p.id}
+            className={isTool({ kind: 'add', pieceType: p.id }) ? 'active' : ''}
+            aria-pressed={isTool({ kind: 'add', pieceType: p.id })}
+            onClick={() => setTool({ kind: 'add', pieceType: p.id })}
+          >
+            <svg className="tool-icon" viewBox="-6 -6 12 12" aria-hidden="true">
+              {p.sides === 3 ? <polygon points="0,-5 5,4 -5,4" /> : <rect x="-4.5" y="-4.5" width="9" height="9" />}
+            </svg>
+            Add {p.name.replace(/ module$/i, '').toLowerCase()}
+          </button>
+        ))}
+      <button className={`danger ${isTool({ kind: 'remove' }) ? 'active' : ''}`} aria-pressed={isTool({ kind: 'remove' })} onClick={() => setTool({ kind: 'remove' })}>
+        Remove module
+      </button>
+    </div>
+  );
+}
+
+function EvolutionPicker({ data, build, body, dispatch }: { data: GameData; build: Build; body: EvolvingBody; dispatch: Dispatch<Action> }) {
+  const current = evolutionPath(build, data).at(-1);
+  if (body.tiers.length === 0) {
+    return <p className="note">Only the starting body is known so far: evolutions need the full game's files.</p>;
+  }
+  return (
+    <div className="evolutions">
+      {body.tiers.map((options, tier) => {
+        const picked = build.evolutions[tier] ?? '';
+        return (
+          <fieldset key={tier} className="evolution-tier">
+            <legend>Evolution {tier + 1}</legend>
+            <div className="evolution-options">
+              <button className={`evolution-card none ${picked ? '' : 'active'}`} aria-pressed={!picked} onClick={() => dispatch({ type: 'setEvolution', tier, id: '' })}>
+                <span className="evolution-name">{tier === 0 ? 'Not yet' : 'Skip'}</span>
+              </button>
+              {options.map((id) => {
+                const plan = data.bodies[id];
+                if (!plan) return null;
+                const active = picked === id;
+                const perks = [plan.bonusDamage ? `+${Math.round(plan.bonusDamage * 100)}% damage` : '', plan.bonusHp ? `+${plan.bonusHp} max HP` : '']
+                  .filter(Boolean)
+                  .join(', ');
+                return (
+                  <button
+                    key={id}
+                    className={`evolution-card ${active ? 'active' : ''} ${current?.id === id ? 'current' : ''}`}
+                    aria-pressed={active}
+                    onClick={() => dispatch({ type: 'setEvolution', tier, id: active ? '' : id })}
+                    title={plan.description ?? plan.name}
+                  >
+                    {plan.sprite && <PlanThumb plan={plan} size={40} />}
+                    <span className="evolution-name">{plan.name}</span>
+                    {perks && <span className="evolution-perk">{perks}</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+        );
+      })}
+    </div>
+  );
+}
+
+function Legend({ data, mirrors }: { data: GameData; mirrors: boolean }) {
+  return (
+    <ul className="legend" aria-label="Legend">
+      {data.rarities.map((r) => (
+        <li key={r.id}>
+          <span className="swatch ring" style={{ borderColor: r.color }} />
+          {r.name}
+        </li>
+      ))}
+      <li>
+        <span className="swatch line attack" />
+        Attack passes through
+      </li>
+      <li>
+        <span className="swatch line gun" />
+        Attack speed
+      </li>
+      <li>
+        <span className="swatch line overcharge" />
+        Overcharge
+      </li>
+      {data.grafts.map((g) => (
+        <li key={g.id}>
+          <span className={`swatch ring graft-${g.id}`} />
+          {g.name} slot
+        </li>
+      ))}
+      {mirrors && (
+        <li>
+          <span className="swatch ring mirror" />
+          Mirrored copy
+        </li>
+      )}
+    </ul>
   );
 }

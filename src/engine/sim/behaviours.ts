@@ -35,6 +35,28 @@ function weapon(p: WeaponProfile, notes?: string): Behaviour {
 // Weapons
 
 const weapons: Record<string, Behaviour> = {
+  // Actives: charged by Overcharge, used as soon as they're ready.
+  'explosive-charge': weapon(
+    { kind: 'explosion', base: 1000, damageMult: (r) => 1 + 0.6 * r, interval: fixed(1), energyCost: () => 10, stamina: 0, reach: 'area' },
+    'Active: builds 1 energy per second per point of Overcharge and explodes at 10 (assumes you use it as soon as it is ready). Does not scale with level.',
+  ),
+  'ciliate-strike': weapon(
+    { kind: 'slash', base: 250, damageMult: (r) => 1 + r, interval: fixed(1), energyCost: () => 5, stamina: 0, reach: 'line' },
+    'Active: a dash attack for every 5 Overcharge-seconds (assumes you use it as soon as it is ready).',
+  ),
+  // Zaps enemies that come near: charges itself, faster with Overcharge.
+  'galvanic-sac': weapon(
+    {
+      kind: 'lightning',
+      base: 20,
+      damage: (r) => 25 + 10 * r,
+      interval: fixed(1),
+      rate: (ctx, r, c) => Math.min(20, (0.5 + 0.1 * r + c) / 0.25) * ctx.param('nearbyTime'),
+      stamina: 0,
+      reach: 'single',
+    },
+    'Zaps an enemy touching its field for 0.25 energy; recharges 0.5 (+0.1 per rarity) energy per second plus its Overcharge. Uses "Enemies next to you".',
+  ),
   'caustic-secretor': weapon({ kind: 'bullet', base: 6, interval: scaled(0.1), stamina: 0.5, reach: 'single', speed: 3000 }),
   'pulsar-gland': weapon({
     kind: 'bullet',
@@ -461,7 +483,45 @@ const mitochondria: Record<string, Behaviour> = {
   },
 };
 
-export const behaviours: Record<string, Behaviour> = { ...weapons, ...infusers, ...weaponInfusers, ...mitochondria };
+// ---------------------------------------------------------------------------
+// Everything else: no effect on damage, or not modeled yet (and why).
+
+const none = (notes: string): Behaviour => ({ noDps: true, notes });
+const later = (notes: string): Behaviour => ({ notes });
+
+const others: Record<string, Behaviour> = {
+  flagellum: none('Movement only.'),
+  'chitin-shield': none('Blocks incoming attacks.'),
+  'cryptobiotic-core': none('Prevents death once.'),
+  endospore: none('Adds max HP.'),
+  mutagen: none('Creates DNA pickups.'),
+  opulentor: none('Creates core pickups.'),
+  ossificator: none('Creates armor pickups.'),
+  refiner: none('Upgrades organelles.'),
+  regenerator: none('Heals.'),
+  'iridophore-membrane': none('Invulnerability.'),
+  'sequence-scrambler': none('Rerolls rewards.'),
+  'chemoreceptor-antenna': none('Finds secrets.'),
+  'kinetic-pseudopod': none('Pushes enemies away.'),
+  cryopulse: none('Freezes enemies and erases projectiles.'),
+  cryopseudopod: none('Freezes enemies.'),
+  'apex-nidus': later('Minions follow their own AI (attack timing, chasing), which the calculator does not simulate.'),
+  'mitotic-nidus': later('Minions follow their own AI, which the calculator does not simulate.'),
+  'sentry-nidus': later('Minions follow their own AI, which the calculator does not simulate.'),
+  'swarm-nidus': later('Minions follow their own AI, which the calculator does not simulate.'),
+  nidublast: later('Shoots minions, which follow their own AI.'),
+  'bacteriophage-launcher': later('Shoots multiplying minions, which follow their own AI.'),
+  'symbiotic-pseudopod': later('Buffs minions, which are not simulated.'),
+  pyroflagellum: later('Burning trail when dodging: depends on where enemies walk.'),
+  'toxic-flagellum': later('Toxic trail: depends on where enemies walk.'),
+  cryoflagellum: later('Freezes enemies when dodging.'),
+  'galvanic-flagellum': later('Arcs when dashing: depends on how often you dash (full-game organelle, numbers unknown).'),
+  'ballistic-flagellum': later('Fires backwards while sprinting (full-game organelle, numbers unknown).'),
+  'projectile-surge': later('Fires a ring of shots from connected weapons: how many hit depends on positioning.'),
+  'necrolytic-igniter': later('Explodes the remains of dead enemies: depends on kills.'),
+};
+
+export const behaviours: Record<string, Behaviour> = { ...weapons, ...infusers, ...weaponInfusers, ...mitochondria, ...others };
 
 export const EMPTY_BEHAVIOUR: Behaviour = {};
 
@@ -472,7 +532,7 @@ export function behaviourFor(id: string): Behaviour {
 /** True when the calculator knows what the organelle does to damage. */
 export function isModeled(id: string): boolean {
   const b = behaviours[id];
-  return !!b && !!(b.weapon || b.mito || b.modifyAttack || b.modifyGun || b.staminaRefund || b.conduit);
+  return !!b && !!(b.weapon || b.mito || b.modifyAttack || b.modifyGun || b.staminaRefund || b.conduit || b.noDps);
 }
 
 export type { Attack, Ctx, Item };

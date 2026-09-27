@@ -22,7 +22,7 @@ function build(slots: Record<string, SlotState>, extra: Partial<Build> = {}): Bu
       { id: 's', type: 'square', attach: { to: 'core', edge: 1 } },
     ],
     slots,
-    upgrades: {},
+    evolutions: [],
     mutations: {},
     plasmids: {},
     params: { staminaLimits: 0 },
@@ -190,6 +190,39 @@ describe('performance', () => {
   });
 });
 
+describe('actives and self-charging organelles', () => {
+  it('Explosive Charge fires every 10 Overcharge-seconds', () => {
+    const b = build({ 'core.c': org('explosive-charge'), 's.c': { ...org('entrant-mitochondrion'), uptime: 1 } });
+    expect(dps(b, 'core.c')).toBeCloseTo(100);
+    // Half the uptime: half as many explosions.
+    b.slots['s.c'].uptime = 0.5;
+    expect(dps(b, 'core.c')).toBeCloseTo(50);
+    // Autonomic Discharge: 25% less Overcharge needed.
+    b.slots['s.c'].uptime = 1;
+    b.mutations = { 'autonomic-discharge': 1 };
+    expect(dps(b, 'core.c')).toBeCloseTo(1000 / 7.5);
+  });
+
+  it('does nothing without Overcharge', () => {
+    expect(dps(build({ 'core.c': org('explosive-charge') }), 'core.c')).toBe(0);
+  });
+
+  it('Galvanic Sac zaps nearby enemies as fast as it recharges', () => {
+    // 0.5 energy per second / 0.25 per zap = 2 zaps/s, enemies nearby half the time
+    const b = build({ 'core.c': org('galvanic-sac') }, { params: { staminaLimits: 0, nearbyTime: 0.5 } });
+    expect(dps(b, 'core.c')).toBeCloseTo(25);
+    // Mutations add a share of its base damage (20), not of the zap's 25.
+    b.mutations = { 'corrosive-acid': 1 };
+    expect(dps(b, 'core.c')).toBeCloseTo(27);
+  });
+
+  it('counts organelles that never deal damage as modeled', () => {
+    const r = calculate(build({ 'core.c': org('regenerator') }), gameData);
+    expect(r.items.get('core.c')!.modeled).toBe(true);
+    expect(r.items.get('core.c')!.notes).toContain('Heals.');
+  });
+});
+
 describe('stamina', () => {
   it('pauses about 1.5s after draining 100 stamina', () => {
     const b = build({ 'core.e0': org('caustic-secretor') }, { params: {} });
@@ -298,5 +331,81 @@ describe('mutations, plasmids and run state', () => {
     expect(r.run).toContainEqual({ source: 'Corrosive Acid', text: '+10% damage', inactive: false });
     expect(r.run.find((l) => l.source === 'Cilium Growth')?.inactive).toBe(true);
     expect(r.warnings).toContain('Unknown mutation "nope"');
+  });
+});
+
+describe('evolving classes', () => {
+  function evolving(classId: string, slots: Record<string, SlotState>, extra: Partial<Build> = {}): Build {
+    return {
+      version: 2,
+      name: 'test',
+      classId,
+      pieces: [],
+      evolutions: [],
+      slots,
+      mutations: {},
+      plasmids: {},
+      params: { staminaLimits: 0 },
+      targets: 1,
+      custom: [],
+      ...extra,
+    };
+  }
+  const caustic = org('caustic-secretor');
+
+  it('copies an organelle in a mirrored slot to its twin on the other side', () => {
+    const r = calculate(evolving('bacterium', { ESlot2: caustic }), gameData);
+    expect(r.warnings).toEqual([]);
+    expect(r.weapons.map((w) => w.slotId).sort()).toEqual(['ESlot2', 'ESlot2Mirror']);
+    expect(r.totalDps).toBeCloseTo(120);
+  });
+
+  it('keeps grafts per slot, even on mirrored twins', () => {
+    const b = evolving('bacterium', { ESlot2: caustic, ESlot2Mirror: { graft: 'volatile' } });
+    expect(dps(b, 'ESlot2')).toBeCloseTo(60);
+    expect(dps(b, 'ESlot2Mirror')).toBeCloseTo(84);
+  });
+
+  it('adds evolution damage bonuses, which carry over to later evolutions', () => {
+    // Bacillus Transversus: +15% damage
+    const b = evolving('bacterium', { ESlot1: caustic }, { evolutions: ['bacterium-bacillus-transversus'] });
+    expect(dps(b, 'ESlot1')).toBeCloseTo(69);
+    b.evolutions = ['bacterium-bacillus-transversus', 'bacterium-clostridium'];
+    expect(dps(b, 'ESlot1')).toBeCloseTo(69);
+    b.evolutions = ['bacterium-coccus'];
+    expect(dps(b, 'ESlot1')).toBeCloseTo(60);
+  });
+
+  it('ignores evolutions picked for the wrong tier', () => {
+    const b = evolving('bacterium', { ESlot1: caustic }, { evolutions: ['bacterium-clostridium'] });
+    expect(calculate(b, gameData).body.plan?.id).toBe('bacterium-start');
+  });
+
+  it('uses slots built into the body: Omni takes any organelle, Volatile adds damage', () => {
+    // Fungal Spore: TSlot1 is an internal Omni slot, so a weapon fits.
+    const omni = calculate(evolving('fungal-spore', { TSlot1: caustic }), gameData);
+    expect(omni.warnings).toEqual([]);
+    expect(omni.totalDps).toBeCloseTo(60);
+    // Ascomycota: ESlot1 is a Volatile slot.
+    expect(dps(evolving('fungal-spore', { ESlot1: caustic }, { evolutions: ['fungal-spore-ascomycota'] }), 'ESlot1')).toBeCloseTo(84);
+  });
+
+  it('measures body halves from the body centre (Dorsal Dominance, Chirality)', () => {
+    // Dorsal Dominance: weapons on the bottom half +70%
+    const back = evolving('bacterium', { EBackSlot1: caustic, ESlot1: org('caustic-secretor') }, { plasmids: { 'bacterium-bottomdamageplasmid': 1 } });
+    expect(dps(back, 'EBackSlot1')).toBeCloseTo(102);
+    expect(dps(back, 'ESlot1')).toBeCloseTo(60);
+    // Sinistral Chirality: the left twin gains, the right twin loses.
+    const sides = evolving('bacterium', { ESlot2: caustic }, { mutations: { 'sinistral-chirality': 1 } });
+    expect(dps(sides, 'ESlot2')).toBeCloseTo(120);
+    expect(dps(sides, 'ESlot2Mirror')).toBeCloseTo(30);
+  });
+
+  it('Dextral Conduction strengthens mitochondria on the right half', () => {
+    const slots = { ESlot5: caustic, ESlot7: { ...org('entrant-mitochondrion'), uptime: 1 } };
+    const plain = evolving('fungal-spore', slots, { evolutions: ['', 'fungal-spore-aspergillus'] });
+    expect(dps(plain, 'ESlot5')).toBeCloseTo(60 * 1.3);
+    const boosted = { ...plain, plasmids: { 'fungal-spore-rightoverchargeplasmid': 1 } };
+    expect(dps(boosted, 'ESlot5')).toBeCloseTo(60 * (1 + 0.3 * 1.4));
   });
 });

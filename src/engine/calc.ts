@@ -8,12 +8,12 @@
 // on/off combination, weighted by each one's uptime, and average. That keeps
 // thresholds exact (the Rotary Extruder only fires with ~1 Overcharge).
 
-import { buildBody, type Body, type PieceShape } from './body';
+import { buildBody, buildPlanBody, type Body, type PieceShape } from './body';
 import { behaviourFor, isModeled } from './sim/behaviours';
 import {
-  addDamage,
   announce,
   applyModifiers,
+  fmt,
   evaluateRoot,
   newAttack,
   type Attack,
@@ -24,7 +24,7 @@ import {
   type TraceLine,
 } from './sim/model';
 import { runModel, type RunLine, type Share } from './run';
-import type { Build, ClassDef, GameData, OrganelleInfo, OrganelleInstance } from './types';
+import type { BodyPlan, Build, ClassDef, GameData, OrganelleInfo, OrganelleInstance, SlotState, ZoneEffect } from './types';
 import { RARITIES } from './types';
 
 export type { AttackNode, TraceLine } from './sim/model';
@@ -38,8 +38,7 @@ const STAMINA_REGEN = 190;
 const STAMINA_DELAY = 1;
 /** Explosions scale with the level to keep up with enemy health. */
 const EXPLOSION_LEVEL_SCALING = 0.75;
-/** How far (in module sides) a slot must be from the middle to count as left or right (Chirality). */
-const SIDE_THRESHOLD = 0.15;
+const OPPOSITE = { left: 'right', right: 'left', top: 'bottom', bottom: 'top' } as const;
 
 export interface StateView {
   label: string;
@@ -113,10 +112,43 @@ export function findClass(data: GameData, classId: string): ClassDef {
   return data.classes.find((c) => c.id === classId) ?? data.classes[0];
 }
 
+/**
+ * Evolving classes: the starting body, then each evolution picked so far.
+ * The last one is the current body; bonuses from earlier ones carry over.
+ */
+export function evolutionPath(build: Build, data: GameData): BodyPlan[] {
+  const cls = findClass(data, build.classId);
+  if (cls.body.kind !== 'evolving') return [];
+  const { start, tiers } = cls.body;
+  const path = [data.bodies[start]];
+  tiers.forEach((options, i) => {
+    const pick = build.evolutions[i];
+    if (pick && options.includes(pick) && data.bodies[pick]) path.push(data.bodies[pick]);
+  });
+  return path.filter((p) => !!p);
+}
+
 export function bodyFor(build: Build, data: GameData): Body {
   const cls = findClass(data, build.classId);
-  const shapes = new Map(cls.pieceTypes.map((p) => [p.id, p]));
+  if (cls.body.kind === 'evolving') {
+    const path = evolutionPath(build, data);
+    return buildPlanBody(path[path.length - 1]);
+  }
+  const shapes = new Map(cls.body.pieceTypes.map((p) => [p.id, p]));
   return buildBody(build.pieces, (t) => shapes.get(t) ?? FALLBACK_SHAPE);
+}
+
+/**
+ * What a slot holds. A mirrored slot always holds a copy of its twin's
+ * organelle (with the twin's settings), but keeps its own graft.
+ */
+export function slotState(build: Build, body: Body, slotId: string): SlotState | undefined {
+  const mirrorOf = body.slotById.get(slotId)?.mirrorOf;
+  if (!mirrorOf) return build.slots[slotId];
+  const source = build.slots[mirrorOf];
+  const own = build.slots[slotId];
+  if (!source && !own) return undefined;
+  return { ...source, graft: own?.graft };
 }
 
 export function calculate(build: Build, data: GameData): CalcResult {
@@ -133,14 +165,16 @@ export function calculate(build: Build, data: GameData): CalcResult {
   // --- Organelles in valid slots ---------------------------------------------
   const items = new Map<string, Item>();
   for (const slot of body.slots) {
-    const state = build.slots[slot.id];
+    const state = slotState(build, body, slot.id);
     if (!state?.organelle) continue;
     const info = infos.get(state.organelle.id);
     if (!info) {
       warnings.push(`Unknown organelle "${state.organelle.id}" in slot ${slot.id}`);
       continue;
     }
-    const graft = state.graft ? grafts.get(state.graft as 'volatile') : undefined;
+    // A graft replaces a special slot built into the body.
+    const graftId = state.graft ?? slot.special;
+    const graft = graftId ? grafts.get(graftId as 'volatile') : undefined;
     const accepts = graft?.id === 'omni' ? ['internal', 'external'] : [slot.kind];
     if (!accepts.includes(info.slot)) {
       warnings.push(`${info.name} is ${info.slot} but slot ${slot.id} is ${slot.kind}`);
@@ -168,22 +202,29 @@ export function calculate(build: Build, data: GameData): CalcResult {
   // --- Mutations, plasmids and run state -------------------------------------------
   const run = runModel(build, data, cls, {
     cores: Math.max(0, param('cores')),
-    hp: param('hp'),
+    hp: build.params.hp ?? cls.hp,
     bossesBeaten: Math.max(0, param('bossesBeaten')),
     weapons: [...items.values()].filter((i) => i.info.category === 'weapon' || i.behaviour.weapon).length,
     emptyInternal: body.slots.filter((sl) => sl.kind === 'internal' && !items.has(sl.id)).length,
   });
   warnings.push(...run.warnings);
   const maxStamina = Math.max(1, param('maxStamina') + run.extraStamina);
-  const sideOf = (item: Item): 'left' | 'right' | null => {
-    const x = body.slotById.get(item.slotId)?.position.x ?? 0;
-    return x < -SIDE_THRESHOLD ? 'left' : x > SIDE_THRESHOLD ? 'right' : null;
+  /** Whether an organelle's slot is in a part of the body (measured from the body's centre, front up). */
+  const inZone = (item: Item, side: ZoneEffect['side'], threshold: number) => {
+    const p = body.slotById.get(item.slotId)?.position ?? { x: 0, y: 0 };
+    const along = side === 'left' ? -p.x : side === 'right' ? p.x : side === 'top' ? -p.y : p.y;
+    return along > threshold;
   };
 
   // --- Overcharge ----------------------------------------------------------------
   const overchargeBonus = custom('overchargeStrength').reduce((s, c) => s + c.value, 0);
+  const activeCostCut = (item: Item) =>
+    run.activeCost + run.zones.reduce((s, z) => (z.activeCost && inZone(item, z.side, z.threshold) ? s + z.activeCost : s), 0);
+  const generatorBonus = (item: Item) =>
+    run.generatorStrength +
+    run.zones.reduce((s, z) => (z.generatorStrength && inZone(item, z.side, z.threshold) ? s + z.generatorStrength : s), 0);
   const strength = (item: Item) =>
-    (item.graft?.id === 'conductive' ? 0.4 : 0) + overchargeBonus + (item.behaviour.mito || item.behaviour.conduit ? run.generatorStrength : 0);
+    (item.graft?.id === 'conductive' ? 0.4 : 0) + overchargeBonus + (item.behaviour.mito || item.behaviour.conduit ? generatorBonus(item) : 0);
   const mitos = [...items.values()].filter((i) => i.behaviour.mito);
   const mitoResults = new Map<Item, MitoResult>();
   for (const m of mitos) {
@@ -243,13 +284,10 @@ export function calculate(build: Build, data: GameData): CalcResult {
   // --- Evaluating a state ----------------------------------------------------------
   const linkSet = new Map<string, Link>();
   const chainsCut = new Set<string>();
-  const upgradeBonus = (item: Item) =>
-    cls.upgrades.reduce((s, u) => {
-      const stacks = Math.min(build.upgrades[u.id] ?? 0, u.maxStacks);
-      return u.pieceDamage && stacks > 0 && u.pieceDamage.pieceTypes.includes(item.pieceType) ? s + u.pieceDamage.bonus * stacks : s;
-    }, 0);
   const runDamage = run.damage.reduce((s, d) => s + d.share, 0);
+  const evolutionDamage = evolutionPath(build, data).reduce((s, p) => s + (p.bonusDamage ?? 0), 0);
   const fixedShares: Share[] = [
+    { source: 'Evolutions', share: evolutionDamage },
     { source: 'Mutations and plasmids', share: runDamage },
     { source: 'Extra bonuses', share: custom('damage').reduce((s, c) => s + c.value, 0) },
   ].filter((b) => Math.abs(b.share) > 1e-9);
@@ -298,10 +336,10 @@ export function calculate(build: Build, data: GameData): CalcResult {
     const bonuses = (a: Attack, emitter: Item): Share[] => {
       const out = [...fixedShares];
       if (a.melee) out.push(...run.meleeDamage);
-      const side = sideOf(emitter);
-      for (const c of run.chirality) {
-        const share = side === c.side ? c.bonus : side ? c.penalty : 0;
-        if (share) out.push({ source: c.source, share });
+      for (const z of run.zones) {
+        if (z.meleeOnly && !a.melee) continue;
+        const share = inZone(emitter, z.side, z.threshold) ? z.damage : inZone(emitter, OPPOSITE[z.side], z.threshold) ? z.opposite : 0;
+        if (share) out.push({ source: z.source, share });
       }
       if (activeMitos) for (const b of run.perActiveMito) out.push({ source: b.source, share: b.share * activeMitos });
       if (starving) for (const b of run.starvation) out.push({ source: b.source, share: b.share * starving });
@@ -331,26 +369,40 @@ export function calculate(build: Build, data: GameData): CalcResult {
         results.set(w, zero);
         continue;
       }
-      // Attack speed: weapon infusers add up, Overcharge multiplies.
       const gun: GunState = { bonus: 0, trace: [], interval: 0 };
-      for (const b of speedShares) {
+      const selfTimed = !!(prof.energyCost || prof.rate);
+      let rate = 0;
+      let comboMult = 1;
+      if (prof.energyCost) {
+        // Actives build energy from Overcharge and fire when full.
+        const cost = prof.energyCost(w.r) * Math.max(0.1, 1 - activeCostCut(w));
+        rate = c / cost;
+        gun.trace.push({ source: w.info.name, text: `uses ${fmt(cost)} Overcharge-seconds per activation` });
+      } else if (prof.rate) {
+        rate = prof.rate(ctx, w.r, c);
+      }
+      if (selfTimed && rate <= 0) {
+        results.set(w, zero);
+        continue;
+      }
+      // Attack speed: weapon infusers add up, Overcharge multiplies.
+      for (const b of selfTimed ? [] : speedShares) {
         gun.bonus += b.share;
         gun.trace.push({ source: b.source, text: `${b.share >= 0 ? '+' : ''}${Math.round(b.share * 100)}% attack speed` });
       }
-      for (const n of neighbours(w)) {
+      for (const n of selfTimed ? [] : neighbours(w)) {
         if (n.behaviour.modifyGun && ctx.works(n)) {
           const before = gun.trace.length;
           n.behaviour.modifyGun(ctx, n, gun, 1);
           if (gun.trace.length > before) ctx.link(n, w, 'gun');
         }
       }
-      const chargeSpeed = (prof.chargeAttackSpeed ?? 0.3) * c;
+      const chargeSpeed = selfTimed ? 0 : (prof.chargeAttackSpeed ?? 0.3) * c;
       if (chargeSpeed) gun.trace.push({ source: 'Overcharge', text: `x${(1 + chargeSpeed).toFixed(2)} attack speed` });
       let interval = prof.interval(w.r) / ((1 + chargeSpeed) * (1 + gun.bonus));
       if (prof.spinUp) interval = Math.max(1 / 60, interval - prof.spinUp * Math.max(0, 1 - 0.1 * w.r));
       if (prof.extraDelay) interval += prof.extraDelay;
-      let rate = 1 / interval;
-      let comboMult = 1;
+      if (!selfTimed) rate = 1 / interval;
       if (prof.combo) {
         // Hits 1 and 2 normal, hit 3 deals 3x and comes 0.4s later.
         rate = 3 / (3 * interval + 0.4);
@@ -375,9 +427,14 @@ export function calculate(build: Build, data: GameData): CalcResult {
         melee: prof.kind === 'slash',
         speed: prof.speed ?? 0,
       });
-      root.trace.push({ source: w.info.name, text: `${prof.base} base x${(base / prof.base).toFixed(2)} rarity = ${base.toFixed(1)}` });
-      const upgrade = upgradeBonus(w);
-      if (upgrade) addDamage(root, upgrade, `${cls.name} upgrade`);
+      if (prof.damage) {
+        // The organelle sets the damage itself; bonuses still scale off the attack's own base damage.
+        root.base = prof.base;
+        root.damage = prof.damage(w.r);
+        root.trace.push({ source: w.info.name, text: `${fmt(root.damage)} damage (bonuses use its base damage, ${prof.base})` });
+      } else {
+        root.trace.push({ source: w.info.name, text: `${prof.base} base x${(base / prof.base).toFixed(2)} rarity = ${base.toFixed(1)}` });
+      }
       announce(ctx, root, w);
       applyModifiers(ctx, root, [w], neighbours(w), 1);
 
