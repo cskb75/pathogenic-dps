@@ -3,6 +3,7 @@
 import { bodyFor, findClass } from '../engine/calc';
 import { nextGrowthId, type Growth } from '../engine/amoeba';
 import { removePieceTree } from '../engine/body';
+import { toggleNode } from './plasmidTree';
 import type { Build, CustomKind, CustomModifier, GameData, OrganelleInstance, Rarity, SlotState } from '../engine/types';
 import { RARITIES } from '../engine/types';
 
@@ -68,6 +69,8 @@ export type Action =
   | { type: 'setEvolution'; tier: number; id: string }
   | { type: 'setMutation'; id: string; count: number }
   | { type: 'setPlasmid'; id: string; count: number }
+  | { type: 'togglePlasmid'; id: string }
+  | { type: 'clearPlasmids' }
   | { type: 'clearMutations' }
   | { type: 'setParam'; id: string; value: number }
   | { type: 'setTargets'; targets: number }
@@ -148,7 +151,14 @@ export function makeReducer(data: GameData) {
       case 'setMutation':
         return { ...build, mutations: withCount(build.mutations, action.id, action.count) };
       case 'setPlasmid':
-        return { ...build, plasmids: withCount(build.plasmids, action.id, action.count) };
+        return { ...build, plasmids: withCount(build.plasmids, action.id, Math.min(1, action.count)) };
+      case 'togglePlasmid': {
+        const nodes = findClass(data, build.classId).plasmids;
+        const owned = toggleNode(nodes, new Set(Object.keys(build.plasmids)), action.id);
+        return { ...build, plasmids: Object.fromEntries([...owned].map((id) => [id, 1])) };
+      }
+      case 'clearPlasmids':
+        return { ...build, plasmids: {} };
       case 'clearMutations':
         return { ...build, mutations: {} };
       case 'setParam':
@@ -288,7 +298,13 @@ export function parseBuild(raw: unknown, data: GameData): Build | null {
       ...(cls.body.kind === 'freeform' ? { growth } : {}),
       slots: parseSlots(raw.slots, known),
       mutations: countMap(raw.mutations, new Set(data.mutations.map((m) => m.id))),
-      plasmids: countMap(raw.plasmids, new Set(cls.plasmids.map((p) => p.id))),
+      // Each tree node is owned or not, and owned nodes connect back to the root (as in the game).
+      plasmids: Object.fromEntries(
+        [...Object.keys(countMap(raw.plasmids, new Set(cls.plasmids.map((p) => p.id)))).reduce(
+          (owned, id) => (owned.has(id) ? owned : toggleNode(cls.plasmids, owned, id)),
+          new Set<string>(),
+        )].map((id) => [id, 1]),
+      ),
       params: numberMap(raw.params) as Record<string, number>,
       targets: typeof raw.targets === 'number' ? raw.targets : 1,
       custom: Array.isArray(raw.custom) ? raw.custom.filter(isCustomModifier) : [],

@@ -16,9 +16,12 @@ const KINDS: Record<CustomKind, { label: string; unit: 'percent' | 'mult'; initi
 };
 
 const GROUPS: { title: string; ids: string[] }[] = [
-  { title: 'Aim and positioning', ids: ['angledHit', 'pelletHit', 'sideHit', 'mineHit', 'orbContact', 'targetDistance', 'backstabChance', 'beatSync', 'nearbyTime'] },
-  { title: 'Mitochondria triggers', ids: ['roomLength', 'killRate', 'hitsTakenRate', 'dodgeRate', 'pickupRate', 'perfectRooms'] },
-  { title: 'Stamina and stacking organelles', ids: ['staminaLimits', 'maxStamina', 'resonantStacks', 'phagosomeKills'] },
+  {
+    title: 'Aim and positioning',
+    ids: ['angledHit', 'pelletHit', 'sideHit', 'mineHit', 'orbContact', 'stauroLasers', 'fireballContact', 'targetDistance', 'backstabChance', 'beatSync', 'nearbyTime'],
+  },
+  { title: 'Overcharge triggers', ids: ['roomLength', 'killRate', 'hitsTakenRate', 'dodgeRate', 'dodgeRateAll', 'blockRate', 'slashRate', 'pickupRate', 'perfectRooms'] },
+  { title: 'Stamina and stacking organelles', ids: ['staminaLimits', 'maxStamina', 'resonantStacks'] },
 ];
 
 export function BuildSettings({ data, build, dispatch }: Props) {

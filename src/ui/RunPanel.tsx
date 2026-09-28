@@ -1,10 +1,11 @@
 import { useState, type Dispatch } from 'react';
 import { findClass, fullHp, type CalcResult } from '../engine/calc';
 import { mutationStacks } from '../engine/run';
-import type { Build, GameData, MutationDef, ParamDef, PlasmidDef } from '../engine/types';
+import type { Build, GameData, MutationDef, ParamDef } from '../engine/types';
 import type { Action } from '../state/build';
-import { Icon, mutationIcon, plasmidIcon } from './art';
+import { Icon, mutationIcon } from './art';
 import { ParamInput } from './BuildSettings';
+import { PlasmidTree } from './PlasmidTree';
 
 interface Props {
   data: GameData;
@@ -13,7 +14,7 @@ interface Props {
   dispatch: Dispatch<Action>;
 }
 
-const RUN_PARAMS = ['cores', 'hp', 'bossesBeaten', 'level'];
+const RUN_PARAMS = ['cores', 'hp', 'bossesBeaten', 'level', 'phagosomeKills', 'recycled', 'eaten'];
 
 /** Mutations picked this run, plasmids bought, and the run state they depend on. */
 export function RunPanel({ data, build, result, dispatch }: Props) {
@@ -38,19 +39,6 @@ export function RunPanel({ data, build, result, dispatch }: Props) {
       count={build.mutations[m.id] ?? 0}
       granted={(stacks.get(m.id) ?? 0) - (build.mutations[m.id] ?? 0)}
       onChange={(count) => dispatch({ type: 'setMutation', id: m.id, count })}
-    />
-  );
-
-  const mutationName = new Map(data.mutations.map((m) => [m.id, m]));
-  const affectsDps = (p: PlasmidDef) => !!p.effects || !!p.notes || (!!p.mutation && !!mutationName.get(p.mutation)?.effects);
-  const plasmidRow = (p: PlasmidDef) => (
-    <PlasmidRow
-      key={p.id}
-      icon={plasmidIcon(p, data)}
-      plasmid={p}
-      grants={p.mutation ? mutationName.get(p.mutation) : undefined}
-      count={build.plasmids[p.id] ?? 0}
-      onChange={(count) => dispatch({ type: 'setPlasmid', id: p.id, count })}
     />
   );
 
@@ -116,21 +104,12 @@ export function RunPanel({ data, build, result, dispatch }: Props) {
         </details>
       )}
 
-      <h3>{cls.name} plasmids</h3>
-      <p className="muted small">
-        Bought in the plasmid tree between runs. Count each node you own: some plasmids appear more than once in the tree. The tree's layout isn't known yet, so
-        they're listed here.
-      </p>
-      <ul className="pick-list">{cls.plasmids.filter(affectsDps).map(plasmidRow)}</ul>
-      <details open={cls.plasmids.some((p) => !affectsDps(p) && build.plasmids[p.id])}>
-        <summary>Plasmids with no effect on DPS ({cls.plasmids.filter((p) => !affectsDps(p)).length})</summary>
-        <ul className="pick-list">{cls.plasmids.filter((p) => !affectsDps(p)).map(plasmidRow)}</ul>
-      </details>
+      <PlasmidTree data={data} cls={cls} build={build} dispatch={dispatch} />
     </section>
   );
 }
 
-/** Splits "Formula from the demo code. Uses your HP." into where the numbers come from and what to do. */
+/** Splits "Formula from the game code. Uses your HP." into where the numbers come from and what to do. */
 function splitNotes(notes?: string): { source?: string; tip?: string } {
   if (!notes) return {};
   const m = notes.match(/^((?:Formula|Numbers) from [^.]+\.)\s*(.*)$/);
@@ -151,33 +130,6 @@ function MutationRow({ mutation: m, count, granted, onChange }: { mutation: Muta
         {tip && <span className="pick-note small">{tip}</span>}
       </div>
       <Stepper label={m.name} value={count} onChange={onChange} />
-    </li>
-  );
-}
-
-function PlasmidRow({
-  plasmid: p,
-  icon,
-  grants,
-  count,
-  onChange,
-}: {
-  plasmid: PlasmidDef;
-  icon: string;
-  grants?: MutationDef;
-  count: number;
-  onChange: (n: number) => void;
-}) {
-  return (
-    <li className={`pick ${count > 0 ? 'on' : ''}`}>
-      <Icon src={icon} size={40} className="pick-icon" />
-      <div className="pick-text">
-        <span className="pick-name">{p.name}</span>
-        <span className="muted small">{p.description}</span>
-        {grants && <span className="pick-note small">Counts as a stack of {grants.name} in the mutation list.</span>}
-        {p.notes && <span className="pick-note small">{p.notes}</span>}
-      </div>
-      <Stepper label={p.name} value={count} onChange={onChange} />
     </li>
   );
 }

@@ -128,7 +128,6 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
             <span className="small">{info.description}</span>
             <span>
               {item && !item.modeled && <span className="badge warn">not counted in DPS</span>}
-              {item?.modeled && !info.demoId && <span className="badge warn">patch notes only</span>}
             </span>
           </div>
           {!source && (

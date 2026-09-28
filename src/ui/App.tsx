@@ -78,9 +78,8 @@ export function App() {
       <ClassPicker data={gameData} build={build} dispatch={dispatch} onSwitched={() => setSelected(null)} />
 
       <p className="banner" role="note">
-        Numbers and body plans come from the free demo build (January 2026), updated with official patch notes where they give exact values. The
-        Nanobot, the Diatom and some newer organelles aren't in the demo, so a few details are best guesses; each organelle says where its numbers come
-        from.
+        Numbers, body plans and plasmid trees come from the full game's files (September 2026 build). Things that depend on how you play (aim,
+        positioning, how often mitochondria trigger) are fight assumptions you can change below; each organelle says what it assumes.
       </p>
 
       <main className="layout">
@@ -96,7 +95,7 @@ export function App() {
       </main>
 
       <footer className="app-footer muted small">
-        Fan-made tool, not affiliated with Aberrant Labs or Slug Disco. Game art © its creators, via the demo build and pathogenic.wiki. Data:{' '}
+        Fan-made tool, not affiliated with Aberrant Labs or Slug Disco. Game art © its creators, from the game files and pathogenic.wiki. Data:{' '}
         {gameData.dataSource}.
       </footer>
     </div>

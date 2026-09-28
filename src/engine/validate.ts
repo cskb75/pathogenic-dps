@@ -15,7 +15,7 @@ export function validateData(data: GameData): string[] {
     }
   };
   dupes(data.organelles.map((o) => o.id), 'organelle');
-  dupes(data.organelles.filter((o) => o.demoId).map((o) => o.demoId!), 'demo');
+  dupes(data.organelles.filter((o) => o.gameId).map((o) => o.gameId!), 'game');
   dupes(data.traits.map((t) => t.id), 'trait');
   dupes(data.grafts.map((g) => g.id), 'graft');
   dupes(data.params.map((p) => p.id), 'param');
@@ -29,8 +29,8 @@ export function validateData(data: GameData): string[] {
       problems.push(`Behaviour for "${id}" has no catalogue entry`);
       continue;
     }
-    if (b.weapon && !['weapon', 'active', 'support'].includes(info.category)) problems.push(`"${id}" has a weapon profile but is a ${info.category}`);
-    if (b.mito && info.category !== 'mitochondrion' && info.category !== 'active') problems.push(`"${id}" has a mitochondrion profile but is a ${info.category}`);
+    if (b.weapon && !['weapon', 'active', 'support', 'pseudopod', 'flagellum'].includes(info.category)) problems.push(`"${id}" has a weapon profile but is a ${info.category}`);
+    if (b.mito && !['mitochondrion', 'active', 'pseudopod', 'support'].includes(info.category)) problems.push(`"${id}" has a mitochondrion profile but is a ${info.category}`);
     if (b.weapon?.aimParam && !params.has(b.weapon.aimParam)) problems.push(`"${id}" uses unknown parameter "${b.weapon.aimParam}"`);
   }
   for (const [id, plan] of Object.entries(data.bodies)) {

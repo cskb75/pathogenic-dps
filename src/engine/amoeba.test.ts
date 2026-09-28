@@ -66,7 +66,7 @@ describe('Amoeba body', () => {
     build = reducer(build, { type: 'setOrganelle', slotId: 'Blob0', organelle: { id: 'caustic-secretor', rarity: 'common', traits: [] } });
     const r = calculate(build, gameData);
     expect(r.weapons.map((w) => w.slotId).sort()).toEqual(['Blob0', 'Blob0Mirror']);
-    expect(r.totalDps).toBeCloseTo(120);
+    expect(r.totalDps).toBeCloseTo(2 * 6.5 * (60 / 7));
     const back = parseBuild(JSON.parse(JSON.stringify(build)), gameData)!;
     expect(back.growth).toEqual(build.growth);
     expect(back.slots.Blob0?.organelle?.id).toBe('caustic-secretor');

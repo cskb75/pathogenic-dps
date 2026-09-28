@@ -32,6 +32,7 @@ TAGS = {
     0: 'EnergyGenerator', 1: 'EnergyConsumer', 2: 'Weapon', 3: 'AttackModifier', 4: 'CanBeAttackModified', 5: 'Lash',
     6: 'Internal', 7: 'External', 8: 'Any', 9: 'Active', 10: 'CanBeBulletModified', 11: 'BulletModifier', 12: 'UsesBulletWeapons',
     13: 'ShootsBullets', 14: 'Upgrade', 15: 'WeaponModifier', 16: 'UsesWeapons', 17: 'MeleeWeapon', 18: 'UsesMeleeWeapons',
+    19: 'CreatesLightning', 20: 'SpawnsMinions', 21: 'Pseudopod',
 }
 SKIP_PROPS = re.compile(r'^(texture|material|modulate|self_modulate|position|rotation|scale|z_index|visibility_layer|metadata/|parasite_colors|color\d|rarity_textures)')
 

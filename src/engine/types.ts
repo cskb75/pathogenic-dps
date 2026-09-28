@@ -26,8 +26,8 @@ export interface OrganelleInfo {
   subtype?: 'attack' | 'projectile' | 'weapon' | 'melee' | 'ranged';
   /** In-game description. */
   description: string;
-  /** Internal id in the game files, when the organelle exists in the demo build. */
-  demoId?: string;
+  /** Internal name in the game files. */
+  gameId?: string;
 }
 
 export interface TraitDef {
@@ -154,6 +154,16 @@ export interface RunEffects {
   generatorStrength?: number;
   /** Active organelles need this much less Overcharge to use (0.25 = 25% less). */
   activeCost?: number;
+  /** Extra Overcharge strength for active organelles (0.35 = they charge 35% faster). */
+  activeCharge?: number;
+  /** Overcharge active organelles get on their own. */
+  activeFlatCharge?: number;
+  /** Share of base damage per pseudopod reaching for an enemy. */
+  perPseudopod?: number;
+  /** Share of base damage per point of thrust from flagella. */
+  perThrust?: number;
+  /** Multiplies all damage (Glycogen Funnel: 0.7). */
+  damageMultiplier?: number;
   /** Extra stamina containers (100 stamina each). */
   staminaContainers?: number;
   /** Share of base damage per empty stamina container. */
@@ -180,6 +190,8 @@ export interface ZoneEffect {
   generatorStrength?: number;
   /** Active organelles in the zone need this much less Overcharge. */
   activeCost?: number;
+  /** Active organelles in the zone charge this much faster. */
+  activeCharge?: number;
 }
 
 export interface MutationDef {
@@ -192,6 +204,7 @@ export interface MutationDef {
   notes?: string;
 }
 
+/** A node of a pathogen's plasmid tree. */
 export interface PlasmidDef {
   id: string;
   name: string;
@@ -200,6 +213,15 @@ export interface PlasmidDef {
   /** Start the run with this mutation (counts as one stack of it). */
   mutation?: string;
   notes?: string;
+  /** Position in the tree, in game pixels (y down). */
+  x: number;
+  y: number;
+  /** Nodes this one unlocks. */
+  links: string[];
+  /** Icon path relative to the site root. */
+  icon?: string;
+  /** The tree's root: always owned. */
+  root?: boolean;
 }
 
 export interface ClassDef {

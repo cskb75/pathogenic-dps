@@ -69,5 +69,5 @@ export const lilCollector: ClassDef = {
   portrait: 'art/bodies/lil-collector-start.webp',
   source: 'Body plans from the game files',
   body: { kind: 'evolving', start: 'lil-collector-start', tiers: [] },
-  plasmids: plasmids['lil-collector'] ?? [],
+  plasmids: plasmids['lil-collector'],
 };

@@ -1,8 +1,10 @@
 // The Nanobot pathogen.
 //
-// Not in the demo build, so these details come from public sources. The body
-// is built from square and triangle modules: each has an internal slot in its
-// centre and an external slot on every free edge.
+// Its body is built from square and triangle modules (102.4 game pixels a
+// side, from scn/player/player_nanobot): each has an internal slot in its
+// centre and an external slot on every free edge. It starts as one square;
+// the Square and Triangle Module mutations add more (see src/engine/body.ts
+// for how the game wires their slots).
 
 import type { ClassDef } from '../engine/types';
 import { plasmids } from './plasmids';
@@ -12,9 +14,9 @@ export const nanobot: ClassDef = {
   name: 'Nanobot',
   tagline: 'Modular machine. 50% of health pickups become armor',
   description:
-    'Armored but Frail. Starts at 1 HP and leans on Armor (up to 10) instead of Health. Grows by attaching square and triangle modules.',
+    'Starts at 1 HP with 8 armor; half of health pickups become armor. Grows by attaching square and triangle modules (each also gives 1 armor).',
   hp: 1,
-  source: 'Module layout from player descriptions',
+  source: 'Module rules from the game files',
   body: {
     kind: 'modular',
     corePiece: 'core',

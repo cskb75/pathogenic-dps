@@ -34,5 +34,5 @@ export const amoeba: ClassDef = {
   hp: 6,
   source: 'Body rules from the game files',
   body: { kind: 'freeform', start: amoebaStart.id },
-  plasmids: plasmids.amoeba ?? [],
+  plasmids: plasmids.amoeba,
 };

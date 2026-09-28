@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { gameData } from '../data';
 import { calculate } from '../engine/calc';
+import { availableNodes } from './plasmidTree';
 import { decodeBuild, emptyBuild, encodeBuild, exampleBuild, makeReducer } from './build';
 
 const reducer = makeReducer(gameData);
@@ -135,6 +136,22 @@ describe('build state', () => {
     };
     const parsed = decodeBuild(encodeBuild(tampered as never), gameData)!;
     expect(parsed.mutations).toEqual({ 'corrosive-acid': 3, 'fast-twitch-fibers': 99 });
-    expect(parsed.plasmids).toEqual({ 'nanobot-staminaplasmid': 1 });
+    // A node is owned once, together with the path to it from the root.
+    expect(parsed.plasmids['nanobot-staminaplasmid']).toBe(1);
+    expect(parsed.plasmids['corrosive-acid']).toBeUndefined();
+    expect(Object.values(parsed.plasmids).every((n) => n === 1)).toBe(true);
+  });
+
+  it('owns plasmid nodes as in the game: with the path to them, and never cut off from the root', () => {
+    const nodes = gameData.classes.find((c) => c.id === 'nanobot')!.plasmids;
+    // A node next to the root, and one only reachable through it.
+    const first = availableNodes(nodes, new Set());
+    const next = nodes.find((n) => first.has(n.id) && [...availableNodes(nodes, new Set([n.id]))].some((id) => !first.has(id)))!;
+    const far = nodes.find((n) => availableNodes(nodes, new Set([next.id])).has(n.id) && !first.has(n.id))!;
+    let build = emptyBuild(gameData, 'nanobot');
+    build = reducer(build, { type: 'togglePlasmid', id: far.id });
+    expect(Object.keys(build.plasmids).sort()).toEqual([next.id, far.id].sort());
+    build = reducer(build, { type: 'togglePlasmid', id: next.id });
+    expect(build.plasmids).toEqual({});
   });
 });

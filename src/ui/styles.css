@@ -1367,3 +1367,71 @@ summary {
     display: none;
   }
 }
+
+/* ---- Plasmid tree ------------------------------------------------------------ */
+
+.plasmid-svg {
+  display: block;
+  width: 100%;
+  max-height: 560px;
+  background: radial-gradient(circle at 50% 50%, var(--panel-2), var(--panel) 75%);
+  border-radius: 8px;
+}
+.plasmid-link {
+  stroke: color-mix(in srgb, var(--muted) 45%, transparent);
+  stroke-width: 6;
+}
+.plasmid-link.owned {
+  stroke: var(--accent);
+  stroke-width: 8;
+}
+.plasmid-node {
+  cursor: pointer;
+  outline: none;
+}
+.plasmid-node.root {
+  cursor: default;
+}
+.plasmid-bg {
+  fill: var(--panel-2);
+}
+.plasmid-ring {
+  fill: none;
+  stroke: color-mix(in srgb, var(--muted) 60%, transparent);
+  stroke-width: 5;
+}
+.plasmid-node.locked image {
+  opacity: 0.35;
+}
+.plasmid-node.available .plasmid-ring {
+  stroke: var(--text);
+  stroke-dasharray: 10 8;
+}
+.plasmid-node.owned .plasmid-bg,
+.plasmid-node.root .plasmid-bg {
+  fill: color-mix(in srgb, var(--accent) 22%, var(--panel-2));
+}
+.plasmid-node.owned .plasmid-ring,
+.plasmid-node.root .plasmid-ring {
+  stroke: var(--accent);
+  stroke-width: 8;
+}
+.plasmid-node.dps .plasmid-ring {
+  stroke: var(--warn);
+}
+.plasmid-node.dps.owned .plasmid-ring {
+  stroke: #f5b83d;
+  stroke-width: 10;
+}
+.plasmid-node:hover .plasmid-ring,
+.plasmid-node:focus-visible .plasmid-ring,
+.plasmid-node.focus .plasmid-ring {
+  stroke-width: 12;
+}
+.plasmid-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 3.6em;
+  margin-top: 8px;
+}
