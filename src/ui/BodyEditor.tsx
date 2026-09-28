@@ -1,5 +1,6 @@
 import { useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type KeyboardEvent, type MouseEvent } from 'react';
-import { buildAmoebaBody, nextGrowthId, placeBlob, type AmoebaBody, type Blob } from '../engine/amoeba';
+import { AMOEBA, buildAmoebaBody, nextGrowthId, placeBlob, type AmoebaBody, type Blob } from '../engine/amoeba';
+import { blobOutline, loneBlobEdge } from '../engine/amoebaShape';
 import { placementOptions, removePieceTree, type PlacementOption, type Slot, type SlotKind } from '../engine/body';
 import type { CalcResult } from '../engine/calc';
 import { evolutionPath, findClass, slotState } from '../engine/calc';
@@ -36,6 +37,8 @@ const OUTLINE = { units: 0.025, minPx: 1.3 };
 const EXTERNAL_OFFSET = 0.08;
 
 const pts = (vs: Vec[]) => vs.map((v) => `${v.x * S},${v.y * S}`).join(' ');
+/** An SVG path through closed loops (fill it with the evenodd rule, so holes stay holes). */
+const loopsPath = (loops: Vec[][]) => loops.map((l) => `M${l.map((v) => `${(v.x * S).toFixed(1)},${(v.y * S).toFixed(1)}`).join('L')}Z`).join('');
 
 const onActivate = (fn: () => void) => (e: KeyboardEvent) => {
   if (e.key === 'Enter' || e.key === ' ') {
@@ -53,6 +56,9 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
   const modular = cls.body.kind === 'modular' ? cls.body : null;
   const freeform = cls.body.kind === 'freeform';
   const blobs = (body as Partial<AmoebaBody>).blobs;
+  /** The Amoeba's body: its blobs merged the way the game bakes them. */
+  const blobLoops = useMemo(() => (blobs ? blobOutline(blobs) : []), [blobs]);
+  const blobPath = useMemo(() => loopsPath(blobLoops), [blobLoops]);
   const svgRef = useRef<SVGSVGElement>(null);
   const [cursor, setCursor] = useState<Vec | null>(null);
   const organelles = useMemo(() => new Map(data.organelles.map((o) => [o.id, o])), [data]);
@@ -120,19 +126,26 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
     const next = buildAmoebaBody(plan, [...growth, step]);
     const fresh = next.slots.filter((s) => !body.slotById.has(s.id));
     const links = next.links.filter(([a, b]) => fresh.some((s) => s.id === a || s.id === b));
-    return { at, next, fresh, links, blobs: next.blobs.filter((b) => b.growthId === step.id) };
+    return { at, next, fresh, links, outline: loopsPath(blobOutline(next.blobs)) };
   }, [activeTool, cursor, blobs, plan, build.growth, body]);
 
   const viewBox = useMemo(() => {
     let all: Vec[];
     let pad: number;
     if (blobs) {
-      // Frame the blobs with room to grow one more on every side.
-      all = blobs.flatMap((b) => [
-        { x: b.x - b.r, y: b.y - b.r },
-        { x: b.x + b.r, y: b.y + b.r },
-      ]);
-      pad = 0.9;
+      // Frame the body with room to grow one more blob anywhere: a new blob can sit
+      // up to maxDist x the two radii from a blob, and its lobe bulges ~0.5 past that.
+      all = [
+        ...blobLoops.flat(),
+        ...blobs.flatMap((b) => {
+          const reach = AMOEBA.maxDist * (AMOEBA.blobRadius + b.r) + 0.5;
+          return [
+            { x: b.x - reach, y: b.y - reach },
+            { x: b.x + reach, y: b.y + reach },
+          ];
+        }),
+      ];
+      pad = 0.1;
     } else if (plan) {
       // Frame the slots: long tails and wide lobes can run off the edges.
       all = body.slots.map((s) => s.position);
@@ -159,7 +172,7 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
     const w = Math.max(...xs) - minX;
     const h = Math.max(...ys) - minY;
     return { box: `${minX * S} ${minY * S} ${w * S} ${h * S}`, aspect: w / h, w, h };
-  }, [body, plan, blobs, equipped]);
+  }, [body, plan, blobs, blobLoops, equipped]);
 
   // Screen pixels per editor unit, so slots and outlines stay readable when zoomed out.
   const [screen, setScreen] = useState({ w: 600, h: 500 });
@@ -295,7 +308,7 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
           <mask id={`${ids}-body`} style={{ maskType: 'alpha' }}>
             {plan?.sprite && !blobs && <image href={art(plan.sprite.src)} x={plan.sprite.x * S} y={plan.sprite.y * S} width={plan.sprite.w * S} height={plan.sprite.h * S} preserveAspectRatio="none" />}
             {plan && !plan.sprite && !blobs && <polygon points={plan.outline.map(([x, y]) => `${x * S},${y * S}`).join(' ')} fill="#fff" />}
-            {blobs?.map((b, i) => <circle key={i} cx={b.x * S} cy={b.y * S} r={b.r * S} fill="#fff" />)}
+            {blobs && <path d={blobPath} fill="#fff" fillRule="evenodd" />}
             {body.placed.map((piece) => (
               <polygon key={piece.id} points={pts(piece.vertices)} fill="#fff" />
             ))}
@@ -307,31 +320,37 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
         {blobs && (
           <g className="blobs">
             <defs>
-              {/* The game tiles this pattern 4 times across its 512px blob canvas. */}
-              <pattern id="amoeba-texture" patternUnits="userSpaceOnUse" width={128} height={128}>
-                <image href={art('art/classes/amoeba-pattern.webp')} width={128} height={128} />
+              {/* threshold_outline.gdshader: the pattern tiles 4 times across the 700x1000 px composer,
+                  whose centre is the first blob, and is tinted by the fill colour (0.7 grey). */}
+              <pattern id="amoeba-texture" patternUnits="userSpaceOnUse" x={-350} y={-500} width={175} height={250}>
+                <image href={art('art/classes/amoeba-pattern.webp')} width={175} height={250} preserveAspectRatio="none" />
+                <rect width={175} height={250} fill="#000" opacity={0.3} />
               </pattern>
             </defs>
-            {['outer', 'inner'].map((ring) =>
-              blobs.map((b, i) => <circle key={`${ring}${i}`} className={`blob-outline ${ring}`} cx={b.x * S} cy={b.y * S} r={b.r * S} />),
-            )}
-            {blobs.map((b, i) => (
-              <circle
-                key={`f${i}`}
-                className={`blob ${b.growthId === undefined ? 'first' : 'grown'}`}
-                cx={b.x * S}
-                cy={b.y * S}
-                r={b.r * S}
-                onClick={(e) => {
-                  if (activeTool.kind !== 'remove') return;
-                  e.stopPropagation();
-                  removeBlob(b);
-                }}
-              >
-                {b.growthId !== undefined && <title>Grown blob</title>}
-              </circle>
-            ))}
-            {growPreview?.blobs.map((b, i) => <circle key={`g${i}`} className="blob-ghost" cx={b.x * S} cy={b.y * S} r={b.r * S} />)}
+            {/* The game's two outline rings sit outside the body: 5 px bright, then 7 px dark. */}
+            <path d={blobPath} className="blob-outline outer" />
+            <path d={blobPath} className="blob-outline inner" />
+            <path d={blobPath} className="blob" fillRule="evenodd" />
+            {activeTool.kind === 'remove' &&
+              blobs
+                .filter((b) => b.growthId !== undefined)
+                .map((b, i) => (
+                  <circle
+                    // A mirrored growth makes two blobs with the same id.
+                    key={`${b.growthId}:${i}`}
+                    className="blob-hit"
+                    cx={b.x * S}
+                    cy={b.y * S}
+                    r={loneBlobEdge(b.r) * 1.6 * S}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeBlob(b);
+                    }}
+                  >
+                    <title>Grown blob</title>
+                  </circle>
+                ))}
+            {growPreview && <path d={growPreview.outline} className="blob-ghost" fillRule="evenodd" />}
             {growPreview?.links.map(([a, b]) => {
               const p = growPreview.next.slotById.get(a)!.position;
               const q = growPreview.next.slotById.get(b)!.position;

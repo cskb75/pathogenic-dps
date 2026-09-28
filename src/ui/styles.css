@@ -377,6 +377,11 @@ input[type='range'] {
   stroke: var(--danger);
 }
 
+/* Connectors and flows are drawn over the body but never take clicks meant for it. */
+.connector,
+.flow {
+  pointer-events: none;
+}
 .connector {
   stroke: var(--piece-stroke);
   stroke-width: calc(1.5px * var(--k, 1));
@@ -454,9 +459,11 @@ input[type='range'] {
   pointer-events: none;
 }
 
-/* Amoeba blobs: outlines drawn under the fills so overlapping blobs read as one body (colours from the game's blob shader). */
+/* The Amoeba's body: its merged outline, stroked under the fill so only the outer half of each
+   ring shows (colours and widths from the game's threshold_outline.gdshader). */
 .blob-outline {
   fill: none;
+  stroke-linejoin: round;
 }
 .blob-outline.outer {
   stroke: #0e2628;
@@ -480,14 +487,16 @@ input[type='range'] {
 .body-svg.tool-grow {
   cursor: crosshair;
 }
-.tool-remove .blob.grown {
+.blob-hit {
+  fill: transparent;
   cursor: pointer;
 }
-.tool-remove .blob.grown:hover {
-  fill: color-mix(in srgb, var(--danger) 35%, var(--amoeba));
+.blob-hit:hover {
+  fill: color-mix(in srgb, var(--danger) 40%, transparent);
 }
+/* The body a grow would make, over the current one. */
 .blob-ghost {
-  fill: color-mix(in srgb, var(--amoeba) 45%, transparent);
+  fill: color-mix(in srgb, var(--accent) 12%, transparent);
   stroke: var(--accent);
   stroke-width: calc(2px * var(--k, 1));
   stroke-dasharray: calc(6px * var(--k, 1)) calc(5px * var(--k, 1));

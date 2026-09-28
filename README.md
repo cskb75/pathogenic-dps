@@ -22,7 +22,7 @@ Things that work the way the game does:
 - **Built-in special slots** act like grafts.
 - **"Left half" and "bottom half".** Effects such as Chirality or Dorsal Dominance are measured from the body's centre, as the game does.
 - **Nanobot modules** are 102.4 game pixels a side. An edge slot connects to its own module's centre and to each neighbouring module's centre, unless it faces away from it; the body's centre is the average of the module centres.
-- **Amoeba blobs** follow the game's placement rules: a blob off the middle line is mirrored, and a new slot connects to up to 3 nearby slots (externals only to internals, never across the middle or across another connection; slots with 3 connections are skipped unless closest). A build stores the placements and replays them.
+- **Amoeba blobs** follow the game's placement rules: a blob off the middle line is mirrored, and a new slot connects to up to 3 nearby slots (externals only to internals, never across the middle or across another connection; slots with 3 connections are skipped unless closest). A build stores the placements and replays them. The body is drawn the way the game bakes it (`blob_composer.gd`): each blob is a soft gradient, and the body is wherever they add up past a threshold. So a lone blob fills about a third of its radius, and grown blobs merge into lobes.
 - **Plasmid trees** are laid out as in the game. You own a connected group of nodes starting from the root.
 - **Physics ticks.** Weapons check their cooldown 60 times a second, so a 0.105s cooldown really fires every 7 ticks (0.117s).
 
