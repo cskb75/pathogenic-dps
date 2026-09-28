@@ -86,16 +86,17 @@ def main(pck_path, out):
     os.makedirs(out, exist_ok=True)
     keys = set()
 
-    # Scripts
+    # Scripts: the demo ships compiled tokens (.gdc), the full game plain source (.gd)
     count = 0
     for n in pack.index:
-        if n.endswith('.gdc') and not n.startswith('addons/'):
-            path = os.path.join(out, 'src', n[:-4] + '.gd')
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, 'w') as f:
-                f.write(decompile(pack.raw(n)))
-            count += 1
-    print(f'decompiled {count} scripts')
+        if n.startswith('addons/') or not n.endswith(('.gdc', '.gd')):
+            continue
+        path = os.path.join(out, 'src', n[:-4] + '.gd' if n.endswith('.gdc') else n)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'w') as f:
+            f.write(decompile(pack.raw(n)) if n.endswith('.gdc') else pack.raw(n).decode())
+        count += 1
+    print(f'wrote {count} scripts')
 
     # Organelles: resource (name, tags) + scene root values
     organelles, weapons = [], {}
@@ -161,7 +162,8 @@ def main(pck_path, out):
     print(f'{len(maps)} plasmid maps')
 
     # English strings for every key seen
-    tr_name = next(n for n in pack.index if n.endswith('.en.translation') and not n.startswith('addons/'))
+    en = [n for n in pack.index if n.endswith('.en.translation') and not n.startswith(('addons/', 'mod_example/'))]
+    tr_name = max(en, key=lambda n: pack.index[n][1])  # the game's own table is the biggest
     t = Translation(parse(pack.raw(tr_name))['resources'][-1]['props'])
     strings = {k: t.get(k) for k in sorted(keys) if isinstance(k, str) and k}
     print(f'{sum(1 for v in strings.values() if v)} of {len(strings)} strings translated')

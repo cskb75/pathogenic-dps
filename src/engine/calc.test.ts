@@ -7,8 +7,11 @@ import type { Build, Rarity, SlotState } from './types';
 // (see src/engine/sim/behaviours.ts).
 //
 // Layout: the core square plus square "s" on the core's right edge (edge 1).
-// Core edges 0 top, 2 bottom, 3 left are free; s.e1..s.e3 are free. A weapon
-// on an edge connects only to its own module's centre; core.c and s.c connect.
+// Core edges 0 top, 2 bottom, 3 left are free; s.e1 top, s.e2 right, s.e3
+// bottom are free. core.c and s.c connect. As in the game, an edge slot
+// connects to its own module's centre and to the neighbouring module's
+// centre, unless it faces away from it: core.e3 and s.e2 reach only their own.
+// The body's centre is halfway between the two modules.
 
 const org = (id: string, rarity: Rarity = 'common', traits: string[] = []): SlotState => ({ organelle: { id, rarity, traits } });
 
@@ -71,18 +74,19 @@ describe('infusers and chains', () => {
     expect(dps(build({ 'core.e0': org('caustic-secretor'), 'core.c': org('oxysome') }), 'core.e0')).toBeCloseTo(75);
   });
 
-  it('does not reach a weapon on another module', () => {
-    expect(dps(build({ 's.e1': org('caustic-secretor'), 'core.c': org('oxysome') }), 's.e1')).toBeCloseTo(60);
+  it('reaches a weapon on a neighbouring module, unless the weapon faces away', () => {
+    expect(dps(build({ 's.e1': org('caustic-secretor'), 'core.c': org('oxysome') }), 's.e1')).toBeCloseTo(75);
+    expect(dps(build({ 's.e2': org('caustic-secretor'), 'core.c': org('oxysome') }), 's.e2')).toBeCloseTo(60);
   });
 
   it('Vesicle passes the attack on to the next module, and can double up from Rare', () => {
-    const b = build({ 's.e1': org('caustic-secretor'), 's.c': org('vesicle'), 'core.c': org('oxysome') });
-    expect(dps(b, 's.e1')).toBeCloseTo(75);
+    const b = build({ 's.e2': org('caustic-secretor'), 's.c': org('vesicle'), 'core.c': org('oxysome') });
+    expect(dps(b, 's.e2')).toBeCloseTo(75);
     b.slots['s.c'] = org('vesicle', 'rare');
     // 20% chance to trigger Oxysome twice: +25% x 1.2
-    expect(dps(b, 's.e1')).toBeCloseTo(78);
+    expect(dps(b, 's.e2')).toBeCloseTo(78);
     const links = calculate(b, gameData).links;
-    expect(links).toContainEqual({ from: 's.e1', to: 's.c', kind: 'attack' });
+    expect(links).toContainEqual({ from: 's.e2', to: 's.c', kind: 'attack' });
     expect(links).toContainEqual({ from: 's.c', to: 'core.c', kind: 'attack' });
   });
 
@@ -92,30 +96,30 @@ describe('infusers and chains', () => {
   });
 
   it('passes the burn down the chain, so a chained Oxysome boosts the burn only', () => {
-    const b = build({ 'core.e0': org('caustic-secretor'), 'core.c': org('pyrosome'), 's.c': org('oxysome') });
+    const b = build({ 'core.e3': org('caustic-secretor'), 'core.c': org('pyrosome'), 's.c': org('oxysome') });
     // bullet 6 (Oxysome is not connected to the weapon) + burn 2 x (5 x 1.25)
-    expect(dps(b, 'core.e0')).toBeCloseTo(10 * (6 + 2 * 6.25));
+    expect(dps(b, 'core.e3')).toBeCloseTo(10 * (6 + 2 * 6.25));
   });
 
   it('Triosome side shots land half the time, or always with Attractor down the chain', () => {
-    const b = build({ 'core.e0': org('caustic-secretor'), 'core.c': org('triosome') });
+    const b = build({ 'core.e3': org('caustic-secretor'), 'core.c': org('triosome') });
     // 2 side shots x 25% damage, 50% land
-    expect(dps(b, 'core.e0')).toBeCloseTo(10 * (6 + 2 * 1.5 * 0.5));
+    expect(dps(b, 'core.e3')).toBeCloseTo(10 * (6 + 2 * 1.5 * 0.5));
     b.slots['s.c'] = org('attractor');
-    expect(dps(b, 'core.e0')).toBeCloseTo(10 * (6 + 2 * 1.5));
+    expect(dps(b, 'core.e3')).toBeCloseTo(10 * (6 + 2 * 1.5));
   });
 
   it('only links attack-speed effects that actually apply', () => {
     // A Vesicle with no weapon infuser behind it does nothing for attack speed.
-    const plain = calculate(build({ 's.e1': org('caustic-secretor'), 's.c': org('vesicle'), 'core.c': org('oxysome') }), gameData);
+    const plain = calculate(build({ 's.e2': org('caustic-secretor'), 's.c': org('vesicle'), 'core.c': org('oxysome') }), gameData);
     expect(plain.links.filter((l) => l.kind === 'gun')).toEqual([]);
     // Resonant Cavity behind a Vesicle speeds up the weapon (not doubled: Vesicle only doubles attack effects).
-    const b = build({ 's.e1': org('caustic-secretor'), 's.c': org('vesicle', 'legendary'), 'core.c': org('resonant-cavity') });
+    const b = build({ 's.e2': org('caustic-secretor'), 's.c': org('vesicle', 'legendary'), 'core.c': org('resonant-cavity') });
     const r = calculate(b, gameData);
     // Common secretor: 60 DPS x (1 + 0.01 x 20 stacks)
-    expect(r.items.get('s.e1')!.weapon!.dps).toBeCloseTo(60 * 1.2);
+    expect(r.items.get('s.e2')!.weapon!.dps).toBeCloseTo(60 * 1.2);
     expect(r.links).toContainEqual({ from: 'core.c', to: 's.c', kind: 'gun' });
-    expect(r.links).toContainEqual({ from: 's.c', to: 's.e1', kind: 'gun' });
+    expect(r.links).toContainEqual({ from: 's.c', to: 's.e2', kind: 'gun' });
   });
 
   it('Resonant Cavity adds attack speed at max stacks', () => {
@@ -160,8 +164,8 @@ describe('slots, traits and Overcharge', () => {
   });
 
   it('relays Overcharge through a Vesicle', () => {
-    const b = build({ 's.e1': org('caustic-secretor'), 's.c': org('vesicle'), 'core.c': { ...org('entrant-mitochondrion'), uptime: 1 } });
-    expect(dps(b, 's.e1')).toBeCloseTo(78);
+    const b = build({ 's.e2': org('caustic-secretor'), 's.c': org('vesicle'), 'core.c': { ...org('entrant-mitochondrion'), uptime: 1 } });
+    expect(dps(b, 's.e2')).toBeCloseTo(78);
   });
 });
 
@@ -271,10 +275,14 @@ describe('mutations, plasmids and run state', () => {
   });
 
   it('Chirality: weapons on one side gain, the other side lose, the middle is unaffected', () => {
-    const b = run({ ...caustic('core.e3'), ...caustic('s.e1'), ...caustic('core.e0') }, { mutations: { 'sinistral-chirality': 1 } });
+    // Measured from the body's centre, halfway between the two modules.
+    const b = run({ ...caustic('core.e3'), ...caustic('s.e2'), ...caustic('core.e0') }, { mutations: { 'sinistral-chirality': 1 } });
     expect(dps(b, 'core.e3')).toBeCloseTo(120);
-    expect(dps(b, 's.e1')).toBeCloseTo(30);
-    expect(dps(b, 'core.e0')).toBeCloseTo(60);
+    expect(dps(b, 's.e2')).toBeCloseTo(30);
+    expect(dps(b, 'core.e0')).toBeCloseTo(120);
+    // On a lone core, its top edge is in the middle.
+    const lone = run(caustic(), { mutations: { 'sinistral-chirality': 1 }, pieces: [{ id: 'core', type: 'core' }] });
+    expect(dps(lone, 'core.e0')).toBeCloseTo(60);
   });
 
   it('Adrenaline works at 2 HP or less', () => {
@@ -403,7 +411,7 @@ describe('evolving classes', () => {
 
   it('Dextral Conduction strengthens mitochondria on the right half', () => {
     const slots = { ESlot5: caustic, ESlot7: { ...org('entrant-mitochondrion'), uptime: 1 } };
-    const plain = evolving('fungal-spore', slots, { evolutions: ['', 'fungal-spore-aspergillus'] });
+    const plain = evolving('fungal-spore', slots, { evolutions: ['', '', 'fungal-spore-aspergillus'] });
     expect(dps(plain, 'ESlot5')).toBeCloseTo(60 * 1.3);
     const boosted = { ...plain, plasmids: { 'fungal-spore-rightoverchargeplasmid': 1 } };
     expect(dps(boosted, 'ESlot5')).toBeCloseTo(60 * (1 + 0.3 * 1.4));

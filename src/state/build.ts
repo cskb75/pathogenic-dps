@@ -1,6 +1,7 @@
 // Build state: creation, edits (as a reducer), and save/load.
 
 import { bodyFor, findClass } from '../engine/calc';
+import { nextGrowthId, type Growth } from '../engine/amoeba';
 import { removePieceTree } from '../engine/body';
 import type { Build, CustomKind, CustomModifier, GameData, OrganelleInstance, Rarity, SlotState } from '../engine/types';
 import { RARITIES } from '../engine/types';
@@ -13,6 +14,7 @@ export function emptyBuild(data: GameData, classId = data.classes[0].id): Build 
     classId: cls.id,
     pieces: cls.body.kind === 'modular' ? [{ id: 'core', type: cls.body.corePiece }] : [],
     evolutions: [],
+    ...(cls.body.kind === 'freeform' ? { growth: [] } : {}),
     slots: {},
     mutations: {},
     plasmids: {},
@@ -58,6 +60,8 @@ export type Action =
   | { type: 'rename'; name: string }
   | { type: 'addPiece'; pieceType: string; to: string; edge: number }
   | { type: 'removePiece'; pieceId: string }
+  | { type: 'addGrowth'; kind: Growth['kind']; x: number; y: number }
+  | { type: 'removeGrowth'; id: number }
   | { type: 'setOrganelle'; slotId: string; organelle: OrganelleInstance | undefined }
   | { type: 'setSlot'; slotId: string; patch: Partial<Omit<SlotState, 'organelle'>> }
   | { type: 'setClass'; classId: string }
@@ -85,6 +89,8 @@ function withCount(map: Record<string, number>, id: string, count: number): Reco
   return next;
 }
 
+const round3 = (v: number) => Math.round(v * 1000) / 1000;
+
 function nextPieceId(build: Build): string {
   const n = build.pieces.reduce((max, p) => Math.max(max, Number(p.id.replace(/^p/, '')) || 0), 0);
   return `p${n + 1}`;
@@ -104,6 +110,13 @@ export function makeReducer(data: GameData) {
       case 'removePiece':
         if (action.pieceId === build.pieces[0]?.id) return build;
         return pruneSlots({ ...build, pieces: removePieceTree(build.pieces, action.pieceId) }, data);
+      case 'addGrowth': {
+        const growth = build.growth ?? [];
+        const step: Growth = { id: nextGrowthId(growth), kind: action.kind, x: round3(action.x), y: round3(action.y) };
+        return { ...build, growth: [...growth, step] };
+      }
+      case 'removeGrowth':
+        return pruneSlots({ ...build, growth: (build.growth ?? []).filter((g) => g.id !== action.id) }, data);
       case 'setClass': {
         // A new body; what you've picked up this run stays (plasmids belong to each pathogen).
         if (action.classId === build.classId) return build;
@@ -251,6 +264,16 @@ export function parseBuild(raw: unknown, data: GameData): Build | null {
         })
       : [];
   while (evolutions.length && !evolutions[evolutions.length - 1]) evolutions.pop();
+  const growth: Growth[] = [];
+  if (cls.body.kind === 'freeform' && Array.isArray(raw.growth)) {
+    for (const g of raw.growth.slice(0, 200)) {
+      if (!isRecord(g) || (g.kind !== 'internal' && g.kind !== 'external')) continue;
+      const { id, x, y } = g;
+      if (typeof id !== 'number' || !Number.isInteger(id) || id < 0 || growth.some((o) => o.id === id)) continue;
+      if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > 50 || Math.abs(y) > 50) continue;
+      growth.push({ id, kind: g.kind, x, y });
+    }
+  }
   const numberMap = (v: unknown) =>
     isRecord(v) ? Object.fromEntries(Object.entries(v).filter(([, x]) => typeof x === 'number' && Number.isFinite(x))) : {};
   // Counters keep known ids only, as whole numbers from 1 to 99.
@@ -262,6 +285,7 @@ export function parseBuild(raw: unknown, data: GameData): Build | null {
       name: typeof raw.name === 'string' ? raw.name.slice(0, 80) : base.name,
       pieces: cls.body.kind === 'modular' ? pieces : [],
       evolutions,
+      ...(cls.body.kind === 'freeform' ? { growth } : {}),
       slots: parseSlots(raw.slots, known),
       mutations: countMap(raw.mutations, new Set(data.mutations.map((m) => m.id))),
       plasmids: countMap(raw.plasmids, new Set(cls.plasmids.map((p) => p.id))),

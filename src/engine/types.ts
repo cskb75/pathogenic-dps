@@ -5,6 +5,7 @@
 // the catalogue: names, slots, categories, rarities, traits, grafts, and the
 // fight assumptions the player can tune.
 
+import type { Growth } from './amoeba';
 import type { SlotKind, PieceShape } from './body';
 import type { PieceInstance } from './geometry';
 
@@ -96,6 +97,8 @@ export interface BodyPlan {
   /** Share of base damage added to every attack from then on. */
   bonusDamage?: number;
   bonusHp?: number;
+  /** Stamina containers (100 stamina each) added. */
+  bonusStamina?: number;
   description?: string;
 }
 
@@ -104,6 +107,13 @@ export interface ModularBody {
   kind: 'modular';
   corePiece: string;
   pieceTypes: PieceTypeDef[];
+}
+
+/** Bodies that grow blobs where you place them (the Amoeba). */
+export interface FreeformBody {
+  kind: 'freeform';
+  /** Body plan id of the starting body. */
+  start: string;
 }
 
 /** Bodies with fixed layouts that change when you evolve. */
@@ -204,7 +214,7 @@ export interface ClassDef {
   portrait?: string;
   /** Where the class's data comes from. */
   source: string;
-  body: ModularBody | EvolvingBody;
+  body: ModularBody | EvolvingBody | FreeformBody;
   plasmids: PlasmidDef[];
 }
 
@@ -258,6 +268,8 @@ export interface Build {
   pieces: PieceInstance[];
   /** Evolving classes: the evolution picked at each tier ('' = not yet, or skipped). */
   evolutions: string[];
+  /** Freeform classes (Amoeba): the blobs grown, in order. */
+  growth?: Growth[];
   slots: Record<string, SlotState>;
   /** Mutations picked this run (DNA upgrades): id -> times picked. */
   mutations: Record<string, number>;

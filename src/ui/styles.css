@@ -17,6 +17,7 @@
   --piece-core: #24404a;
   --piece-triangle: #2a2638;
   --piece-stroke: #3b5563;
+  --amoeba: #2c7a6e;
   --slot-empty: rgba(219, 231, 236, 0.28);
   --slot-fill: #0e171c;
   --graft-volatile: #f87171;
@@ -47,6 +48,7 @@
     --piece-core: #c5dde3;
     --piece-triangle: #e4def0;
     --piece-stroke: #8fa9b5;
+    --amoeba: #7fcdbd;
     --slot-empty: rgba(19, 35, 43, 0.3);
     --slot-fill: #ffffff;
     --graft-volatile: #dc2626;
@@ -425,8 +427,65 @@ input[type='range'] {
   cursor: pointer;
 }
 .tool-add .slot,
-.tool-remove .slot {
+.tool-remove .slot,
+.tool-grow .slot {
   pointer-events: none;
+}
+
+/* Amoeba blobs: outlines drawn under the fills so overlapping blobs read as one body (colours from the game's blob shader). */
+.blob-outline {
+  fill: none;
+}
+.blob-outline.outer {
+  stroke: #0e2628;
+  stroke-width: 24;
+}
+.blob-outline.inner {
+  stroke: #3fcdb0;
+  stroke-width: 10;
+}
+.blob {
+  fill: url(#amoeba-texture);
+}
+.piece-art {
+  pointer-events: none;
+}
+.body-svg.modular .piece {
+  fill: transparent;
+  stroke: color-mix(in srgb, var(--piece-stroke) 60%, transparent);
+}
+.tool-grow .body-svg,
+.body-svg.tool-grow {
+  cursor: crosshair;
+}
+.tool-remove .blob.grown {
+  cursor: pointer;
+}
+.tool-remove .blob.grown:hover {
+  fill: color-mix(in srgb, var(--danger) 35%, var(--amoeba));
+}
+.blob-ghost {
+  fill: color-mix(in srgb, var(--amoeba) 45%, transparent);
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  pointer-events: none;
+}
+.slot-ghost {
+  fill: color-mix(in srgb, var(--accent) 25%, transparent);
+  stroke: var(--accent);
+  stroke-width: 2;
+  pointer-events: none;
+}
+.connector.ghost-link {
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 5;
+  opacity: 0.9;
+  pointer-events: none;
+}
+.toolbar-note {
+  align-self: center;
 }
 .slot-body {
   fill: var(--slot-fill);
@@ -1074,11 +1133,11 @@ summary {
   min-width: 0;
   max-width: 100%;
 }
+/* Up to nine choices per tier: wrap them in a grid of equal cards. */
 .evolution-options {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
   gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 2px;
 }
 .evolution-card {
   display: flex;
@@ -1086,13 +1145,12 @@ summary {
   align-items: center;
   justify-content: flex-end;
   gap: 2px;
-  min-width: 84px;
-  padding: 4px 8px;
+  min-width: 0;
+  padding: 4px 6px;
   border-radius: 8px;
   font-size: 12px;
 }
 .evolution-card.none {
-  min-width: 70px;
   color: var(--muted);
 }
 .evolution-card.active {
@@ -1100,14 +1158,12 @@ summary {
   border-color: var(--accent);
   color: var(--text);
 }
-.evolutions {
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 8px 18px;
-}
 .evolution-name {
   font-weight: 600;
-  white-space: nowrap;
+  font-size: 12.5px;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 .evolution-perk {
   font-size: 11px;

@@ -68,6 +68,7 @@ export function PlanThumb({ plan, size }: { plan: BodyPlan; size: number }) {
 /** A pathogen's portrait: its starting body, or a drawing for modular bodies. */
 export function ClassPortrait({ cls, data, size = 56 }: { cls: ClassDef; data: GameData; size?: number }) {
   const start = cls.body.kind === 'evolving' ? data.bodies[cls.body.start] : undefined;
+  if (cls.body.kind === 'freeform') return <Icon src={art('art/classes/amoeba.webp')} size={size} className="portrait" />;
   if (start?.sprite) return <PlanThumb plan={start} size={size} />;
   if (cls.portrait) return <Icon src={art(cls.portrait)} size={size} className="portrait" />;
   return (

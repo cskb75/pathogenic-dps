@@ -49,7 +49,11 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
   const accepts: SlotKind[] = effectiveGraft === 'omni' ? ['internal', 'external'] : [slot.kind];
   const item = result.items.get(slot.id);
   const where =
-    cls.body.kind === 'modular' ? (cls.body.pieceTypes.find((p) => p.id === slot.pieceType)?.name ?? slot.pieceType) : (body.plan?.name ?? '');
+    cls.body.kind === 'modular'
+      ? (cls.body.pieceTypes.find((p) => p.id === slot.pieceType)?.name ?? slot.pieceType)
+      : cls.body.kind === 'freeform' && slot.id.startsWith('Blob')
+        ? 'Grown blob'
+        : (body.plan?.name ?? '');
   const nameOf = (id: string) => {
     const other = slotState(build, body, id)?.organelle;
     return other ? (infos.get(other.id)?.name ?? other.id) : 'empty slot';

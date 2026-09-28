@@ -97,11 +97,11 @@ describe('build state', () => {
   it('picks evolutions per tier, keeping organelles in slots with the same name', () => {
     let build = emptyBuild(gameData, 'bacterium');
     build = reducer(build, { type: 'setOrganelle', slotId: 'ESlot1', organelle: { id: 'caustic-secretor', rarity: 'common', traits: [] } });
-    build = reducer(build, { type: 'setEvolution', tier: 1, id: 'bacterium-clostridium' });
-    expect(build.evolutions).toEqual(['', 'bacterium-clostridium']);
+    build = reducer(build, { type: 'setEvolution', tier: 2, id: 'bacterium-clostridium' });
+    expect(build.evolutions).toEqual(['', '', 'bacterium-clostridium']);
     expect(calculate(build, gameData).body.plan?.id).toBe('bacterium-clostridium');
     expect(calculate(build, gameData).weapons.map((w) => w.slotId)).toEqual(['ESlot1']);
-    build = reducer(build, { type: 'setEvolution', tier: 1, id: '' });
+    build = reducer(build, { type: 'setEvolution', tier: 2, id: '' });
     expect(build.evolutions).toEqual([]);
   });
 

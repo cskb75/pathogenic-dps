@@ -53,6 +53,8 @@ def main(out_dir):
             plan['bonusDamage'] = b['bonusDamage']
         if b.get('bonusHp'):
             plan['bonusHp'] = b['bonusHp']
+        if b.get('bonusStamina'):
+            plan['bonusStamina'] = b['bonusStamina']
         if b.get('description'):
             plan['description'] = b['description']
         if b.get('sprite'):

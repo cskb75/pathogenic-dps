@@ -2,14 +2,14 @@
 // Organelle behaviour (the numbers) lives in src/engine/sim/behaviours.ts.
 
 import type { BodyPlan, ClassDef, GameData } from '../engine/types';
+import { amoeba, amoebaStart } from './amoeba';
 import bodyData from './bodies.json';
-import { bacterium, diatom, fungalSpore, helminth } from './classes';
-import { diatomStart } from './diatom';
+import { bacterium, diatom, fungalSpore, helminth, lilCollector } from './classes';
 import { mutations } from './mutations';
 import { nanobot } from './nanobot';
 import { organelles } from './organelles';
 
-const bodies: Record<string, BodyPlan> = { ...(bodyData.bodies as unknown as Record<string, BodyPlan>), [diatomStart.id]: diatomStart };
+const bodies: Record<string, BodyPlan> = { ...(bodyData.bodies as unknown as Record<string, BodyPlan>), [amoebaStart.id]: amoebaStart };
 
 /** Evolving classes take their starting body and evolution tiers from the extracted body plans. */
 function withEvolutions(cls: ClassDef): ClassDef {
@@ -66,5 +66,5 @@ export const gameData: GameData = {
   ],
   mutations,
   bodies,
-  classes: [bacterium, helminth, fungalSpore, diatom, nanobot].map(withEvolutions),
+  classes: [bacterium, helminth, fungalSpore, diatom, lilCollector, nanobot, amoeba].map(withEvolutions),
 };

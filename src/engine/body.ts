@@ -2,8 +2,11 @@
 //
 // Modular bodies (Nanobot) are built from pieces. Each piece has an internal
 // slot in its centre and an external slot on every edge that is not covered
-// by another piece. Connectors are fixed by the geometry:
-//   - a piece's centre slot connects to each external slot on its own edges
+// by another piece. Connectors are fixed by the geometry, as in the game
+// (PlayerNanobot._rebuild_external_internal_connections):
+//   - an external slot connects to its own piece's centre slot, and to the
+//     centre slot of every piece sharing an edge with its piece, unless its own
+//     centre sits on the straight line between them (the slot faces away)
 //   - centre slots of two pieces that share an edge connect to each other
 //
 // Other classes have fixed layouts (body plans) extracted from the game, with
@@ -48,6 +51,9 @@ export interface Slot {
   mirrorOf?: string;
 }
 
+/** Game pixels per editor unit of modular pieces (the Nanobot's BLOCK_SIZE). */
+export const MODULE_PX = 102.4;
+
 export interface Body {
   placed: PlacedPiece[];
   pieceById: Map<string, PlacedPiece>;
@@ -61,6 +67,11 @@ export interface Body {
   errors: { pieceId: string; reason: string }[];
   /** Fixed layouts: the body plan (outline, sprite). */
   plan?: BodyPlan;
+  /**
+   * The body's centre, and hundreds of game pixels per editor unit. Effects
+   * that care where a slot is ("the right half") measure (position - center) * scale.
+   */
+  frame: { center: Vec; scale: number };
 }
 
 export const centerSlotId = (pieceId: string) => `${pieceId}.c`;
@@ -104,10 +115,21 @@ export function buildBody(pieces: PieceInstance[], shapeOf: (type: string) => Pi
   }
 
   const pieceById = new Map(placed.map((p) => [p.id, p]));
+  const neighbours = new Map<string, PlacedPiece[]>(placed.map((p) => [p.id, []]));
   for (const s of shared) {
     const a = pieceById.get(s.a)!;
     const b = pieceById.get(s.b)!;
+    neighbours.get(a.id)!.push(b);
+    neighbours.get(b.id)!.push(a);
     if (shapeOf(a.type).centerSlot && shapeOf(b.type).centerSlot) links.push([centerSlotId(a.id), centerSlotId(b.id)]);
+  }
+  for (const slot of slots) {
+    if (slot.edge === undefined) continue;
+    const own = pieceById.get(slot.pieceId)!;
+    for (const n of neighbours.get(own.id)!) {
+      if (!shapeOf(n.type).centerSlot || passesThrough(slot.position, n.center, own.center)) continue;
+      links.push([slot.id, centerSlotId(n.id)]);
+    }
   }
 
   const connections = new Map<string, string[]>(slots.map((s) => [s.id, []]));
@@ -116,7 +138,34 @@ export function buildBody(pieces: PieceInstance[], shapeOf: (type: string) => Pi
     connections.get(b)!.push(a);
   }
 
-  return { placed, pieceById, slots, slotById: new Map(slots.map((s) => [s.id, s])), connections, links, freeEdges, errors };
+  // The game's centre body is the average of the block centres.
+  const center = placed.length
+    ? { x: placed.reduce((s, p) => s + p.center.x, 0) / placed.length, y: placed.reduce((s, p) => s + p.center.y, 0) / placed.length }
+    : { x: 0, y: 0 };
+  return {
+    placed,
+    pieceById,
+    slots,
+    slotById: new Map(slots.map((s) => [s.id, s])),
+    connections,
+    links,
+    freeEdges,
+    errors,
+    frame: { center, scale: MODULE_PX / 100 },
+  };
+}
+
+/**
+ * Whether `point` lies on the segment a -> b (away from its ends), within a
+ * tenth of a module: the game's test for a slot facing away from a neighbour.
+ */
+function passesThrough(a: Vec, b: Vec, point: Vec): boolean {
+  const ab = { x: b.x - a.x, y: b.y - a.y };
+  const lenSq = ab.x * ab.x + ab.y * ab.y;
+  if (lenSq < 1e-4) return false;
+  const t = ((point.x - a.x) * ab.x + (point.y - a.y) * ab.y) / lenSq;
+  if (t <= 0.05 || t >= 0.95) return false;
+  return Math.hypot(a.x + ab.x * t - point.x, a.y + ab.y * t - point.y) < 0.1;
 }
 
 /** Pseudo piece id for slots on a fixed layout. */
@@ -140,7 +189,8 @@ export function buildPlanBody(plan: BodyPlan): Body {
     connections.get(a)!.push(b);
     connections.get(b)!.push(a);
   }
-  return { placed: [], pieceById: new Map(), slots, slotById, connections, links, freeEdges: [], errors: [], plan };
+  // Plans are already centred on the body's centre, in hundreds of game pixels.
+  return { placed: [], pieceById: new Map(), slots, slotById, connections, links, freeEdges: [], errors: [], plan, frame: { center: { x: 0, y: 0 }, scale: 1 } };
 }
 
 export interface PlacementOption {

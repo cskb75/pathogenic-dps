@@ -1,5 +1,5 @@
 import { useState, type Dispatch } from 'react';
-import { findClass, type CalcResult } from '../engine/calc';
+import { findClass, fullHp, type CalcResult } from '../engine/calc';
 import { mutationStacks } from '../engine/run';
 import type { Build, GameData, MutationDef, ParamDef, PlasmidDef } from '../engine/types';
 import type { Action } from '../state/build';
@@ -68,7 +68,7 @@ export function RunPanel({ data, build, result, dispatch }: Props) {
               <ParamInput
                 key={p.id}
                 param={p}
-                value={build.params[p.id] ?? (p.id === 'hp' ? cls.hp : p.default)}
+                value={build.params[p.id] ?? (p.id === 'hp' ? fullHp(build, data) : p.default)}
                 onChange={(v) => dispatch({ type: 'setParam', id: p.id, value: v })}
               />
             ))}

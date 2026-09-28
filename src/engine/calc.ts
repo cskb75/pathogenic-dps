@@ -8,6 +8,7 @@
 // on/off combination, weighted by each one's uptime, and average. That keeps
 // thresholds exact (the Rotary Extruder only fires with ~1 Overcharge).
 
+import { buildAmoebaBody } from './amoeba';
 import { buildBody, buildPlanBody, type Body, type PieceShape } from './body';
 import { behaviourFor, isModeled } from './sim/behaviours';
 import {
@@ -128,12 +129,18 @@ export function evolutionPath(build: Build, data: GameData): BodyPlan[] {
   return path.filter((p) => !!p);
 }
 
+/** HP at full health: the pathogen's own plus what its evolutions added. */
+export function fullHp(build: Build, data: GameData): number {
+  return findClass(data, build.classId).hp + evolutionPath(build, data).reduce((s, p) => s + (p.bonusHp ?? 0), 0);
+}
+
 export function bodyFor(build: Build, data: GameData): Body {
   const cls = findClass(data, build.classId);
   if (cls.body.kind === 'evolving') {
     const path = evolutionPath(build, data);
     return buildPlanBody(path[path.length - 1]);
   }
+  if (cls.body.kind === 'freeform') return buildAmoebaBody(data.bodies[cls.body.start], build.growth ?? []);
   const shapes = new Map(cls.body.pieceTypes.map((p) => [p.id, p]));
   return buildBody(build.pieces, (t) => shapes.get(t) ?? FALLBACK_SHAPE);
 }
@@ -202,16 +209,19 @@ export function calculate(build: Build, data: GameData): CalcResult {
   // --- Mutations, plasmids and run state -------------------------------------------
   const run = runModel(build, data, cls, {
     cores: Math.max(0, param('cores')),
-    hp: build.params.hp ?? cls.hp,
+    hp: build.params.hp ?? fullHp(build, data),
     bossesBeaten: Math.max(0, param('bossesBeaten')),
     weapons: [...items.values()].filter((i) => i.info.category === 'weapon' || i.behaviour.weapon).length,
     emptyInternal: body.slots.filter((sl) => sl.kind === 'internal' && !items.has(sl.id)).length,
   });
   warnings.push(...run.warnings);
-  const maxStamina = Math.max(1, param('maxStamina') + run.extraStamina);
+  const evolutionStamina = 100 * evolutionPath(build, data).reduce((s, p) => s + (p.bonusStamina ?? 0), 0);
+  const maxStamina = Math.max(1, param('maxStamina') + run.extraStamina + evolutionStamina);
   /** Whether an organelle's slot is in a part of the body (measured from the body's centre, front up). */
   const inZone = (item: Item, side: ZoneEffect['side'], threshold: number) => {
-    const p = body.slotById.get(item.slotId)?.position ?? { x: 0, y: 0 };
+    const at = body.slotById.get(item.slotId)?.position ?? body.frame.center;
+    const { center, scale } = body.frame;
+    const p = { x: (at.x - center.x) * scale, y: (at.y - center.y) * scale };
     const along = side === 'left' ? -p.x : side === 'right' ? p.x : side === 'top' ? -p.y : p.y;
     return along > threshold;
   };

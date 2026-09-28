@@ -52,7 +52,7 @@ export function validateData(data: GameData): string[] {
       const body = c.body;
       if (!body.pieceTypes.some((p) => p.id === body.corePiece)) problems.push(`Class "${c.id}": core piece "${body.corePiece}" is not a piece type`);
     } else {
-      for (const id of [c.body.start, ...c.body.tiers.flat()]) {
+      for (const id of [c.body.start, ...(c.body.kind === 'evolving' ? c.body.tiers.flat() : [])]) {
         if (!data.bodies[id]) problems.push(`Class "${c.id}": unknown body plan "${id}"`);
       }
     }
