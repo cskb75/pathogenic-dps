@@ -340,6 +340,28 @@ input[type='range'] {
   color: var(--muted);
   font-size: 12.5px;
 }
+.hint-row {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+}
+.hint-row .hint {
+  flex: 1;
+}
+.animate-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0;
+  font-size: 12.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.animate-toggle:has(input:disabled) {
+  opacity: 0.6;
+  cursor: default;
+}
 
 .body-svg {
   display: block;
@@ -393,32 +415,31 @@ input[type='range'] {
   opacity: 0.9;
 }
 
-/* Flows scale with the body (they run slot to slot); only rings and hit targets keep their screen size. */
-.flow {
-  stroke-width: 3.5;
-  stroke-linecap: round;
-  transition: opacity 0.15s;
-}
+/* Flows: the game's scrolling arrows along a connection, coloured by what flows (Connections.tsx). */
 .flow.attack {
-  stroke: var(--flow-attack);
+  --flow: var(--flow-attack);
 }
 .flow.gun {
-  stroke: var(--flow-gun);
+  --flow: var(--flow-gun);
 }
 .flow.overcharge {
-  stroke: var(--flow-overcharge);
+  --flow: var(--flow-overcharge);
+}
+.flow {
+  transition: opacity 0.15s;
+}
+.flow-chevron {
+  fill: var(--flow);
+}
+.flow-stop {
+  stop-color: var(--flow);
 }
 .flow.dim {
   opacity: 0.2;
 }
-.arrowhead.attack {
-  fill: var(--flow-attack);
-}
-.arrowhead.gun {
-  fill: var(--flow-gun);
-}
-.arrowhead.overcharge {
-  fill: var(--flow-overcharge);
+.connection {
+  pointer-events: none;
+  transition: opacity 0.15s;
 }
 
 .ghost {

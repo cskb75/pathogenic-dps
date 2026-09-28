@@ -139,11 +139,20 @@ The body editor draws organelles the way the game does, from `src/data/organelle
 
 - **External organelles** stick straight out of their slot, along the slot's facing. Each is the texture its scene draws at rest, at the game's size, with its round end on the slot. Flagella are a connector plus a body; the plain Flagellum is a tapered line in your pathogen's colour, brighter with rarity.
 - **Internal organelles** show their sprite on the slot and tint the body around it with their pattern.
-- **Rarity:** above Common, an outline in the rarity's colour, like the game's outline shaders.
+- **Rarity:** above Common, an outline in the rarity's colour, drawn like the game's outline shader. Only the node the game outlines gets one: the sprite, weapon line or flagellum body, but not pseudopods. The outline is baked once per texture, so it costs nothing per frame.
 - **Empty slots** are the game's slot sprites: a disc inside the body, a teardrop pointing out for external slots.
 - **Framing:** the view zooms out to fit every organelle, like the game's camera. Slot rings keep a readable size on screen.
 
-Animation (wiggle, recoil) and the game's lighting are left out. Everywhere else (the picker, the slot panel, the results) organelles keep their wiki icons.
+- **Connections** are the game's editor connections: curves that leave external slots heading into the body. Each is a pinched gold line with a bright band sliding along it, bright where the organelles at both ends work together. Flows (attacks passing through, attack speed, Overcharge) are the game's scrolling arrows, coloured by what flows.
+
+**Animation** follows what the game's organelle editor shows at rest, ported from the scripts that do it (`src/ui/motion.ts`, with each organelle's values extracted into `organelle_art.json`):
+
+- **Weapons** sway their aim about ±11° on a 5–9 s cycle, bending along their length (`gun.gd`). The Chemoreceptor Antenna does the same.
+- **Pseudopods** wobble at the base, and a wave runs down the tentacle (`tentacle.gd`).
+- **Flagella** flutter about ±14°, with the body trailing behind (`lash.gd`, `hair.gd`).
+- **Internal organelles** pulse to 110% twice a second (each scene's autoplayed "wiggle").
+
+The Animate switch turns it off (remembered in the browser), and it stays off when the system asks for reduced motion. The game's lighting, and animation in combat (aiming, recoil), are left out. Everywhere else (the picker, the slot panel, the results) organelles keep their wiki icons.
 
 Components pick an organelle's type (weapon, active, modifier, energy or lash) with `CATEGORY_TYPE` in `src/ui/format.ts`. The theme is dark only, like the game.
 
