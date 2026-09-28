@@ -1,0 +1,2682 @@
+{
+ "bacterium": [
+  {
+   "id": "bacterium-startingplasmid",
+   "name": "Start",
+   "description": "The root of the tree: always owned.",
+   "x": 0,
+   "y": 0,
+   "root": true,
+   "icon": "art/plasmids/circle.webp",
+   "links": [
+    "bacterium-hpplasmid",
+    "bacterium-damageplasmid",
+    "bacterium-betterdropsprogressionplasmid3",
+    "bacterium-speedplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-speedplasmid",
+   "name": "Cilium Growth",
+   "description": "+20% base speed.",
+   "x": 0,
+   "y": 150,
+   "icon": "art/plasmids/plasmid-unlock-mobility.webp",
+   "links": [
+    "bacterium-betterdropsprogressionplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-speedplasmid2",
+   "name": "Cilium Growth",
+   "description": "+20% base speed.",
+   "x": 0,
+   "y": 400,
+   "icon": "art/plasmids/plasmid-unlock-mobility.webp",
+   "links": [
+    "bacterium-attackspeedplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-speedplasmid3",
+   "name": "Cilium Growth",
+   "description": "+20% base speed.",
+   "x": -190,
+   "y": 480,
+   "icon": "art/plasmids/plasmid-unlock-mobility.webp",
+   "links": [
+    "bacterium-attackspeedplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-speednolashesplasmid",
+   "name": "Cilium Overtake",
+   "description": "+80% base speed, handling and dodge power. Starting Flagella removed.",
+   "x": 0,
+   "y": 720,
+   "icon": "art/plasmids/plasmid-unlock-no-lashes.webp",
+   "links": [
+    "bacterium-speedplasmid3",
+    "bacterium-bossarmorplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-attackspeedplasmid",
+   "name": "Start with Fast Twitch Fibers",
+   "description": "Start with Fast Twitch Fibers: +15% attack speed.",
+   "x": 0,
+   "y": 540,
+   "mutation": "fast-twitch-fibers",
+   "icon": "art/plasmids/plasmid-unlock-attack-speed.webp",
+   "links": []
+  },
+  {
+   "id": "bacterium-bottomdamageplasmid",
+   "name": "Dorsal Dominance",
+   "description": "Weapons on the bottom half of the body deal +70% damage.",
+   "x": -360,
+   "y": 0,
+   "effects": {
+    "zone": {
+     "side": "bottom",
+     "threshold": 0.5,
+     "damage": 0.7
+    }
+   },
+   "notes": "Counts slots more than 50 game pixels behind the body centre.",
+   "icon": "art/plasmids/plasmid-unlock-dmg-behind.webp",
+   "links": [
+    "bacterium-bossmoneyplasmid",
+    "bacterium-rerollplasmid2"
+   ]
+  },
+  {
+   "id": "bacterium-damageplasmid",
+   "name": "Lysosomal Rupture",
+   "description": "+10% damage.",
+   "x": 0,
+   "y": -150,
+   "effects": {
+    "damage": 0.1
+   },
+   "icon": "art/plasmids/plasmid-unlock-damage.webp",
+   "links": [
+    "bacterium-stashslotplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-bossarmorplasmid2",
+   "name": "Apoptotic Carapace",
+   "description": "Spawn 1 armor after beating a boss.",
+   "x": 208,
+   "y": -526,
+   "icon": "art/plasmids/plasmid-boss-armor.webp",
+   "links": [
+    "bacterium-damageprogressionplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-rerollplasmid3",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": -208,
+   "y": -528,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "bacterium-damageprogressionplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-rerollplasmid",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": 345,
+   "y": -180,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "bacterium-speeddamageplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-hpplasmid",
+   "name": "Cytoskeletal Reinforcement",
+   "description": "+1 max HP.",
+   "x": -120,
+   "y": 0,
+   "icon": "art/plasmids/plasmid-unlock-health.webp",
+   "links": [
+    "bacterium-startingmoneyplasmid2"
+   ]
+  },
+  {
+   "id": "bacterium-hpplasmid2",
+   "name": "Cytoskeletal Reinforcement",
+   "description": "+1 max HP.",
+   "x": -210,
+   "y": 210,
+   "icon": "art/plasmids/plasmid-unlock-health.webp",
+   "links": [
+    "bacterium-bossmoneyplasmid2"
+   ]
+  },
+  {
+   "id": "bacterium-bosshppickupplasmid",
+   "name": "Phagocytic Reflex",
+   "description": "Spawn 1 HP heart after beating a boss.",
+   "x": 210,
+   "y": 210,
+   "icon": "art/plasmids/plasmid-boss-hp-pickup.webp",
+   "links": [
+    "bacterium-startingdnaplasmid2"
+   ]
+  },
+  {
+   "id": "bacterium-bossmoneyplasmid2",
+   "name": "Heterotrophic Yield",
+   "description": "Spawn 4 cores after beating a boss.",
+   "x": -150,
+   "y": 330,
+   "icon": "art/plasmids/plasmid-boss-money.webp",
+   "links": [
+    "bacterium-speedplasmid2"
+   ]
+  },
+  {
+   "id": "bacterium-loadoutlimitweaponplasmid",
+   "name": "Offensive Capacity",
+   "description": "Raises the starting weapon loadout limit by 1.",
+   "x": -210,
+   "y": -210,
+   "icon": "art/plasmids/plasmid-unlock-weapon.webp",
+   "links": [
+    "bacterium-stashslotplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-startingdnaplasmid2",
+   "name": "Primordiate DNA",
+   "description": "Start with +5 DNA.",
+   "x": 150,
+   "y": 330,
+   "icon": "art/plasmids/plasmid-unlock-dna.webp",
+   "links": [
+    "bacterium-speedplasmid2"
+   ]
+  },
+  {
+   "id": "bacterium-startingmoneyplasmid2",
+   "name": "Primordiate Lucrum",
+   "description": "Start with +5 cores.",
+   "x": -240,
+   "y": 0,
+   "icon": "art/plasmids/plasmid-unlock-money.webp",
+   "links": [
+    "bacterium-loadoutlimitweaponplasmid",
+    "bacterium-hpplasmid2",
+    "bacterium-bottomdamageplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-rerollplasmid2",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": -345,
+   "y": 180,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "bacterium-staminaplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-bossmoneyplasmid",
+   "name": "Heterotrophic Yield",
+   "description": "Spawn 4 cores after beating a boss.",
+   "x": -345,
+   "y": -180,
+   "icon": "art/plasmids/plasmid-boss-money.webp",
+   "links": [
+    "bacterium-moneydamageplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-moneydamageplasmid",
+   "name": "Start with Argentic Coating",
+   "description": "Start with Argentic Coating: +0.5% damage for each core.",
+   "x": -305,
+   "y": -330,
+   "mutation": "argentic-coating",
+   "icon": "art/plasmids/plasmid-unlock-dmg-money.webp",
+   "links": [
+    "bacterium-rerollplasmid3"
+   ]
+  },
+  {
+   "id": "bacterium-betterdropsprogressionplasmid3",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": 120,
+   "y": 0,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": [
+    "bacterium-betterenergyplasmid2"
+   ]
+  },
+  {
+   "id": "bacterium-betterdropsprogressionplasmid",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": 0,
+   "y": 270,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": [
+    "bacterium-speedplasmid2"
+   ]
+  },
+  {
+   "id": "bacterium-betterdropsprogressionplasmid2",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": 305,
+   "y": 340,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": [
+    "bacterium-bossarmorplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-bossarmorplasmid",
+   "name": "Apoptotic Carapace",
+   "description": "Spawn 1 armor after beating a boss.",
+   "x": 190,
+   "y": 480,
+   "icon": "art/plasmids/plasmid-boss-armor.webp",
+   "links": [
+    "bacterium-attackspeedplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-speeddamageplasmid",
+   "name": "Start with Additive Momentum",
+   "description": "Start with Additive Momentum: +0.75% damage for each point of thrust from flagella.",
+   "x": 305,
+   "y": -330,
+   "mutation": "additive-momentum",
+   "icon": "art/plasmids/plasmid-unlock-dmg-speeed.webp",
+   "links": [
+    "bacterium-bossarmorplasmid2"
+   ]
+  },
+  {
+   "id": "bacterium-betterenergyplasmid2",
+   "name": "Start with Mitochondrial Augmentation",
+   "description": "Start with Mitochondrial Augmentation: +15% overcharge strength from mitochondria.",
+   "x": 240,
+   "y": 0,
+   "mutation": "mitochondrial-augmentation",
+   "icon": "art/plasmids/plasmid-unlock-energy.webp",
+   "links": [
+    "bacterium-bosshppickupplasmid",
+    "bacterium-loadoutlimitmitochondriaplasmid",
+    "bacterium-startingdnaplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-autoshootplasmid",
+   "name": "Autonomous Offense",
+   "description": "All weapons shoot automatically at the closest enemy. -25% damage.",
+   "x": 523,
+   "y": 0,
+   "effects": {
+    "damage": -0.25
+   },
+   "notes": "Auto-aim itself is not modeled.",
+   "icon": "art/plasmids/plasmid-unlock-auto-shoot.webp",
+   "links": [
+    "bacterium-stashslotplasmid2",
+    "bacterium-rerollplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-loadoutlimitmitochondriaplasmid",
+   "name": "Mitochondrial Capacity",
+   "description": "Raises the starting mitochondrion loadout limit by 1.",
+   "x": 360,
+   "y": 0,
+   "icon": "art/plasmids/plasmid-unlock-mitochondria.webp",
+   "links": [
+    "bacterium-stashslotplasmid2",
+    "bacterium-rerollplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-nostaminaplasmid",
+   "name": "Start with Glycogen Funnel",
+   "description": "Start with Glycogen Funnel: Weapons no longer consume stamina. 0.7× damage.",
+   "x": -523,
+   "y": 0,
+   "mutation": "glycogen-funnel",
+   "icon": "art/plasmids/plasmid-unlock-no-energy.webp",
+   "links": [
+    "bacterium-bossmoneyplasmid",
+    "bacterium-rerollplasmid2"
+   ]
+  },
+  {
+   "id": "bacterium-staminaplasmid",
+   "name": "Start with Glycogen Reserve",
+   "description": "Start with Glycogen Reserve: +1 stamina container.",
+   "x": -305,
+   "y": 340,
+   "mutation": "glycogen-reserve",
+   "icon": "art/plasmids/plasmid-unlock-stamina.webp",
+   "links": [
+    "bacterium-speedplasmid3"
+   ]
+  },
+  {
+   "id": "bacterium-stashslotplasmid",
+   "name": "Endosomal Cache",
+   "description": "+1 stash slot to store organelles.",
+   "x": 0,
+   "y": -352,
+   "icon": "art/plasmids/plasmid-unlock-stashes.webp",
+   "links": [
+    "bacterium-damagelowerhpplasmid2"
+   ]
+  },
+  {
+   "id": "bacterium-damagelowerhpplasmid2",
+   "name": "Sacrificial Enzyme",
+   "description": "+15% damage. -1 max HP.",
+   "x": 0,
+   "y": -488,
+   "effects": {
+    "damage": 0.15
+   },
+   "icon": "art/plasmids/plasmid-unlock-dmg-up-health-down.webp",
+   "links": [
+    "bacterium-damageprogressionplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-glasscannonplasmid",
+   "name": "Apoptotic Frenzy",
+   "description": "+100% damage. Take double damage.",
+   "x": 0,
+   "y": -760,
+   "effects": {
+    "damage": 1.0
+   },
+   "icon": "art/plasmids/plasmid-unlock-deal-take-double.webp",
+   "links": [
+    "bacterium-bossarmorplasmid2",
+    "bacterium-rerollplasmid3"
+   ]
+  },
+  {
+   "id": "bacterium-startingdnaplasmid",
+   "name": "Primordiate DNA",
+   "description": "Start with +5 DNA.",
+   "x": 210,
+   "y": -210,
+   "icon": "art/plasmids/plasmid-unlock-dna.webp",
+   "links": [
+    "bacterium-stashslotplasmid"
+   ]
+  },
+  {
+   "id": "bacterium-stashslotplasmid2",
+   "name": "Endosomal Cache",
+   "description": "+1 stash slot to store organelles.",
+   "x": 345,
+   "y": 180,
+   "icon": "art/plasmids/plasmid-unlock-stashes.webp",
+   "links": [
+    "bacterium-betterdropsprogressionplasmid2"
+   ]
+  },
+  {
+   "id": "bacterium-damageprogressionplasmid",
+   "name": "Virulent Adaptation",
+   "description": "Gain +5% damage after beating each boss.",
+   "x": 0,
+   "y": -610,
+   "effects": {
+    "perBoss": 0.05
+   },
+   "notes": "Uses your bosses beaten.",
+   "icon": "art/plasmids/plasmid-damage-progression.webp",
+   "links": []
+  }
+ ],
+ "fungal-spore": [
+  {
+   "id": "fungal-spore-startingplasmid",
+   "name": "Start",
+   "description": "The root of the tree: always owned.",
+   "x": 0,
+   "y": 0,
+   "root": true,
+   "icon": "art/plasmids/circle.webp",
+   "links": [
+    "fungal-spore-rerollplasmid3",
+    "fungal-spore-damageplasmid",
+    "fungal-spore-speedplasmid4",
+    "fungal-spore-hpplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-loadoutlimitinternalsplasmid",
+   "name": "Recombinant Capacity",
+   "description": "Raises the starting internal organelle loadout limit by 1.",
+   "x": -258,
+   "y": 368,
+   "icon": "art/plasmids/plasmid-unlock-weaponmodifier.webp",
+   "links": [
+    "fungal-spore-bossarmorplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-bossarmorplasmid",
+   "name": "Apoptotic Carapace",
+   "description": "Spawn 1 armor after beating a boss.",
+   "x": 0,
+   "y": 450,
+   "icon": "art/plasmids/plasmid-boss-armor.webp",
+   "links": [
+    "fungal-spore-betterdropsprogressionplasmid2",
+    "fungal-spore-loadoutlimitweaponplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-hpplasmid4",
+   "name": "Cytoskeletal Reinforcement",
+   "description": "+1 max HP.",
+   "x": -440,
+   "y": 0,
+   "icon": "art/plasmids/plasmid-unlock-health.webp",
+   "links": [
+    "fungal-spore-startingdnaplasmid2",
+    "fungal-spore-stashslotplasmid",
+    "fungal-spore-loadoutlimitweaponplasmid2",
+    "fungal-spore-betterdropsprogressionplasmid2"
+   ]
+  },
+  {
+   "id": "fungal-spore-damageplasmid",
+   "name": "Lysosomal Rupture",
+   "description": "+10% damage.",
+   "x": 0,
+   "y": -120,
+   "effects": {
+    "damage": 0.1
+   },
+   "icon": "art/plasmids/plasmid-unlock-damage.webp",
+   "links": [
+    "fungal-spore-damagelowerhpplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-bosshppickupplasmid",
+   "name": "Phagocytic Reflex",
+   "description": "Spawn 1 HP heart after beating a boss.",
+   "x": 0,
+   "y": 248,
+   "icon": "art/plasmids/plasmid-boss-hp-pickup.webp",
+   "links": []
+  },
+  {
+   "id": "fungal-spore-staminaplasmid",
+   "name": "Start with Glycogen Reserve",
+   "description": "Start with Glycogen Reserve: +1 stamina container.",
+   "x": 258,
+   "y": -366,
+   "mutation": "glycogen-reserve",
+   "icon": "art/plasmids/plasmid-unlock-stamina.webp",
+   "links": [
+    "fungal-spore-speedplasmid5"
+   ]
+  },
+  {
+   "id": "fungal-spore-rerollplasmid2",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": -258,
+   "y": -366,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "fungal-spore-speedplasmid5"
+   ]
+  },
+  {
+   "id": "fungal-spore-rerollplasmid3",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": -120,
+   "y": 0,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "fungal-spore-betterdropsprogressionplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-betterdropsprogressionplasmid2",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": -176,
+   "y": 152,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": [
+    "fungal-spore-bosshppickupplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-leftactivesplasmid",
+   "name": "Sinistral Metabolism",
+   "description": "Active organelles on the left half of the body require 40% less overcharge time to activate.",
+   "x": -610,
+   "y": 0,
+   "effects": {
+    "zone": {
+     "side": "right",
+     "threshold": 0.5,
+     "generatorStrength": 0.4
+    }
+   },
+   "notes": "Counts slots more than 50 game pixels right of the body centre.",
+   "icon": "art/plasmids/plasmid-unlock-charge-faster.webp",
+   "links": [
+    "fungal-spore-stashslotplasmid",
+    "fungal-spore-startingdnaplasmid2"
+   ]
+  },
+  {
+   "id": "fungal-spore-rightoverchargeplasmid",
+   "name": "Dextral Conduction",
+   "description": "Mitochondria on the right half of the body have +40% stronger overcharge.",
+   "x": 607,
+   "y": 0,
+   "effects": {
+    "zone": {
+     "side": "left",
+     "threshold": 0.5,
+     "activeCharge": 0.4
+    }
+   },
+   "notes": "Counts slots more than 50 game pixels left of the body centre. Actives charge 40% faster there.",
+   "icon": "art/plasmids/plasmid-unlock-overcharge.webp",
+   "links": [
+    "fungal-spore-loadoutlimitmitochondriaplasmid",
+    "fungal-spore-startingmoneyplasmid4"
+   ]
+  },
+  {
+   "id": "fungal-spore-topdamageplasmid",
+   "name": "Supral Dominance",
+   "description": "Weapons on the top half of the body deal +40% damage.",
+   "x": 0,
+   "y": -615,
+   "effects": {
+    "zone": {
+     "side": "top",
+     "threshold": 0.5,
+     "damage": 0.4
+    }
+   },
+   "notes": "Counts slots more than 50 game pixels in front of the body centre.",
+   "icon": "art/plasmids/plasmid-unlock-damage.webp",
+   "links": [
+    "fungal-spore-rerollplasmid2",
+    "fungal-spore-staminaplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-bottommeleedamageplasmid",
+   "name": "Dorsal Impact",
+   "description": "Melee weapons on the bottom half of the body deal +70% damage.",
+   "x": 0,
+   "y": 627,
+   "effects": {
+    "zone": {
+     "side": "bottom",
+     "threshold": 0.5,
+     "damage": 0.7,
+     "meleeOnly": true
+    }
+   },
+   "notes": "Counts slots more than 50 game pixels behind the body centre.",
+   "icon": "art/plasmids/plasmid-unlock-melee-damage.webp",
+   "links": [
+    "fungal-spore-loadoutlimitinternalsplasmid",
+    "fungal-spore-rerollplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-loadoutlimitweaponplasmid2",
+   "name": "Offensive Capacity",
+   "description": "Raises the starting weapon loadout limit by 1.",
+   "x": -176,
+   "y": -152,
+   "icon": "art/plasmids/plasmid-unlock-weapon.webp",
+   "links": [
+    "fungal-spore-damagelowerhpplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-loadoutlimitweaponplasmid",
+   "name": "Offensive Capacity",
+   "description": "Raises the starting weapon loadout limit by 1.",
+   "x": 176,
+   "y": 152,
+   "icon": "art/plasmids/plasmid-unlock-weapon.webp",
+   "links": [
+    "fungal-spore-bosshppickupplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-betterdropsprogressionplasmid",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": -248,
+   "y": 0,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": [
+    "fungal-spore-loadoutlimitweaponplasmid2",
+    "fungal-spore-betterdropsprogressionplasmid2",
+    "fungal-spore-hpplasmid4"
+   ]
+  },
+  {
+   "id": "fungal-spore-startingdnaplasmid2",
+   "name": "Primordiate DNA",
+   "description": "Start with +5 DNA.",
+   "x": -392,
+   "y": -198,
+   "icon": "art/plasmids/plasmid-unlock-dna.webp",
+   "links": [
+    "fungal-spore-rerollplasmid2"
+   ]
+  },
+  {
+   "id": "fungal-spore-speedplasmid4",
+   "name": "Cilium Growth",
+   "description": "+20% base speed.",
+   "x": 120,
+   "y": 0,
+   "icon": "art/plasmids/plasmid-unlock-mobility.webp",
+   "links": [
+    "fungal-spore-betterenergyplasmid2"
+   ]
+  },
+  {
+   "id": "fungal-spore-hpplasmid",
+   "name": "Cytoskeletal Reinforcement",
+   "description": "+1 max HP.",
+   "x": 0,
+   "y": 120,
+   "icon": "art/plasmids/plasmid-unlock-health.webp",
+   "links": [
+    "fungal-spore-bosshppickupplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-startingmoneyplasmid4",
+   "name": "Primordiate Lucrum",
+   "description": "Start with +5 cores.",
+   "x": 392,
+   "y": 200,
+   "icon": "art/plasmids/plasmid-unlock-money.webp",
+   "links": [
+    "fungal-spore-rerollplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-rerollplasmid",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": 258,
+   "y": 368,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "fungal-spore-bossarmorplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-loadoutlimitmitochondriaplasmid",
+   "name": "Mitochondrial Capacity",
+   "description": "Raises the starting mitochondrion loadout limit by 1.",
+   "x": 392,
+   "y": -198,
+   "icon": "art/plasmids/plasmid-unlock-mitochondria.webp",
+   "links": [
+    "fungal-spore-staminaplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-betterenergyplasmid2",
+   "name": "Start with Mitochondrial Augmentation",
+   "description": "Start with Mitochondrial Augmentation: +15% overcharge strength from mitochondria.",
+   "x": 248,
+   "y": 0,
+   "mutation": "mitochondrial-augmentation",
+   "icon": "art/plasmids/plasmid-unlock-energy.webp",
+   "links": [
+    "fungal-spore-loadoutlimitweaponplasmid",
+    "fungal-spore-stashslotplasmid2",
+    "fungal-spore-damageprogressionplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-stashslotplasmid2",
+   "name": "Endosomal Cache",
+   "description": "+1 stash slot to store organelles.",
+   "x": 440,
+   "y": 0,
+   "icon": "art/plasmids/plasmid-unlock-stashes.webp",
+   "links": [
+    "fungal-spore-startingmoneyplasmid4",
+    "fungal-spore-loadoutlimitmitochondriaplasmid",
+    "fungal-spore-damageprogressionplasmid",
+    "fungal-spore-loadoutlimitweaponplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-stashslotplasmid",
+   "name": "Endosomal Cache",
+   "description": "+1 stash slot to store organelles.",
+   "x": -392,
+   "y": 200,
+   "icon": "art/plasmids/plasmid-unlock-stashes.webp",
+   "links": [
+    "fungal-spore-loadoutlimitinternalsplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-damagelowerhpplasmid",
+   "name": "Sacrificial Enzyme",
+   "description": "+15% damage. -1 max HP.",
+   "x": 0,
+   "y": -248,
+   "effects": {
+    "damage": 0.15
+   },
+   "icon": "art/plasmids/plasmid-unlock-dmg-up-health-down.webp",
+   "links": [
+    "fungal-spore-bossmoneyplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-bossmoneyplasmid",
+   "name": "Heterotrophic Yield",
+   "description": "Spawn 4 cores after beating a boss.",
+   "x": 0,
+   "y": -344,
+   "icon": "art/plasmids/plasmid-boss-money.webp",
+   "links": [
+    "fungal-spore-speedplasmid5"
+   ]
+  },
+  {
+   "id": "fungal-spore-startingdnaplasmid",
+   "name": "Primordiate DNA",
+   "description": "Start with +5 DNA.",
+   "x": 0,
+   "y": 336,
+   "icon": "art/plasmids/plasmid-unlock-dna.webp",
+   "links": [
+    "fungal-spore-bosshppickupplasmid",
+    "fungal-spore-bossarmorplasmid"
+   ]
+  },
+  {
+   "id": "fungal-spore-speedplasmid5",
+   "name": "Cilium Growth",
+   "description": "+20% base speed.",
+   "x": 0,
+   "y": -448,
+   "icon": "art/plasmids/plasmid-unlock-mobility.webp",
+   "links": [
+    "fungal-spore-damageprogressionplasmid",
+    "fungal-spore-loadoutlimitweaponplasmid2"
+   ]
+  },
+  {
+   "id": "fungal-spore-damageprogressionplasmid",
+   "name": "Virulent Adaptation",
+   "description": "Gain +5% damage after beating each boss.",
+   "x": 176,
+   "y": -152,
+   "effects": {
+    "perBoss": 0.05
+   },
+   "notes": "Uses your bosses beaten.",
+   "icon": "art/plasmids/plasmid-damage-progression.webp",
+   "links": [
+    "fungal-spore-damagelowerhpplasmid"
+   ]
+  }
+ ],
+ "helminth": [
+  {
+   "id": "helminth-startingplasmid",
+   "name": "Start",
+   "description": "The root of the tree: always owned.",
+   "x": 0,
+   "y": 228,
+   "root": true,
+   "icon": "art/plasmids/circle.webp",
+   "links": [
+    "helminth-damageplasmid7",
+    "helminth-hpplasmid",
+    "helminth-speedplasmid6"
+   ]
+  },
+  {
+   "id": "helminth-damageplasmid7",
+   "name": "Lysosomal Rupture",
+   "description": "+10% damage.",
+   "x": -64,
+   "y": 36,
+   "effects": {
+    "damage": 0.1
+   },
+   "icon": "art/plasmids/plasmid-unlock-damage.webp",
+   "links": []
+  },
+  {
+   "id": "helminth-speedplasmid4",
+   "name": "Cilium Growth",
+   "description": "+15% base speed.",
+   "x": -80,
+   "y": -572,
+   "icon": "art/plasmids/plasmid-unlock-mobility.webp",
+   "links": [
+    "helminth-rerollplasmid2"
+   ]
+  },
+  {
+   "id": "helminth-rangeplasmid",
+   "name": "Start with Kinetic Extension",
+   "description": "Start with Kinetic Extension: +25% range of projectiles, melee attacks and areas of effect.",
+   "x": 80,
+   "y": -572,
+   "mutation": "kinetic-extension",
+   "icon": "art/plasmids/plasmid-unlock-range.webp",
+   "links": [
+    "helminth-rerollplasmid2"
+   ]
+  },
+  {
+   "id": "helminth-betterdropsprogressionplasmid",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": -200,
+   "y": -604,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": [
+    "helminth-rerollplasmid",
+    "helminth-damagelowerhpplasmid",
+    "helminth-bossarmorplasmid"
+   ]
+  },
+  {
+   "id": "helminth-loadoutlimitinternalsplasmid",
+   "name": "Recombinant Capacity",
+   "description": "Raises the starting internal organelle loadout limit by 1.",
+   "x": 208,
+   "y": -796,
+   "icon": "art/plasmids/plasmid-unlock-weaponmodifier.webp",
+   "links": [
+    "helminth-rerollplasmid3"
+   ]
+  },
+  {
+   "id": "helminth-betterdropsprogressionplasmid2",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": 112,
+   "y": -756,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": [
+    "helminth-rangeplasmid"
+   ]
+  },
+  {
+   "id": "helminth-bossarmorplasmid",
+   "name": "Apoptotic Carapace",
+   "description": "Spawn 1 armor after beating a boss.",
+   "x": -112,
+   "y": -756,
+   "icon": "art/plasmids/plasmid-boss-armor.webp",
+   "links": [
+    "helminth-speedplasmid4"
+   ]
+  },
+  {
+   "id": "helminth-damagelowerhpplasmid",
+   "name": "Sacrificial Enzyme",
+   "description": "+15% damage. -1 max HP.",
+   "x": -168,
+   "y": -412,
+   "effects": {
+    "damage": 0.15
+   },
+   "icon": "art/plasmids/plasmid-unlock-dmg-up-health-down.webp",
+   "links": []
+  },
+  {
+   "id": "helminth-hpplasmid",
+   "name": "Cytoskeletal Reinforcement",
+   "description": "+1 max HP.",
+   "x": 64,
+   "y": 36,
+   "icon": "art/plasmids/plasmid-unlock-health.webp",
+   "links": []
+  },
+  {
+   "id": "helminth-rerollplasmid",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": -208,
+   "y": -796,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "helminth-damageprogressionplasmid"
+   ]
+  },
+  {
+   "id": "helminth-loadoutlimitweaponplasmid",
+   "name": "Offensive Capacity",
+   "description": "Raises the starting weapon loadout limit by 1.",
+   "x": -88,
+   "y": -868,
+   "icon": "art/plasmids/plasmid-unlock-weapon.webp",
+   "links": [
+    "helminth-bossarmorplasmid"
+   ]
+  },
+  {
+   "id": "helminth-damageprogressionplasmid",
+   "name": "Virulent Adaptation",
+   "description": "Gain +5% damage after beating each boss.",
+   "x": -135,
+   "y": -988,
+   "effects": {
+    "perBoss": 0.05
+   },
+   "notes": "Uses your bosses beaten.",
+   "icon": "art/plasmids/plasmid-damage-progression.webp",
+   "links": [
+    "helminth-speedplasmid7"
+   ]
+  },
+  {
+   "id": "helminth-startingdnaplasmid5",
+   "name": "Primordiate DNA",
+   "description": "Start with +5 DNA.",
+   "x": 113,
+   "y": -124,
+   "icon": "art/plasmids/plasmid-unlock-dna.webp",
+   "links": [
+    "helminth-hpplasmid"
+   ]
+  },
+  {
+   "id": "helminth-dodgecdplasmid",
+   "name": "Start with Enhanced Boosters",
+   "description": "Start with Enhanced Boosters: -30% dodge cooldown.",
+   "x": 0,
+   "y": -226,
+   "mutation": "enhanced-boosters",
+   "icon": "art/plasmids/plasmid-unlock-dodge-cd.webp",
+   "links": [
+    "helminth-speedplasmid6"
+   ]
+  },
+  {
+   "id": "helminth-speedplasmid6",
+   "name": "Cilium Growth",
+   "description": "+15% base speed.",
+   "x": 0,
+   "y": -60,
+   "icon": "art/plasmids/plasmid-unlock-mobility.webp",
+   "links": []
+  },
+  {
+   "id": "helminth-rerollplasmid3",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": 136,
+   "y": -988,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "helminth-speedplasmid7"
+   ]
+  },
+  {
+   "id": "helminth-bossmoneyplasmid",
+   "name": "Heterotrophic Yield",
+   "description": "Spawn 4 cores after beating a boss.",
+   "x": 200,
+   "y": -604,
+   "icon": "art/plasmids/plasmid-boss-money.webp",
+   "links": [
+    "helminth-stashslotplasmid",
+    "helminth-loadoutlimitinternalsplasmid"
+   ]
+  },
+  {
+   "id": "helminth-wormtailexplodeplasmid",
+   "name": "Caudal Burst",
+   "description": "Tail now explodes on dodge, dealing 150 damage.",
+   "x": 128,
+   "y": -1116,
+   "notes": "Dodge explosions are not counted in DPS.",
+   "icon": "art/plasmids/plasmid-unlock-tail-explosion.webp",
+   "links": [
+    "helminth-speedplasmid7",
+    "helminth-rerollplasmid3"
+   ]
+  },
+  {
+   "id": "helminth-wormtailcontactdamageplasmid",
+   "name": "Caudal Aculeus",
+   "description": "Tail now deals 100 damage on touch.",
+   "x": -296,
+   "y": -932,
+   "notes": "Tail contact damage is not counted in DPS.",
+   "icon": "art/plasmids/plasmid-unlock-tail-contact-damage.webp",
+   "links": [
+    "helminth-damageprogressionplasmid",
+    "helminth-rerollplasmid"
+   ]
+  },
+  {
+   "id": "helminth-wormtailreflectplasmid",
+   "name": "Caudal Resilin",
+   "description": "Tail now reflects bullets that deal 50 damage.",
+   "x": 320,
+   "y": -692,
+   "notes": "Reflected bullets are not counted in DPS.",
+   "icon": "art/plasmids/plasmid-unlock-tail-reflect.webp",
+   "links": [
+    "helminth-loadoutlimitinternalsplasmid",
+    "helminth-bossmoneyplasmid"
+   ]
+  },
+  {
+   "id": "helminth-stashslotplasmid2",
+   "name": "Endosomal Cache",
+   "description": "+1 stash slot to store organelles.",
+   "x": -113,
+   "y": -129,
+   "icon": "art/plasmids/plasmid-unlock-stashes.webp",
+   "links": [
+    "helminth-damageplasmid7"
+   ]
+  },
+  {
+   "id": "helminth-hpplasmid5",
+   "name": "Cytoskeletal Reinforcement",
+   "description": "+1 max HP.",
+   "x": 0,
+   "y": -668,
+   "icon": "art/plasmids/plasmid-unlock-health.webp",
+   "links": [
+    "helminth-rangeplasmid"
+   ]
+  },
+  {
+   "id": "helminth-loadoutlimitmitochondriaplasmid",
+   "name": "Mitochondrial Capacity",
+   "description": "Raises the starting mitochondrion loadout limit by 1.",
+   "x": 88,
+   "y": -868,
+   "icon": "art/plasmids/plasmid-unlock-mitochondria.webp",
+   "links": [
+    "helminth-betterdropsprogressionplasmid2"
+   ]
+  },
+  {
+   "id": "helminth-betterenergyplasmid2",
+   "name": "Start with Mitochondrial Augmentation",
+   "description": "Start with Mitochondrial Augmentation: +15% overcharge strength from mitochondria.",
+   "x": 0,
+   "y": -772,
+   "mutation": "mitochondrial-augmentation",
+   "icon": "art/plasmids/plasmid-unlock-energy.webp",
+   "links": [
+    "helminth-hpplasmid5",
+    "helminth-loadoutlimitweaponplasmid"
+   ]
+  },
+  {
+   "id": "helminth-speedplasmid7",
+   "name": "Cilium Growth",
+   "description": "+15% base speed.",
+   "x": 0,
+   "y": -1068,
+   "icon": "art/plasmids/plasmid-unlock-mobility.webp",
+   "links": []
+  },
+  {
+   "id": "helminth-stashslotplasmid",
+   "name": "Endosomal Cache",
+   "description": "+1 stash slot to store organelles.",
+   "x": 168,
+   "y": -412,
+   "icon": "art/plasmids/plasmid-unlock-stashes.webp",
+   "links": [
+    "helminth-rangeplasmid"
+   ]
+  },
+  {
+   "id": "helminth-rerollplasmid2",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": 0,
+   "y": -372,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "helminth-dodgecdplasmid"
+   ]
+  },
+  {
+   "id": "helminth-staminaplasmid",
+   "name": "Start with Glycogen Reserve",
+   "description": "Start with Glycogen Reserve: +1 stamina container.",
+   "x": 0,
+   "y": -972,
+   "mutation": "glycogen-reserve",
+   "icon": "art/plasmids/plasmid-unlock-stamina.webp",
+   "links": [
+    "helminth-loadoutlimitweaponplasmid",
+    "helminth-loadoutlimitmitochondriaplasmid",
+    "helminth-speedplasmid7"
+   ]
+  },
+  {
+   "id": "helminth-betterdropsprogressionplasmid3",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": -143,
+   "y": -266,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": [
+    "helminth-stashslotplasmid2",
+    "helminth-damagelowerhpplasmid"
+   ]
+  },
+  {
+   "id": "helminth-bossarmorplasmid2",
+   "name": "Apoptotic Carapace",
+   "description": "Spawn 1 armor after beating a boss.",
+   "x": 143,
+   "y": -265,
+   "icon": "art/plasmids/plasmid-boss-armor.webp",
+   "links": [
+    "helminth-startingdnaplasmid5",
+    "helminth-stashslotplasmid"
+   ]
+  }
+ ],
+ "diatom": [
+  {
+   "id": "diatom-startingplasmid",
+   "name": "Start",
+   "description": "The root of the tree: always owned.",
+   "x": 0,
+   "y": 0,
+   "root": true,
+   "icon": "art/plasmids/circle.webp",
+   "links": [
+    "diatom-stashslotplasmid2",
+    "diatom-speedplasmid2",
+    "diatom-bossarmorplasmid",
+    "diatom-damageprogressionplasmid"
+   ]
+  },
+  {
+   "id": "diatom-stashslotplasmid2",
+   "name": "Endosomal Cache",
+   "description": "+1 stash slot to store organelles.",
+   "x": 0,
+   "y": 77,
+   "icon": "art/plasmids/plasmid-unlock-stashes.webp",
+   "links": []
+  },
+  {
+   "id": "diatom-damageprogressionplasmid",
+   "name": "Virulent Adaptation",
+   "description": "Gain +5% damage after beating each boss.",
+   "x": -111,
+   "y": 0,
+   "effects": {
+    "perBoss": 0.05
+   },
+   "notes": "Uses your bosses beaten.",
+   "icon": "art/plasmids/plasmid-damage-progression.webp",
+   "links": []
+  },
+  {
+   "id": "diatom-damagelowerhpplasmid2",
+   "name": "Sacrificial Enzyme",
+   "description": "+10% damage. -1 max HP.",
+   "x": -746,
+   "y": 0,
+   "effects": {
+    "damage": 0.1
+   },
+   "icon": "art/plasmids/plasmid-unlock-dmg-up-health-down.webp",
+   "links": [
+    "diatom-betterdropsprogressionplasmid3"
+   ]
+  },
+  {
+   "id": "diatom-recyclednaplasmid2",
+   "name": "Endosomal Reclaim",
+   "description": "Gain +1 DNA from recycling.",
+   "x": 136,
+   "y": 220,
+   "icon": "art/plasmids/plasmid-unlock-dna.webp",
+   "links": [
+    "diatom-stashslotplasmid2",
+    "diatom-rerollplasmid3"
+   ]
+  },
+  {
+   "id": "diatom-loadoutlimitweaponplasmid3",
+   "name": "Offensive Capacity",
+   "description": "Raises the starting weapon loadout limit by 1.",
+   "x": 656,
+   "y": 220,
+   "icon": "art/plasmids/plasmid-unlock-weapon.webp",
+   "links": [
+    "diatom-rerollplasmid3"
+   ]
+  },
+  {
+   "id": "diatom-bulletspreadplasmid",
+   "name": "Start with Stenosis",
+   "description": "Start with Stenosis: -50% projectile spread.",
+   "x": -404,
+   "y": 99,
+   "mutation": "stenosis",
+   "icon": "art/plasmids/plasmid-bullet-spread.webp",
+   "links": []
+  },
+  {
+   "id": "diatom-recyclednaplasmid",
+   "name": "Endosomal Reclaim",
+   "description": "Gain +1 DNA from recycling.",
+   "x": -236,
+   "y": 99,
+   "icon": "art/plasmids/plasmid-unlock-dna.webp",
+   "links": [
+    "diatom-damageprogressionplasmid",
+    "diatom-bulletspreadplasmid"
+   ]
+  },
+  {
+   "id": "diatom-bosshppickupplasmid",
+   "name": "Phagocytic Reflex",
+   "description": "Spawn 1 HP heart after beating a boss.",
+   "x": 404,
+   "y": 99,
+   "icon": "art/plasmids/plasmid-boss-hp-pickup.webp",
+   "links": [
+    "diatom-dodgecdplasmid",
+    "diatom-rerollplasmid3"
+   ]
+  },
+  {
+   "id": "diatom-speedplasmid2",
+   "name": "Cilium Growth",
+   "description": "+15% base speed.",
+   "x": 0,
+   "y": -77,
+   "icon": "art/plasmids/plasmid-unlock-mobility.webp",
+   "links": [
+    "diatom-loadoutlimitinternalsplasmid"
+   ]
+  },
+  {
+   "id": "diatom-betterenergyplasmid2",
+   "name": "Start with Mitochondrial Augmentation",
+   "description": "Start with Mitochondrial Augmentation: +15% overcharge strength from mitochondria.",
+   "x": -236,
+   "y": -99,
+   "mutation": "mitochondrial-augmentation",
+   "icon": "art/plasmids/plasmid-unlock-energy.webp",
+   "links": [
+    "diatom-damageprogressionplasmid",
+    "diatom-damageprogressionplasmid4"
+   ]
+  },
+  {
+   "id": "diatom-damageprogressionplasmid4",
+   "name": "Virulent Adaptation",
+   "description": "Gain +5% damage after beating each boss.",
+   "x": -404,
+   "y": -99,
+   "effects": {
+    "perBoss": 0.05
+   },
+   "notes": "Uses your bosses beaten.",
+   "icon": "art/plasmids/plasmid-damage-progression.webp",
+   "links": [
+    "diatom-attackspeedplasmid",
+    "diatom-rerollplasmid2"
+   ]
+  },
+  {
+   "id": "diatom-betterdropsprogressionplasmid2",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": 558,
+   "y": -99,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": []
+  },
+  {
+   "id": "diatom-bossmoneyplasmid",
+   "name": "Heterotrophic Yield",
+   "description": "Spawn 4 cores after beating a boss.",
+   "x": -136,
+   "y": 220,
+   "icon": "art/plasmids/plasmid-boss-money.webp",
+   "links": [
+    "diatom-stashslotplasmid2"
+   ]
+  },
+  {
+   "id": "diatom-bossmoneyplasmid3",
+   "name": "Heterotrophic Yield",
+   "description": "Spawn 4 cores after beating a boss.",
+   "x": 236,
+   "y": -99,
+   "icon": "art/plasmids/plasmid-boss-money.webp",
+   "links": [
+    "diatom-bossarmorplasmid"
+   ]
+  },
+  {
+   "id": "diatom-loadoutlimitmitochondriaplasmid",
+   "name": "Mitochondrial Capacity",
+   "description": "Raises the starting mitochondrion loadout limit by 1.",
+   "x": 136,
+   "y": -220,
+   "icon": "art/plasmids/plasmid-unlock-mitochondria.webp",
+   "links": [
+    "diatom-speedplasmid2"
+   ]
+  },
+  {
+   "id": "diatom-rerollplasmid2",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": -404,
+   "y": -342,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "diatom-loadoutlimitinternalsplasmid"
+   ]
+  },
+  {
+   "id": "diatom-rerollplasmid3",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": 404,
+   "y": 342,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": []
+  },
+  {
+   "id": "diatom-loadoutlimitinternalsplasmid",
+   "name": "Recombinant Capacity",
+   "description": "Raises the starting internal organelle loadout limit by 1.",
+   "x": -136,
+   "y": -220,
+   "icon": "art/plasmids/plasmid-unlock-weaponmodifier.webp",
+   "links": []
+  },
+  {
+   "id": "diatom-hpplasmid5",
+   "name": "Cytoskeletal Reinforcement",
+   "description": "+1 max HP.",
+   "x": 656,
+   "y": -220,
+   "icon": "art/plasmids/plasmid-unlock-health.webp",
+   "links": [
+    "diatom-stashslotplasmid"
+   ]
+  },
+  {
+   "id": "diatom-dodgecdplasmid",
+   "name": "Start with Enhanced Boosters",
+   "description": "Start with Enhanced Boosters: -30% dodge cooldown.",
+   "x": 236,
+   "y": 99,
+   "mutation": "enhanced-boosters",
+   "icon": "art/plasmids/plasmid-unlock-dodge-cd.webp",
+   "links": [
+    "diatom-bossarmorplasmid"
+   ]
+  },
+  {
+   "id": "diatom-staminaplasmid",
+   "name": "Start with Glycogen Reserve",
+   "description": "Start with Glycogen Reserve: +1 stamina container.",
+   "x": 558,
+   "y": 99,
+   "mutation": "glycogen-reserve",
+   "icon": "art/plasmids/plasmid-unlock-stamina.webp",
+   "links": [
+    "diatom-slowerbulletsplasmid",
+    "diatom-bosshppickupplasmid"
+   ]
+  },
+  {
+   "id": "diatom-rerollplasmid4",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": 404,
+   "y": -99,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "diatom-bossmoneyplasmid3",
+    "diatom-betterdropsprogressionplasmid2",
+    "diatom-stashslotplasmid"
+   ]
+  },
+  {
+   "id": "diatom-slowerbulletsplasmid",
+   "name": "Start with Viscous Secretion",
+   "description": "Start with Viscous Secretion: Enemy projectiles move 25% slower.",
+   "x": 746,
+   "y": 0,
+   "mutation": "viscous-secretion",
+   "icon": "art/plasmids/plasmid-slower-bullets.webp",
+   "links": [
+    "diatom-loadoutlimitweaponplasmid3",
+    "diatom-hpplasmid5",
+    "diatom-betterdropsprogressionplasmid2"
+   ]
+  },
+  {
+   "id": "diatom-loadoutlimitweaponplasmid2",
+   "name": "Offensive Capacity",
+   "description": "Raises the starting weapon loadout limit by 1.",
+   "x": -656,
+   "y": 220,
+   "icon": "art/plasmids/plasmid-unlock-weapon.webp",
+   "links": [
+    "diatom-damagelowerhpplasmid2"
+   ]
+  },
+  {
+   "id": "diatom-betterdropsprogressionplasmid",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": -558,
+   "y": 99,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": [
+    "diatom-bulletspreadplasmid",
+    "diatom-damagelowerhpplasmid2"
+   ]
+  },
+  {
+   "id": "diatom-damageprogressionplasmid5",
+   "name": "Virulent Adaptation",
+   "description": "Gain +5% damage after beating each boss.",
+   "x": -404,
+   "y": 342,
+   "effects": {
+    "perBoss": 0.05
+   },
+   "notes": "Uses your bosses beaten.",
+   "icon": "art/plasmids/plasmid-damage-progression.webp",
+   "links": [
+    "diatom-loadoutlimitweaponplasmid2",
+    "diatom-bossmoneyplasmid",
+    "diatom-bulletspreadplasmid"
+   ]
+  },
+  {
+   "id": "diatom-bossarmorplasmid",
+   "name": "Apoptotic Carapace",
+   "description": "Spawn 1 armor after beating a boss.",
+   "x": 111,
+   "y": 0,
+   "icon": "art/plasmids/plasmid-boss-armor.webp",
+   "links": []
+  },
+  {
+   "id": "diatom-betterdropsprogressionplasmid3",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": -656,
+   "y": -220,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": [
+    "diatom-rerollplasmid2"
+   ]
+  },
+  {
+   "id": "diatom-stashslotplasmid",
+   "name": "Endosomal Cache",
+   "description": "+1 stash slot to store organelles.",
+   "x": 404,
+   "y": -342,
+   "icon": "art/plasmids/plasmid-unlock-stashes.webp",
+   "links": [
+    "diatom-loadoutlimitmitochondriaplasmid"
+   ]
+  },
+  {
+   "id": "diatom-attackspeedplasmid",
+   "name": "Start with Fast Twitch Fibers",
+   "description": "Start with Fast Twitch Fibers: +15% attack speed.",
+   "x": -558,
+   "y": -99,
+   "mutation": "fast-twitch-fibers",
+   "icon": "art/plasmids/plasmid-unlock-attack-speed.webp",
+   "links": [
+    "diatom-damagelowerhpplasmid2"
+   ]
+  }
+ ],
+ "lil-collector": [
+  {
+   "id": "lil-collector-startingplasmid",
+   "name": "Start",
+   "description": "The root of the tree: always owned.",
+   "x": 0,
+   "y": 1,
+   "root": true,
+   "icon": "art/plasmids/circle.webp",
+   "links": [
+    "lil-collector-hpplasmid4"
+   ]
+  },
+  {
+   "id": "lil-collector-betterdropsprogressionplasmid",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": 113,
+   "y": 214,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": [
+    "lil-collector-staminaplasmid"
+   ]
+  },
+  {
+   "id": "lil-collector-betterdropsprogressionplasmid3",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": -475,
+   "y": 187,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": []
+  },
+  {
+   "id": "lil-collector-rangeplasmid",
+   "name": "Start with Kinetic Extension",
+   "description": "Start with Kinetic Extension: +25% range of projectiles, melee attacks and areas of effect.",
+   "x": -607,
+   "y": -69,
+   "mutation": "kinetic-extension",
+   "icon": "art/plasmids/plasmid-unlock-range.webp",
+   "links": [
+    "lil-collector-rerollplasmid2",
+    "lil-collector-betterdropsprogressionplasmid3"
+   ]
+  },
+  {
+   "id": "lil-collector-salemutationplasmid",
+   "name": "Start with Osmotic Bargaining",
+   "description": "Start with Osmotic Bargaining: Shop prices are 25% cheaper.",
+   "x": 0,
+   "y": 282,
+   "mutation": "osmotic-bargaining",
+   "icon": "art/plasmids/plasmid-discount.webp",
+   "links": [
+    "lil-collector-bosshppickupplasmid",
+    "lil-collector-betterdropsprogressionplasmid"
+   ]
+  },
+  {
+   "id": "lil-collector-loadoutlimitweaponplasmid2",
+   "name": "Offensive Capacity",
+   "description": "Raises the starting weapon loadout limit by 1.",
+   "x": 666,
+   "y": 162,
+   "icon": "art/plasmids/plasmid-unlock-weapon.webp",
+   "links": [
+    "lil-collector-rerollplasmid3"
+   ]
+  },
+  {
+   "id": "lil-collector-staminaplasmid",
+   "name": "Start with Glycogen Reserve",
+   "description": "Start with Glycogen Reserve: +1 stamina container.",
+   "x": 277,
+   "y": 97,
+   "mutation": "glycogen-reserve",
+   "icon": "art/plasmids/plasmid-unlock-stamina.webp",
+   "links": []
+  },
+  {
+   "id": "lil-collector-bossmoneyplasmid3",
+   "name": "Heterotrophic Yield",
+   "description": "Spawn 4 cores after beating a boss.",
+   "x": 164,
+   "y": -26,
+   "icon": "art/plasmids/plasmid-boss-money.webp",
+   "links": [
+    "lil-collector-startingplasmid",
+    "lil-collector-staminaplasmid"
+   ]
+  },
+  {
+   "id": "lil-collector-bossarmorplasmid",
+   "name": "Apoptotic Carapace",
+   "description": "Spawn 1 armor after beating a boss.",
+   "x": 375,
+   "y": 427,
+   "icon": "art/plasmids/plasmid-boss-armor.webp",
+   "links": [
+    "lil-collector-bossmoneyplasmid2",
+    "lil-collector-rerollplasmid3"
+   ]
+  },
+  {
+   "id": "lil-collector-rerollplasmid4",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": 0,
+   "y": -126,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "lil-collector-speedplasmid6"
+   ]
+  },
+  {
+   "id": "lil-collector-energyplasmid",
+   "name": "Start with Mitochondrial Augmentation",
+   "description": "Start with Mitochondrial Augmentation: +15% overcharge strength from mitochondria.",
+   "x": 475,
+   "y": 187,
+   "mutation": "mitochondrial-augmentation",
+   "icon": "art/plasmids/plasmid-unlock-energy.webp",
+   "links": [
+    "lil-collector-betterdropsprogressionplasmid4",
+    "lil-collector-staminaplasmid",
+    "lil-collector-rerollplasmid3"
+   ]
+  },
+  {
+   "id": "lil-collector-damageprogressionplasmid",
+   "name": "Virulent Adaptation",
+   "description": "Gain +5% damage after beating each boss.",
+   "x": -164,
+   "y": -26,
+   "effects": {
+    "perBoss": 0.05
+   },
+   "notes": "Uses your bosses beaten.",
+   "icon": "art/plasmids/plasmid-damage-progression.webp",
+   "links": [
+    "lil-collector-stashslotplasmid2",
+    "lil-collector-startingplasmid"
+   ]
+  },
+  {
+   "id": "lil-collector-hpplasmid",
+   "name": "Cytoskeletal Reinforcement",
+   "description": "+1 max HP.",
+   "x": -375,
+   "y": 427,
+   "icon": "art/plasmids/plasmid-unlock-health.webp",
+   "links": []
+  },
+  {
+   "id": "lil-collector-salemutationplasmid3",
+   "name": "Start with Osmotic Bargaining",
+   "description": "Start with Osmotic Bargaining: Shop prices are 25% cheaper.",
+   "x": -406,
+   "y": -39,
+   "mutation": "osmotic-bargaining",
+   "icon": "art/plasmids/plasmid-discount.webp",
+   "links": []
+  },
+  {
+   "id": "lil-collector-bosshppickupplasmid",
+   "name": "Phagocytic Reflex",
+   "description": "Spawn 1 HP heart after beating a boss.",
+   "x": -113,
+   "y": 214,
+   "icon": "art/plasmids/plasmid-boss-hp-pickup.webp",
+   "links": [
+    "lil-collector-hpplasmid4",
+    "lil-collector-stashslotplasmid2"
+   ]
+  },
+  {
+   "id": "lil-collector-bossarmorplasmid2",
+   "name": "Apoptotic Carapace",
+   "description": "Spawn 1 armor after beating a boss.",
+   "x": 213,
+   "y": -176,
+   "icon": "art/plasmids/plasmid-boss-armor.webp",
+   "links": [
+    "lil-collector-rerollplasmid4",
+    "lil-collector-bossmoneyplasmid3"
+   ]
+  },
+  {
+   "id": "lil-collector-dodgecdplasmid",
+   "name": "Start with Enhanced Boosters",
+   "description": "Start with Enhanced Boosters: -30% dodge cooldown.",
+   "x": -186,
+   "y": -373,
+   "mutation": "enhanced-boosters",
+   "icon": "art/plasmids/plasmid-unlock-dodge-cd.webp",
+   "links": [
+    "lil-collector-speedplasmid6"
+   ]
+  },
+  {
+   "id": "lil-collector-speedplasmid6",
+   "name": "Cilium Growth",
+   "description": "+10% base speed.",
+   "x": -213,
+   "y": -176,
+   "icon": "art/plasmids/plasmid-unlock-mobility.webp",
+   "links": [
+    "lil-collector-damageprogressionplasmid"
+   ]
+  },
+  {
+   "id": "lil-collector-rerollplasmid3",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": 577,
+   "y": 346,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": []
+  },
+  {
+   "id": "lil-collector-bossmoneyplasmid",
+   "name": "Heterotrophic Yield",
+   "description": "Spawn 4 cores after beating a boss.",
+   "x": 438,
+   "y": -246,
+   "icon": "art/plasmids/plasmid-boss-money.webp",
+   "links": [
+    "lil-collector-stashslotplasmid"
+   ]
+  },
+  {
+   "id": "lil-collector-bossmoneyplasmid2",
+   "name": "Heterotrophic Yield",
+   "description": "Spawn 4 cores after beating a boss.",
+   "x": 181,
+   "y": 399,
+   "icon": "art/plasmids/plasmid-boss-money.webp",
+   "links": [
+    "lil-collector-betterdropsprogressionplasmid",
+    "lil-collector-staminaplasmid2"
+   ]
+  },
+  {
+   "id": "lil-collector-salemutationplasmid2",
+   "name": "Start with Osmotic Bargaining",
+   "description": "Start with Osmotic Bargaining: Shop prices are 25% cheaper.",
+   "x": 406,
+   "y": -39,
+   "mutation": "osmotic-bargaining",
+   "icon": "art/plasmids/plasmid-discount.webp",
+   "links": [
+    "lil-collector-staminaplasmid"
+   ]
+  },
+  {
+   "id": "lil-collector-staminaplasmid2",
+   "name": "Start with Glycogen Reserve",
+   "description": "Start with Glycogen Reserve: +1 stamina container.",
+   "x": -181,
+   "y": 399,
+   "mutation": "glycogen-reserve",
+   "icon": "art/plasmids/plasmid-unlock-stamina.webp",
+   "links": [
+    "lil-collector-bosshppickupplasmid",
+    "lil-collector-hpplasmid"
+   ]
+  },
+  {
+   "id": "lil-collector-betterdropsprogressionplasmid4",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": 607,
+   "y": -69,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": [
+    "lil-collector-loadoutlimitweaponplasmid2",
+    "lil-collector-bossmoneyplasmid"
+   ]
+  },
+  {
+   "id": "lil-collector-slowerbulletsplasmid",
+   "name": "Start with Viscous Secretion",
+   "description": "Start with Viscous Secretion: Enemy projectiles move 25% slower.",
+   "x": -666,
+   "y": 162,
+   "mutation": "viscous-secretion",
+   "icon": "art/plasmids/plasmid-slower-bullets.webp",
+   "links": [
+    "lil-collector-rangeplasmid"
+   ]
+  },
+  {
+   "id": "lil-collector-damagelowerhpplasmid",
+   "name": "Sacrificial Enzyme",
+   "description": "+15% damage. -1 max HP.",
+   "x": 0,
+   "y": -400,
+   "effects": {
+    "damage": 0.15
+   },
+   "icon": "art/plasmids/plasmid-unlock-dmg-up-health-down.webp",
+   "links": [
+    "lil-collector-stashslotplasmid",
+    "lil-collector-dodgecdplasmid"
+   ]
+  },
+  {
+   "id": "lil-collector-loadoutlimitinternalsplasmid",
+   "name": "Recombinant Capacity",
+   "description": "Raises the starting internal organelle loadout limit by 1.",
+   "x": -577,
+   "y": 346,
+   "icon": "art/plasmids/plasmid-unlock-weaponmodifier.webp",
+   "links": [
+    "lil-collector-slowerbulletsplasmid",
+    "lil-collector-betterdropsprogressionplasmid3",
+    "lil-collector-hpplasmid"
+   ]
+  },
+  {
+   "id": "lil-collector-hpplasmid4",
+   "name": "Cytoskeletal Reinforcement",
+   "description": "+1 max HP.",
+   "x": 0,
+   "y": 133,
+   "icon": "art/plasmids/plasmid-unlock-health.webp",
+   "links": [
+    "lil-collector-betterdropsprogressionplasmid"
+   ]
+  },
+  {
+   "id": "lil-collector-stashslotplasmid",
+   "name": "Endosomal Cache",
+   "description": "+1 stash slot to store organelles.",
+   "x": 186,
+   "y": -373,
+   "icon": "art/plasmids/plasmid-unlock-stashes.webp",
+   "links": [
+    "lil-collector-bossarmorplasmid2"
+   ]
+  },
+  {
+   "id": "lil-collector-rerollplasmid2",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": -438,
+   "y": -246,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "lil-collector-dodgecdplasmid"
+   ]
+  },
+  {
+   "id": "lil-collector-stashslotplasmid2",
+   "name": "Endosomal Cache",
+   "description": "+1 stash slot to store organelles.",
+   "x": -277,
+   "y": 97,
+   "icon": "art/plasmids/plasmid-unlock-stashes.webp",
+   "links": [
+    "lil-collector-salemutationplasmid3",
+    "lil-collector-betterdropsprogressionplasmid3"
+   ]
+  }
+ ],
+ "nanobot": [
+  {
+   "id": "nanobot-startingplasmid",
+   "name": "Start",
+   "description": "The root of the tree: always owned.",
+   "x": 0,
+   "y": 1,
+   "root": true,
+   "icon": "art/plasmids/circle.webp",
+   "links": [
+    "nanobot-betterdropsprogressionplasmid",
+    "nanobot-damageprogressionplasmid4",
+    "nanobot-startingdnaplasmid",
+    "nanobot-bossarmorplasmid2"
+   ]
+  },
+  {
+   "id": "nanobot-betterdropsprogressionplasmid",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": 222,
+   "y": 130,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": []
+  },
+  {
+   "id": "nanobot-betterdropsprogressionplasmid3",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": 0,
+   "y": -345,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": []
+  },
+  {
+   "id": "nanobot-rangeplasmid",
+   "name": "Start with Kinetic Extension",
+   "description": "Start with Kinetic Extension: +25% range of projectiles, melee attacks and areas of effect.",
+   "x": -322,
+   "y": 130,
+   "mutation": "kinetic-extension",
+   "icon": "art/plasmids/plasmid-unlock-range.webp",
+   "links": []
+  },
+  {
+   "id": "nanobot-speedplasmid2",
+   "name": "Cilium Growth",
+   "description": "+15% base speed.",
+   "x": 68,
+   "y": -449,
+   "icon": "art/plasmids/plasmid-unlock-mobility.webp",
+   "links": [
+    "nanobot-nanobotdamageslotplasmid2"
+   ]
+  },
+  {
+   "id": "nanobot-rerollplasmid5",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": 322,
+   "y": 439,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "nanobot-betterdropsprogressionplasmid2"
+   ]
+  },
+  {
+   "id": "nanobot-staminaplasmid",
+   "name": "Start with Glycogen Reserve",
+   "description": "Start with Glycogen Reserve: +1 stamina container.",
+   "x": 272,
+   "y": -98,
+   "mutation": "glycogen-reserve",
+   "icon": "art/plasmids/plasmid-unlock-stamina.webp",
+   "links": []
+  },
+  {
+   "id": "nanobot-startingdnaplasmid5",
+   "name": "Primordiate DNA",
+   "description": "Start with +5 DNA.",
+   "x": 128,
+   "y": -98,
+   "icon": "art/plasmids/plasmid-unlock-dna.webp",
+   "links": [
+    "nanobot-nanobotdamageslotplasmid2",
+    "nanobot-staminaplasmid"
+   ]
+  },
+  {
+   "id": "nanobot-nanobotenergyslotplasmid",
+   "name": "Conductive Assembly",
+   "description": "The internal slot of each new square module has a 33% chance to become a +40% overcharge strength slot.",
+   "x": 0,
+   "y": 283,
+   "notes": "Mark those slots as Conductive in the editor.",
+   "icon": "art/plasmids/plasmid-unlock-slot-energy.webp",
+   "links": [
+    "nanobot-bossmoneyplasmid2"
+   ]
+  },
+  {
+   "id": "nanobot-damageprogressionplasmid4",
+   "name": "Virulent Adaptation",
+   "description": "Gain +5% damage after beating each boss.",
+   "x": 0,
+   "y": -148,
+   "effects": {
+    "perBoss": 0.05
+   },
+   "notes": "Uses your bosses beaten.",
+   "icon": "art/plasmids/plasmid-damage-progression.webp",
+   "links": [
+    "nanobot-betterdropsprogressionplasmid3"
+   ]
+  },
+  {
+   "id": "nanobot-damagelowerhpplasmid2",
+   "name": "Sacrificial Enzyme",
+   "description": "+15% damage. -1 max HP.",
+   "x": 0,
+   "y": -562,
+   "effects": {
+    "damage": 0.15
+   },
+   "icon": "art/plasmids/plasmid-unlock-dmg-up-health-down.webp",
+   "links": [
+    "nanobot-rerollplasmid",
+    "nanobot-speedplasmid2"
+   ]
+  },
+  {
+   "id": "nanobot-stashslotplasmid3",
+   "name": "Endosomal Cache",
+   "description": "+1 stash slot to store organelles.",
+   "x": -128,
+   "y": -98,
+   "icon": "art/plasmids/plasmid-unlock-stashes.webp",
+   "links": [
+    "nanobot-nanobotdamageslotplasmid",
+    "nanobot-damageprogressionplasmid"
+   ]
+  },
+  {
+   "id": "nanobot-rerollplasmid",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": -68,
+   "y": -449,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": []
+  },
+  {
+   "id": "nanobot-startingdnaplasmid2",
+   "name": "Primordiate DNA",
+   "description": "Start with +5 DNA.",
+   "x": -222,
+   "y": 439,
+   "icon": "art/plasmids/plasmid-unlock-dna.webp",
+   "links": []
+  },
+  {
+   "id": "nanobot-startingdnaplasmid",
+   "name": "Primordiate DNA",
+   "description": "Start with +5 DNA.",
+   "x": -222,
+   "y": 130,
+   "icon": "art/plasmids/plasmid-unlock-dna.webp",
+   "links": []
+  },
+  {
+   "id": "nanobot-bossarmorplasmid2",
+   "name": "Apoptotic Carapace",
+   "description": "Spawn 1 armor after beating a boss.",
+   "x": 164,
+   "y": 0,
+   "icon": "art/plasmids/plasmid-boss-armor.webp",
+   "links": [
+    "nanobot-betterenergyplasmid"
+   ]
+  },
+  {
+   "id": "nanobot-dodgecdplasmid",
+   "name": "Start with Enhanced Boosters",
+   "description": "Start with Enhanced Boosters: -30% dodge cooldown.",
+   "x": -322,
+   "y": 0,
+   "mutation": "enhanced-boosters",
+   "icon": "art/plasmids/plasmid-unlock-dodge-cd.webp",
+   "links": [
+    "nanobot-rerollplasmid4",
+    "nanobot-damageprogressionplasmid",
+    "nanobot-rangeplasmid"
+   ]
+  },
+  {
+   "id": "nanobot-rerollplasmid4",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": -164,
+   "y": 0,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": [
+    "nanobot-startingplasmid"
+   ]
+  },
+  {
+   "id": "nanobot-betterdropsprogressionplasmid2",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": 322,
+   "y": 283,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": []
+  },
+  {
+   "id": "nanobot-bossarmorplasmid3",
+   "name": "Apoptotic Carapace",
+   "description": "Spawn 1 armor after beating a boss.",
+   "x": 120,
+   "y": 595,
+   "icon": "art/plasmids/plasmid-boss-armor.webp",
+   "links": [
+    "nanobot-stashslotplasmid"
+   ]
+  },
+  {
+   "id": "nanobot-bossmoneyplasmid2",
+   "name": "Heterotrophic Yield",
+   "description": "Spawn 4 cores after beating a boss.",
+   "x": 222,
+   "y": 283,
+   "icon": "art/plasmids/plasmid-boss-money.webp",
+   "links": [
+    "nanobot-betterdropsprogressionplasmid"
+   ]
+  },
+  {
+   "id": "nanobot-betterenergyplasmid",
+   "name": "Start with Mitochondrial Augmentation",
+   "description": "Start with Mitochondrial Augmentation: +15% overcharge strength from mitochondria.",
+   "x": 322,
+   "y": 0,
+   "mutation": "mitochondrial-augmentation",
+   "icon": "art/plasmids/plasmid-unlock-energy.webp",
+   "links": [
+    "nanobot-betterdropsprogressionplasmid2",
+    "nanobot-staminaplasmid"
+   ]
+  },
+  {
+   "id": "nanobot-bossarmorplasmid",
+   "name": "Apoptotic Carapace",
+   "description": "Spawn 1 armor after beating a boss.",
+   "x": -222,
+   "y": 283,
+   "icon": "art/plasmids/plasmid-boss-armor.webp",
+   "links": [
+    "nanobot-startingdnaplasmid",
+    "nanobot-startingdnaplasmid2",
+    "nanobot-nanobotenergyslotplasmid"
+   ]
+  },
+  {
+   "id": "nanobot-loadoutlimitweaponplasmid",
+   "name": "Offensive Capacity",
+   "description": "Raises the starting weapon loadout limit by 1.",
+   "x": 322,
+   "y": 595,
+   "icon": "art/plasmids/plasmid-unlock-weapon.webp",
+   "links": [
+    "nanobot-rerollplasmid5",
+    "nanobot-bossarmorplasmid3"
+   ]
+  },
+  {
+   "id": "nanobot-speedplasmid",
+   "name": "Cilium Growth",
+   "description": "+20% base speed.",
+   "x": -322,
+   "y": 595,
+   "icon": "art/plasmids/plasmid-unlock-mobility.webp",
+   "links": [
+    "nanobot-betterdropsprogressionplasmid4"
+   ]
+  },
+  {
+   "id": "nanobot-nanobotdamageslotplasmid2",
+   "name": "Volatile Assembly",
+   "description": "A random external slot on each new triangle module becomes a +40% damage slot.",
+   "x": 128,
+   "y": -345,
+   "notes": "Mark those slots as Volatile in the editor.",
+   "icon": "art/plasmids/plasmid-unlock-slot-damage.webp",
+   "links": [
+    "nanobot-staminaplasmid",
+    "nanobot-betterdropsprogressionplasmid3"
+   ]
+  },
+  {
+   "id": "nanobot-startingmutationplasmid",
+   "name": "Start with Fast Twitch Fibers",
+   "description": "Start with Fast Twitch Fibers: +15% attack speed.",
+   "x": -120,
+   "y": 595,
+   "mutation": "fast-twitch-fibers",
+   "icon": "art/plasmids/plasmid-unlock-attack-speed.webp",
+   "links": [
+    "nanobot-speedplasmid",
+    "nanobot-startingdnaplasmid2",
+    "nanobot-bossarmorplasmid3"
+   ]
+  },
+  {
+   "id": "nanobot-damageprogressionplasmid",
+   "name": "Virulent Adaptation",
+   "description": "Gain +5% damage after beating each boss.",
+   "x": -272,
+   "y": -98,
+   "effects": {
+    "perBoss": 0.05
+   },
+   "notes": "Uses your bosses beaten.",
+   "icon": "art/plasmids/plasmid-damage-progression.webp",
+   "links": [
+    "nanobot-nanobotdamageslotplasmid"
+   ]
+  },
+  {
+   "id": "nanobot-stashslotplasmid",
+   "name": "Endosomal Cache",
+   "description": "+1 stash slot to store organelles.",
+   "x": 222,
+   "y": 439,
+   "icon": "art/plasmids/plasmid-unlock-stashes.webp",
+   "links": [
+    "nanobot-bossmoneyplasmid2"
+   ]
+  },
+  {
+   "id": "nanobot-betterdropsprogressionplasmid4",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": -322,
+   "y": 283,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": [
+    "nanobot-rangeplasmid"
+   ]
+  },
+  {
+   "id": "nanobot-nanobotdamageslotplasmid",
+   "name": "Volatile Assembly",
+   "description": "A random external slot on each new triangle module becomes a +40% damage slot.",
+   "x": -128,
+   "y": -345,
+   "notes": "Mark those slots as Volatile in the editor.",
+   "icon": "art/plasmids/plasmid-unlock-slot-damage.webp",
+   "links": [
+    "nanobot-rerollplasmid",
+    "nanobot-betterdropsprogressionplasmid3"
+   ]
+  }
+ ],
+ "amoeba": [
+  {
+   "id": "amoeba-startingplasmid",
+   "name": "Start",
+   "description": "The root of the tree: always owned.",
+   "x": 0,
+   "y": 1,
+   "root": true,
+   "icon": "art/plasmids/circle.webp",
+   "links": [
+    "amoeba-betterdropsprogressionplasmid",
+    "amoeba-amoebaenergyslotplasmid2",
+    "amoeba-bosshppickupplasmid"
+   ]
+  },
+  {
+   "id": "amoeba-betterdropsprogressionplasmid",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": 113,
+   "y": 74,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": []
+  },
+  {
+   "id": "amoeba-damageprogressionplasmid",
+   "name": "Virulent Adaptation",
+   "description": "Gain +5% damage after beating each boss.",
+   "x": 0,
+   "y": -274,
+   "effects": {
+    "perBoss": 0.05
+   },
+   "notes": "Uses your bosses beaten.",
+   "icon": "art/plasmids/plasmid-damage-progression.webp",
+   "links": []
+  },
+  {
+   "id": "amoeba-rangeplasmid",
+   "name": "Start with Kinetic Extension",
+   "description": "Start with Kinetic Extension: +25% range of projectiles, melee attacks and areas of effect.",
+   "x": -478,
+   "y": -445,
+   "mutation": "kinetic-extension",
+   "icon": "art/plasmids/plasmid-unlock-range.webp",
+   "links": [
+    "amoeba-startingdnaplasmid4"
+   ]
+  },
+  {
+   "id": "amoeba-amoebaenergyslotplasmid",
+   "name": "Conductive Core",
+   "description": "Blobs placed on your cell's center line have a 33% chance to grow a +40% overcharge strength slot.",
+   "x": 0,
+   "y": 358,
+   "notes": "Mark those slots as Conductive in the editor.",
+   "icon": "art/plasmids/plasmid-unlock-slot-energy.webp",
+   "links": [
+    "amoeba-rerollplasmid",
+    "amoeba-bossarmorplasmid"
+   ]
+  },
+  {
+   "id": "amoeba-betterdropsprogressionplasmid2",
+   "name": "Adaptive Pressure",
+   "description": "Gain +5% chance for better reward rarity after beating each boss.",
+   "x": 517,
+   "y": -322,
+   "icon": "art/plasmids/plasmid-better-drops-progression.webp",
+   "links": [
+    "amoeba-rerollplasmid3"
+   ]
+  },
+  {
+   "id": "amoeba-staminaplasmid",
+   "name": "Start with Glycogen Reserve",
+   "description": "Start with Glycogen Reserve: +1 stamina container.",
+   "x": 118,
+   "y": -518,
+   "mutation": "glycogen-reserve",
+   "icon": "art/plasmids/plasmid-unlock-stamina.webp",
+   "links": []
+  },
+  {
+   "id": "amoeba-hpplasmid2",
+   "name": "Cytoskeletal Reinforcement",
+   "description": "+1 max HP.",
+   "x": 96,
+   "y": -389,
+   "icon": "art/plasmids/plasmid-unlock-health.webp",
+   "links": [
+    "amoeba-damageprogressionplasmid",
+    "amoeba-staminaplasmid"
+   ]
+  },
+  {
+   "id": "amoeba-bossarmorplasmid",
+   "name": "Apoptotic Carapace",
+   "description": "Spawn 1 armor after beating a boss.",
+   "x": 111,
+   "y": 289,
+   "icon": "art/plasmids/plasmid-boss-armor.webp",
+   "links": [
+    "amoeba-bossmoneyplasmid2"
+   ]
+  },
+  {
+   "id": "amoeba-amoebaenergyslotplasmid2",
+   "name": "Conductive Core",
+   "description": "Blobs placed on your cell's center line have a 33% chance to grow a +40% overcharge strength slot.",
+   "x": 0,
+   "y": -126,
+   "notes": "Mark those slots as Conductive in the editor.",
+   "icon": "art/plasmids/plasmid-unlock-slot-energy.webp",
+   "links": [
+    "amoeba-damageprogressionplasmid",
+    "amoeba-speedplasmid6"
+   ]
+  },
+  {
+   "id": "amoeba-amoebaenergyslotplasmid3",
+   "name": "Conductive Core",
+   "description": "Blobs placed on your cell's center line have a 33% chance to grow a +40% overcharge strength slot.",
+   "x": 0,
+   "y": -474,
+   "notes": "Mark those slots as Conductive in the editor.",
+   "icon": "art/plasmids/plasmid-unlock-slot-energy.webp",
+   "links": [
+    "amoeba-damageprogressionplasmid2",
+    "amoeba-staminaplasmid",
+    "amoeba-hpplasmid2",
+    "amoeba-stashslotplasmid3"
+   ]
+  },
+  {
+   "id": "amoeba-stashslotplasmid3",
+   "name": "Endosomal Cache",
+   "description": "+1 stash slot to store organelles.",
+   "x": -96,
+   "y": -389,
+   "icon": "art/plasmids/plasmid-unlock-stashes.webp",
+   "links": [
+    "amoeba-damageprogressionplasmid2",
+    "amoeba-damageprogressionplasmid"
+   ]
+  },
+  {
+   "id": "amoeba-rerollplasmid",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": -111,
+   "y": 289,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": []
+  },
+  {
+   "id": "amoeba-hpplasmid",
+   "name": "Cytoskeletal Reinforcement",
+   "description": "+1 max HP.",
+   "x": -259,
+   "y": -178,
+   "icon": "art/plasmids/plasmid-unlock-health.webp",
+   "links": []
+  },
+  {
+   "id": "amoeba-bosshppickupplasmid",
+   "name": "Phagocytic Reflex",
+   "description": "Spawn 1 HP heart after beating a boss.",
+   "x": -113,
+   "y": 74,
+   "icon": "art/plasmids/plasmid-boss-hp-pickup.webp",
+   "links": [
+    "amoeba-hpplasmid4"
+   ]
+  },
+  {
+   "id": "amoeba-bossarmorplasmid2",
+   "name": "Apoptotic Carapace",
+   "description": "Spawn 1 armor after beating a boss.",
+   "x": 145,
+   "y": -189,
+   "icon": "art/plasmids/plasmid-boss-armor.webp",
+   "links": [
+    "amoeba-amoebaenergyslotplasmid2",
+    "amoeba-betterenergyplasmid"
+   ]
+  },
+  {
+   "id": "amoeba-dodgecdplasmid",
+   "name": "Start with Enhanced Boosters",
+   "description": "Start with Enhanced Boosters: -30% dodge cooldown.",
+   "x": -286,
+   "y": -288,
+   "mutation": "enhanced-boosters",
+   "icon": "art/plasmids/plasmid-unlock-dodge-cd.webp",
+   "links": [
+    "amoeba-speedplasmid6"
+   ]
+  },
+  {
+   "id": "amoeba-speedplasmid6",
+   "name": "Cilium Growth",
+   "description": "+20% base speed.",
+   "x": -145,
+   "y": -189,
+   "icon": "art/plasmids/plasmid-unlock-mobility.webp",
+   "links": [
+    "amoeba-hpplasmid"
+   ]
+  },
+  {
+   "id": "amoeba-rerollplasmid3",
+   "name": "Somatic Hypermutation",
+   "description": "+1 mutation reroll(s).",
+   "x": 402,
+   "y": -225,
+   "icon": "art/plasmids/plasmid-unlock-mutation-reroll.webp",
+   "links": []
+  },
+  {
+   "id": "amoeba-startingdnaplasmid5",
+   "name": "Primordiate DNA",
+   "description": "Start with +5 DNA.",
+   "x": 365,
+   "y": -391,
+   "icon": "art/plasmids/plasmid-unlock-dna.webp",
+   "links": [
+    "amoeba-stashslotplasmid"
+   ]
+  },
+  {
+   "id": "amoeba-bossmoneyplasmid2",
+   "name": "Heterotrophic Yield",
+   "description": "Spawn 4 cores after beating a boss.",
+   "x": 145,
+   "y": 182,
+   "icon": "art/plasmids/plasmid-boss-money.webp",
+   "links": [
+    "amoeba-betterdropsprogressionplasmid"
+   ]
+  },
+  {
+   "id": "amoeba-betterenergyplasmid",
+   "name": "Start with Mitochondrial Augmentation",
+   "description": "Start with Mitochondrial Augmentation: +15% overcharge strength from mitochondria.",
+   "x": 259,
+   "y": -178,
+   "mutation": "mitochondrial-augmentation",
+   "icon": "art/plasmids/plasmid-unlock-energy.webp",
+   "links": [
+    "amoeba-rerollplasmid3"
+   ]
+  },
+  {
+   "id": "amoeba-startingdnaplasmid2",
+   "name": "Primordiate DNA",
+   "description": "Start with +5 DNA.",
+   "x": -145,
+   "y": 182,
+   "icon": "art/plasmids/plasmid-unlock-dna.webp",
+   "links": [
+    "amoeba-bosshppickupplasmid",
+    "amoeba-rerollplasmid"
+   ]
+  },
+  {
+   "id": "amoeba-loadoutlimitweaponplasmid",
+   "name": "Offensive Capacity",
+   "description": "Raises the starting weapon loadout limit by 1.",
+   "x": 478,
+   "y": -445,
+   "icon": "art/plasmids/plasmid-unlock-weapon.webp",
+   "links": [
+    "amoeba-betterdropsprogressionplasmid2",
+    "amoeba-startingdnaplasmid5"
+   ]
+  },
+  {
+   "id": "amoeba-speedplasmid",
+   "name": "Cilium Growth",
+   "description": "+20% base speed.",
+   "x": -517,
+   "y": -322,
+   "icon": "art/plasmids/plasmid-unlock-mobility.webp",
+   "links": [
+    "amoeba-rangeplasmid"
+   ]
+  },
+  {
+   "id": "amoeba-damagelowerhpplasmid",
+   "name": "Sacrificial Enzyme",
+   "description": "+15% damage. -1 max HP.",
+   "x": 0,
+   "y": -628,
+   "effects": {
+    "damage": 0.15
+   },
+   "icon": "art/plasmids/plasmid-unlock-dmg-up-health-down.webp",
+   "links": [
+    "amoeba-staminaplasmid"
+   ]
+  },
+  {
+   "id": "amoeba-startingdnaplasmid3",
+   "name": "Primordiate DNA",
+   "description": "Start with +5 DNA.",
+   "x": -402,
+   "y": -225,
+   "icon": "art/plasmids/plasmid-unlock-dna.webp",
+   "links": [
+    "amoeba-speedplasmid",
+    "amoeba-hpplasmid"
+   ]
+  },
+  {
+   "id": "amoeba-hpplasmid4",
+   "name": "Cytoskeletal Reinforcement",
+   "description": "+1 max HP.",
+   "x": 0,
+   "y": 150,
+   "icon": "art/plasmids/plasmid-unlock-health.webp",
+   "links": [
+    "amoeba-betterdropsprogressionplasmid"
+   ]
+  },
+  {
+   "id": "amoeba-stashslotplasmid",
+   "name": "Endosomal Cache",
+   "description": "+1 stash slot to store organelles.",
+   "x": 286,
+   "y": -288,
+   "icon": "art/plasmids/plasmid-unlock-stashes.webp",
+   "links": [
+    "amoeba-bossarmorplasmid2"
+   ]
+  },
+  {
+   "id": "amoeba-startingdnaplasmid4",
+   "name": "Primordiate DNA",
+   "description": "Start with +5 DNA.",
+   "x": -365,
+   "y": -391,
+   "icon": "art/plasmids/plasmid-unlock-dna.webp",
+   "links": [
+    "amoeba-dodgecdplasmid"
+   ]
+  },
+  {
+   "id": "amoeba-damageprogressionplasmid2",
+   "name": "Virulent Adaptation",
+   "description": "Gain +5% damage after beating each boss.",
+   "x": -118,
+   "y": -518,
+   "effects": {
+    "perBoss": 0.05
+   },
+   "notes": "Uses your bosses beaten.",
+   "icon": "art/plasmids/plasmid-damage-progression.webp",
+   "links": [
+    "amoeba-damagelowerhpplasmid"
+   ]
+  }
+ ]
+}

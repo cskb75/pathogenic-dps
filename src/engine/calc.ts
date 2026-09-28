@@ -8,6 +8,7 @@
 // on/off combination, weighted by each one's uptime, and average. That keeps
 // thresholds exact (the Rotary Extruder only fires with ~1 Overcharge).
 
+import { buildAmoebaBody } from './amoeba';
 import { buildBody, buildPlanBody, type Body, type PieceShape } from './body';
 import { behaviourFor, isModeled } from './sim/behaviours';
 import {
@@ -39,6 +40,22 @@ const STAMINA_DELAY = 1;
 /** Explosions scale with the level to keep up with enemy health. */
 const EXPLOSION_LEVEL_SCALING = 0.75;
 const OPPOSITE = { left: 'right', right: 'left', top: 'bottom', bottom: 'top' } as const;
+const TICK = 1 / 60;
+const pct = (x: number) => `${Math.round(x * 100)}%`;
+/** How long a cooldown really takes: the game checks it once per physics tick. */
+const tick = (seconds: number) => Math.max(1, Math.ceil(seconds / TICK - 1e-6)) * TICK;
+/** Excitable organelles only work at this much Overcharge. */
+const EXCITABLE_CHARGE = 0.9;
+/** Flagellum thrust (Additive Momentum): round(power x rarity multiplier / 30). */
+const FLAGELLUM_POWER: Record<string, number> = { flagellum: 150, pyroflagellum: 75, cryoflagellum: 75, 'toxic-flagellum': 75, 'ballistic-flagellum': 75, 'galvanic-flagellum': 90 };
+function thrustOf(item: Item): number {
+  const power = FLAGELLUM_POWER[item.info.id];
+  if (!power) return 0;
+  // Only the plain Flagellum gets stronger with rarity.
+  const mult = item.info.id === 'flagellum' ? 1 + 0.6 * item.r : 1;
+  // Godot rounds halves away from zero.
+  return Math.round((power * mult) / 30 + 1e-9);
+}
 
 export interface StateView {
   label: string;
@@ -128,12 +145,18 @@ export function evolutionPath(build: Build, data: GameData): BodyPlan[] {
   return path.filter((p) => !!p);
 }
 
+/** HP at full health: the pathogen's own plus what its evolutions added. */
+export function fullHp(build: Build, data: GameData): number {
+  return findClass(data, build.classId).hp + evolutionPath(build, data).reduce((s, p) => s + (p.bonusHp ?? 0), 0);
+}
+
 export function bodyFor(build: Build, data: GameData): Body {
   const cls = findClass(data, build.classId);
   if (cls.body.kind === 'evolving') {
     const path = evolutionPath(build, data);
     return buildPlanBody(path[path.length - 1]);
   }
+  if (cls.body.kind === 'freeform') return buildAmoebaBody(data.bodies[cls.body.start], build.growth ?? []);
   const shapes = new Map(cls.body.pieceTypes.map((p) => [p.id, p]));
   return buildBody(build.pieces, (t) => shapes.get(t) ?? FALLBACK_SHAPE);
 }
@@ -202,16 +225,24 @@ export function calculate(build: Build, data: GameData): CalcResult {
   // --- Mutations, plasmids and run state -------------------------------------------
   const run = runModel(build, data, cls, {
     cores: Math.max(0, param('cores')),
-    hp: build.params.hp ?? cls.hp,
+    hp: build.params.hp ?? fullHp(build, data),
     bossesBeaten: Math.max(0, param('bossesBeaten')),
-    weapons: [...items.values()].filter((i) => i.info.category === 'weapon' || i.behaviour.weapon).length,
+    // The game counts every gun on the body (mirrored copies too); actives and pseudopods aren't guns.
+    weapons: [...items.values()].filter((i) => i.info.category === 'weapon').length,
     emptyInternal: body.slots.filter((sl) => sl.kind === 'internal' && !items.has(sl.id)).length,
+    pseudopods: [...items.values()].filter(
+      (i) => i.info.category === 'pseudopod' && (i.info.id !== 'symbiotic-pseudopod' || [...items.values()].some((m) => m.info.category === 'minion')),
+    ).length,
+    thrust: [...items.values()].reduce((s, i) => s + thrustOf(i), 0),
   });
   warnings.push(...run.warnings);
-  const maxStamina = Math.max(1, param('maxStamina') + run.extraStamina);
+  const evolutionStamina = 100 * evolutionPath(build, data).reduce((s, p) => s + (p.bonusStamina ?? 0), 0);
+  const maxStamina = Math.max(1, param('maxStamina') + run.extraStamina + evolutionStamina);
   /** Whether an organelle's slot is in a part of the body (measured from the body's centre, front up). */
   const inZone = (item: Item, side: ZoneEffect['side'], threshold: number) => {
-    const p = body.slotById.get(item.slotId)?.position ?? { x: 0, y: 0 };
+    const at = body.slotById.get(item.slotId)?.position ?? body.frame.center;
+    const { center, scale } = body.frame;
+    const p = { x: (at.x - center.x) * scale, y: (at.y - center.y) * scale };
     const along = side === 'left' ? -p.x : side === 'right' ? p.x : side === 'top' ? -p.y : p.y;
     return along > threshold;
   };
@@ -223,8 +254,12 @@ export function calculate(build: Build, data: GameData): CalcResult {
   const generatorBonus = (item: Item) =>
     run.generatorStrength +
     run.zones.reduce((s, z) => (z.generatorStrength && inZone(item, z.side, z.threshold) ? s + z.generatorStrength : s), 0);
+  const isActive = (item: Item) => !!item.behaviour.weapon?.energyCost;
   const strength = (item: Item) =>
-    (item.graft?.id === 'conductive' ? 0.4 : 0) + overchargeBonus + (item.behaviour.mito || item.behaviour.conduit ? generatorBonus(item) : 0);
+    (item.graft?.id === 'conductive' ? 0.4 : 0) +
+    overchargeBonus +
+    (item.behaviour.mito || item.behaviour.conduit ? generatorBonus(item) : 0) +
+    (isActive(item) ? run.activeCharge + run.zones.reduce((s, z) => (z.activeCharge && inZone(item, z.side, z.threshold) ? s + z.activeCharge : s), 0) : 0);
   const mitos = [...items.values()].filter((i) => i.behaviour.mito);
   const mitoResults = new Map<Item, MitoResult>();
   for (const m of mitos) {
@@ -258,7 +293,8 @@ export function calculate(build: Build, data: GameData): CalcResult {
       }
     }
     const charges = new Map<Item, number>();
-    for (const item of items.values()) charges.set(item, incoming(item));
+    // Basal Metabolism: actives also get some Overcharge of their own, which their own bonuses scale.
+    for (const item of items.values()) charges.set(item, incoming(item) + (isActive(item) ? run.activeFlatCharge * (1 + strength(item)) : 0));
     return charges;
   }
 
@@ -291,7 +327,7 @@ export function calculate(build: Build, data: GameData): CalcResult {
     { source: 'Mutations and plasmids', share: runDamage },
     { source: 'Extra bonuses', share: custom('damage').reduce((s, c) => s + c.value, 0) },
   ].filter((b) => Math.abs(b.share) > 1e-9);
-  const damageMult = custom('damageMult').reduce((p, c) => p * c.value, 1);
+  const damageMult = custom('damageMult').reduce((p, c) => p * c.value, 1) * run.damageMultiplier;
   const speedShares: Share[] = [...run.attackSpeed, { source: 'Extra bonuses', share: custom('attackSpeed').reduce((s, c) => s + c.value, 0) }].filter(
     (b) => Math.abs(b.share) > 1e-9,
   );
@@ -350,7 +386,7 @@ export function calculate(build: Build, data: GameData): CalcResult {
       targets: Math.max(1, Math.floor(build.targets)),
       charge: (i) => charges.get(i) ?? 0,
       neighbours,
-      works: (i) => !i.traits.some((t) => t.requiresCharge) || (charges.get(i) ?? 0) > 0,
+      works: (i) => !i.traits.some((t) => t.requiresCharge) || (charges.get(i) ?? 0) >= EXCITABLE_CHARGE - 1e-9,
       link: (from, to, kind) => {
         if (recordLinks) linkSet.set(`${kind}:${from.slotId}>${to.slotId}`, { from: from.slotId, to: to.slotId, kind });
       },
@@ -360,16 +396,69 @@ export function calculate(build: Build, data: GameData): CalcResult {
       budget: { left: CHAIN_BUDGET, exhausted: false },
     };
 
+    /** Mitotic Nidus: its minion fires each connected weapon at a share of its base speed, without stamina. */
+    function fireAsMinion(ctx: Ctx, nidus: Item): WeaponEval {
+      const share = nidus.behaviour.minionGunner!(nidus.r);
+      const guns = neighbours(nidus).filter((g) => g.info.category === 'weapon' && g.behaviour.weapon && !g.behaviour.weapon.rate && !g.behaviour.weapon.energyCost && ctx.works(g));
+      const trace: TraceLine[] = [{ source: nidus.info.name, text: `fires ${guns.length ? guns.map((g) => g.info.name).join(', ') : 'nothing: connect weapons to it'} at ${pct(share)} speed` }];
+      const nodes: AttackNode[] = [];
+      let single = 0;
+      let multi = 0;
+      let rate = 0;
+      for (const g of guns) {
+        const prof = g.behaviour.weapon!;
+        const cg = ctx.charge(g);
+        // The minion tries to fire about every 0.05s once a weapon's own (rarity-only) cooldown has passed.
+        const r = (1 / (prof.interval(g.r) / share + 0.025)) * param('minionEngagement');
+        const shots = prof.shots ? prof.shots(g.r, cg) : 1;
+        const mult = prof.damageMult ? prof.damageMult(g.r, cg) : 1 + 0.4 * g.r;
+        const a = newAttack({
+          kind: prof.kind,
+          label: `${g.info.name} (minion)`,
+          base: prof.base * mult,
+          copies: shots,
+          aim: prof.aimParam ? param(prof.aimParam) : 1,
+          hits: prof.hits ? prof.hits(ctx) : 1,
+          reach: prof.reach,
+          bullet: prof.kind === 'bullet',
+          melee: prof.kind === 'slash',
+          speed: prof.speed ?? 0,
+        });
+        if (prof.damage) {
+          a.base = prof.base;
+          a.damage = prof.damage(g.r);
+        }
+        ctx.gun = { bonus: 0, mult: 1, trace: [], interval: 1 / r };
+        ctx.budget = { left: CHAIN_BUDGET, exhausted: false };
+        announce(ctx, a, g);
+        applyModifiers(ctx, a, [g], neighbours(g), 1);
+        applyModifiers(ctx, a, [nidus], neighbours(nidus), 1);
+        prof.onFire?.(ctx, g, a, cg);
+        ctx.link(g, nidus, 'attack');
+        const n = evaluateRoot(ctx, a, param('angledHit'));
+        nodes.push(...n);
+        single += n.reduce((s, x) => s + x.single, 0) * r * damageMult;
+        multi += n.reduce((s, x) => s + x.multi, 0) * r * damageMult;
+        rate += r;
+        ctx.gun = null;
+      }
+      return { single, multi, rate, stamina: 0, nodes, gunTrace: trace, charge: ctx.charge(nidus) };
+    }
+
     const results = new Map<Item, WeaponEval>();
     for (const w of weaponItems) {
       const prof = w.behaviour.weapon!;
       const c = ctx.charge(w);
       const zero: WeaponEval = { single: 0, multi: 0, rate: 0, stamina: 0, nodes: [], gunTrace: [], charge: c };
+      if (w.behaviour.minionGunner) {
+        results.set(w, ctx.works(w) ? fireAsMinion(ctx, w) : zero);
+        continue;
+      }
       if (!ctx.works(w) || (prof.minCharge && c < prof.minCharge)) {
         results.set(w, zero);
         continue;
       }
-      const gun: GunState = { bonus: 0, trace: [], interval: 0 };
+      const gun: GunState = { bonus: 0, mult: 1, trace: [], interval: 0 };
       const selfTimed = !!(prof.energyCost || prof.rate);
       let rate = 0;
       let comboMult = 1;
@@ -385,27 +474,40 @@ export function calculate(build: Build, data: GameData): CalcResult {
         results.set(w, zero);
         continue;
       }
+      // Exocytotic Chamber: charges up instead of firing.
+      const chamber = selfTimed ? undefined : neighbours(w).find((n) => n.behaviour.chargeCluster && ctx.works(n));
       // Attack speed: weapon infusers add up, Overcharge multiplies.
-      for (const b of selfTimed ? [] : speedShares) {
+      for (const b of selfTimed || chamber ? [] : speedShares) {
         gun.bonus += b.share;
         gun.trace.push({ source: b.source, text: `${b.share >= 0 ? '+' : ''}${Math.round(b.share * 100)}% attack speed` });
       }
-      for (const n of selfTimed ? [] : neighbours(w)) {
+      for (const n of selfTimed || chamber ? [] : neighbours(w)) {
         if (n.behaviour.modifyGun && ctx.works(n)) {
           const before = gun.trace.length;
           n.behaviour.modifyGun(ctx, n, gun, 1);
           if (gun.trace.length > before) ctx.link(n, w, 'gun');
         }
       }
-      const chargeSpeed = selfTimed ? 0 : (prof.chargeAttackSpeed ?? 0.3) * c;
+      const chargeSpeed = selfTimed || chamber ? 0 : (prof.chargeAttackSpeed ?? 0.3) * c;
       if (chargeSpeed) gun.trace.push({ source: 'Overcharge', text: `x${(1 + chargeSpeed).toFixed(2)} attack speed` });
-      let interval = prof.interval(w.r) / ((1 + chargeSpeed) * (1 + gun.bonus));
-      if (prof.spinUp) interval = Math.max(1 / 60, interval - prof.spinUp * Math.max(0, 1 - 0.1 * w.r));
-      if (prof.extraDelay) interval += prof.extraDelay;
+      // The game checks each weapon once per physics tick (60 a second), so cooldowns round up to whole ticks.
+      const cooldown = prof.interval(w.r) / ((1 + chargeSpeed) * (1 + gun.bonus) * gun.mult);
+      let interval = tick(cooldown);
+      if (prof.spinUp) interval = tick(cooldown - prof.spinUp * Math.max(0.1, 1 - 0.1 * w.r));
+      if (prof.randomAdvance) {
+        // The next attack comes a random 0..randomAdvance seconds sooner.
+        const n = 40;
+        let sum = 0;
+        for (let i = 0; i < n; i++) sum += tick(cooldown - (prof.randomAdvance * (i + 0.5)) / n);
+        interval = sum / n;
+      }
+      if (!selfTimed && Math.abs(interval - cooldown) > 1e-4) {
+        gun.trace.push({ source: 'Physics ticks', text: `${fmt(cooldown * 1000)}ms cooldown fires every ${fmt(interval * 1000)}ms` });
+      }
       if (!selfTimed) rate = 1 / interval;
       if (prof.combo) {
         // Hits 1 and 2 normal, hit 3 deals 3x and comes 0.4s later.
-        rate = 3 / (3 * interval + 0.4);
+        rate = 3 / (2 * interval + tick(cooldown + 0.4));
         comboMult = 5 / 3;
         gun.trace.push({ source: w.info.name, text: 'every 3rd strike deals 3x damage, 0.4s later' });
       }
@@ -414,49 +516,112 @@ export function calculate(build: Build, data: GameData): CalcResult {
       ctx.budget = { left: CHAIN_BUDGET, exhausted: false };
 
       const shots = prof.shots ? prof.shots(w.r, c) : 1;
-      const base = prof.base * (prof.damageMult ? prof.damageMult(w.r) : 1 + 0.4 * w.r);
-      const root: Attack = newAttack({
-        kind: prof.kind,
-        label: `${w.info.name}${shots !== 1 ? ` x${Number(shots.toFixed(2))}` : ''}`,
-        base,
-        copies: shots,
-        aim: prof.aimParam ? param(prof.aimParam) : 1,
-        hits: prof.hits ? prof.hits(ctx) : 1,
-        reach: prof.reach,
-        bullet: prof.kind === 'bullet',
-        melee: prof.kind === 'slash',
-        speed: prof.speed ?? 0,
-      });
-      if (prof.damage) {
-        // The organelle sets the damage itself; bonuses still scale off the attack's own base damage.
-        root.base = prof.base;
-        root.damage = prof.damage(w.r);
-        root.trace.push({ source: w.info.name, text: `${fmt(root.damage)} damage (bonuses use its base damage, ${prof.base})` });
-      } else {
-        root.trace.push({ source: w.info.name, text: `${prof.base} base x${(base / prof.base).toFixed(2)} rarity = ${base.toFixed(1)}` });
-      }
-      announce(ctx, root, w);
-      applyModifiers(ctx, root, [w], neighbours(w), 1);
+      const mult = prof.damageMult ? prof.damageMult(w.r, c) : 1 + 0.4 * w.r;
+      const base = prof.base * mult;
+      const makeRoot = (copies: number, label: string) => {
+        const a: Attack = newAttack({
+          kind: prof.kind,
+          label,
+          base,
+          copies,
+          aim: prof.aimParam ? param(prof.aimParam) : 1,
+          hits: prof.hits ? prof.hits(ctx) : 1,
+          reach: prof.reach,
+          bullet: prof.kind === 'bullet',
+          melee: prof.kind === 'slash',
+          speed: prof.speed ?? 0,
+        });
+        if (prof.damage) {
+          // The organelle sets the damage itself; bonuses still scale off the attack's own base damage.
+          a.base = prof.base;
+          a.damage = prof.damage(w.r);
+          a.trace.push({ source: w.info.name, text: `${fmt(a.damage)} damage (bonuses use its base damage, ${prof.base})` });
+        } else {
+          a.trace.push({ source: w.info.name, text: `${prof.base} base x${mult.toFixed(2)} = ${fmt(base)}` });
+        }
+        return a;
+      };
 
-      let attack = root;
-      if (prof.explodes) {
-        // The shell hands its damage to the explosion, which also re-runs on-hit effects.
-        const level = Math.max(1, param('level'));
-        const scale = 1 + (level - 1) * EXPLOSION_LEVEL_SCALING;
-        attack = { ...root, kind: 'explosion', label: `${w.info.name} explosion`, reach: 'area', damage: root.damage * scale, onHitDamage: 0 };
-        attack.onHit = root.onHit.map((d) => ({ ...d, perHit: d.perHit * 2 }));
-        attack.trace = [...root.trace, ...(scale !== 1 ? [{ source: 'Level', text: `x${scale.toFixed(2)} explosion damage` }] : [])];
+      let attacks: Attack[];
+      let stamina = prof.stamina * rate;
+      if (chamber) {
+        const cc = chamber.behaviour.chargeCluster!;
+        const cCh = ctx.charge(chamber);
+        const cd = prof.interval(w.r);
+        const perCall = prof.shots ? prof.shots(w.r, c) : 1;
+        const baseShots = prof.shots ? prof.shots(w.r, 0) : 1;
+        const total = cc.maxTime * ((base * baseShots) / cd) * cc.mult;
+        const n = Math.min(15, Math.max(1, Math.floor((cc.maxTime / cd) * cc.burst(chamber.r) * 2)));
+        // Charge to full, let go, fire the cluster, hold again.
+        const cycle = cc.maxTime / (1 + cc.speedPerCharge * cCh) + 2 / 60;
+        rate = 1 / cycle;
+        gun.interval = cycle;
+        stamina = (prof.stamina / cd) * ((cycle - 2 / 60) / cycle);
+        gun.trace.push({ source: chamber.info.name, text: `charges ${fmt(cycle)}s, then fires ${n} shots worth ${fmt(total)} in all` });
+        ctx.link(chamber, w, 'gun');
+        const cluster = makeRoot(n, `${w.info.name} cluster x${n}`);
+        applyModifiers(ctx, cluster, [w], neighbours(w), 1);
+        // The chamber sets each shot's damage after the weapon's own infusers, then the game adds its bonuses.
+        cluster.damage = total / n;
+        cluster.trace.push({ source: chamber.info.name, text: `${fmt(total / n)} damage per shot, replacing infuser damage` });
+        announce(ctx, cluster, w);
+        applyModifiers(ctx, cluster, [w, chamber], neighbours(chamber), 1);
+        attacks = [cluster];
+        if (perCall > 1) {
+          // Multi-projectile weapons fire their other projectiles as normal.
+          const rest = makeRoot(n * (perCall - 1), `${w.info.name} other projectiles x${n * (perCall - 1)}`);
+          announce(ctx, rest, w);
+          applyModifiers(ctx, rest, [w], neighbours(w), 1);
+          attacks.push(rest);
+        }
+      } else {
+        const root = makeRoot(shots, `${w.info.name}${shots !== 1 ? ` x${Number(shots.toFixed(2))}` : ''}`);
+        announce(ctx, root, w);
+        applyModifiers(ctx, root, [w], neighbours(w), 1);
+        attacks = [root];
       }
-      if (comboMult !== 1) {
-        attack.damage *= comboMult;
-        attack.onHitDamage *= comboMult;
+      for (const a of attacks) prof.onFire?.(ctx, w, a, c);
+
+      const nodes: AttackNode[] = [];
+      for (const root of attacks) {
+        let attack = root;
+        if (prof.explodes) {
+          // The shell hands its damage to the explosion, which also re-runs on-hit effects.
+          const level = Math.max(1, param('level'));
+          const scale = 1 + (level - 1) * EXPLOSION_LEVEL_SCALING;
+          attack = { ...root, kind: 'explosion', label: `${root.label} explosion`, reach: 'area', damage: root.damage * scale, onHitDamage: 0 };
+          attack.onHit = root.onHit.map((d) => ({ ...d, perHit: d.perHit * 2 }));
+          attack.trace = [...root.trace, ...(scale !== 1 ? [{ source: 'Level', text: `x${scale.toFixed(2)} explosion damage` }] : [])];
+        }
+        if (comboMult !== 1) {
+          attack.damage *= comboMult;
+          attack.onHitDamage *= comboMult;
+        }
+        nodes.push(...evaluateRoot(ctx, attack, param('angledHit')));
       }
-      const nodes = evaluateRoot(ctx, attack, param('angledHit'));
       const single = nodes.reduce((s, n) => s + n.single, 0) * rate * damageMult;
       const multi = nodes.reduce((s, n) => s + n.multi, 0) * rate * damageMult;
       if (ctx.budget.exhausted) chainsCut.add(w.info.name);
-      results.set(w, { single, multi, rate, stamina: run.noStamina ? 0 : prof.stamina * rate, nodes, gunTrace: gun.trace, charge: c });
+      results.set(w, { single, multi, rate, stamina: run.noStamina ? 0 : stamina, nodes, gunTrace: gun.trace, charge: c });
       ctx.gun = null;
+    }
+
+    // Symbiotic Pseudopod: each one buffs the minion nearest to it, so the buff is spread over all minions alive.
+    const supporters = [...items.values()].filter((i) => i.behaviour.minionSupport && ctx.works(i));
+    if (supporters.length) {
+      const minionWeapons = weaponItems.filter((w) => w.behaviour.weapon!.minions && results.get(w)!.rate > 0);
+      const alive = minionWeapons.reduce((s, w) => s + w.behaviour.weapon!.minions!(ctx, w.r, results.get(w)!.rate), 0);
+      if (alive > 0) {
+        const bonus = supporters.reduce((s, i) => s + i.behaviour.minionSupport!(i.r), 0) / supporters.length;
+        const mult = 1 + bonus * Math.min(1, supporters.length / alive);
+        for (const w of minionWeapons) {
+          const r = results.get(w)!;
+          r.single *= mult;
+          r.multi *= mult;
+          r.gunTrace.push({ source: supporters[0].info.name, text: `x${mult.toFixed(2)} minion damage (${fmt(alive)} minions share the buff)` });
+          for (const s of supporters) ctx.link(s, w, 'attack');
+        }
+      }
     }
 
     // Stamina: all weapons fire together and share one pool.
@@ -517,7 +682,7 @@ export function calculate(build: Build, data: GameData): CalcResult {
       charge: chargeAvg.get(item) ?? 0,
       mito: mitoResults.get(item),
     };
-    if (item.traits.some((t) => t.requiresCharge) && (chargeAvg.get(item) ?? 0) === 0) notes.push('Excitable: needs Overcharge to work.');
+    if (item.traits.some((t) => t.requiresCharge) && (chargeAvg.get(item) ?? 0) < EXCITABLE_CHARGE) notes.push('Excitable: only works at 0.9 Overcharge or more.');
     if (item.behaviour.weapon) {
       const a = avg.get(item)!;
       const idle = view('No Overcharge', idleState, item);

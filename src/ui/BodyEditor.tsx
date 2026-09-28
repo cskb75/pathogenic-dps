@@ -1,5 +1,6 @@
-import { useMemo, useState, type CSSProperties, type Dispatch, type KeyboardEvent } from 'react';
-import { placementOptions, removePieceTree, type PlacementOption, type Slot } from '../engine/body';
+import { useMemo, useRef, useState, type CSSProperties, type Dispatch, type KeyboardEvent, type MouseEvent } from 'react';
+import { buildAmoebaBody, nextGrowthId, placeBlob, type AmoebaBody, type Blob } from '../engine/amoeba';
+import { placementOptions, removePieceTree, type PlacementOption, type Slot, type SlotKind } from '../engine/body';
 import type { CalcResult } from '../engine/calc';
 import { evolutionPath, findClass, slotState } from '../engine/calc';
 import type { Vec } from '../engine/geometry';
@@ -7,7 +8,7 @@ import type { BodyPlan, Build, EvolvingBody, GameData, ModularBody } from '../en
 import type { Action } from '../state/build';
 import { art, organelleIcon, PlanThumb } from './art';
 
-type Tool = { kind: 'select' } | { kind: 'add'; pieceType: string } | { kind: 'remove' };
+type Tool = { kind: 'select' } | { kind: 'add'; pieceType: string } | { kind: 'grow'; slot: SlotKind } | { kind: 'remove' };
 
 interface Props {
   data: GameData;
@@ -41,6 +42,10 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
   const body = result.body;
   const plan = body.plan;
   const modular = cls.body.kind === 'modular' ? cls.body : null;
+  const freeform = cls.body.kind === 'freeform';
+  const blobs = (body as Partial<AmoebaBody>).blobs;
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [cursor, setCursor] = useState<Vec | null>(null);
   const organelles = useMemo(() => new Map(data.organelles.map((o) => [o.id, o])), [data]);
   const rarityColor = useMemo(() => new Map(data.rarities.map((r) => [r.id, r.color])), [data]);
   const rExternal = plan ? R_EXTERNAL.fixed : R_EXTERNAL.modular;
@@ -65,17 +70,36 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
     [build.slots],
   );
 
-  const activeTool = modular ? tool : ({ kind: 'select' } as Tool);
+  const activeTool = modular || freeform ? tool : ({ kind: 'select' } as Tool);
   const addType = activeTool.kind === 'add' && modular ? modular.pieceTypes.find((p) => p.id === activeTool.pieceType) : undefined;
   const ghosts = useMemo(
     () => (addType ? placementOptions(body, addType.sides, occupied).filter((o) => o.valid) : []),
     [addType, body, occupied],
   );
 
+  /** Growing a blob: where it would land, and the body it would make. */
+  const growPreview = useMemo(() => {
+    if (activeTool.kind !== 'grow' || !cursor || !blobs || !plan) return null;
+    const at = placeBlob(blobs, cursor);
+    const growth = build.growth ?? [];
+    const step = { id: nextGrowthId(growth), kind: activeTool.slot, x: at.x, y: at.y };
+    const next = buildAmoebaBody(plan, [...growth, step]);
+    const fresh = next.slots.filter((s) => !body.slotById.has(s.id));
+    const links = next.links.filter(([a, b]) => fresh.some((s) => s.id === a || s.id === b));
+    return { at, next, fresh, links, blobs: next.blobs.filter((b) => b.growthId === step.id) };
+  }, [activeTool, cursor, blobs, plan, build.growth, body]);
+
   const viewBox = useMemo(() => {
     let all: Vec[];
     let pad: number;
-    if (plan) {
+    if (blobs) {
+      // Frame the blobs with room to grow one more on every side.
+      all = blobs.flatMap((b) => [
+        { x: b.x - b.r, y: b.y - b.r },
+        { x: b.x + b.r, y: b.y + b.r },
+      ]);
+      pad = 0.9;
+    } else if (plan) {
       // Frame the slots: long tails and wide lobes can run off the edges.
       all = body.slots.map((s) => s.position);
       pad = 0.55;
@@ -93,7 +117,7 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
     const w = Math.max(...xs) + pad - minX;
     const h = Math.max(...ys) + pad - minY;
     return { box: `${minX * S} ${minY * S} ${w * S} ${h * S}`, aspect: w / h };
-  }, [body, plan]);
+  }, [body, plan, blobs]);
 
   const removal = useMemo(() => {
     if (activeTool.kind !== 'remove' || !hoverPiece || hoverPiece === build.pieces[0]?.id) return new Set<string>();
@@ -133,28 +157,63 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
     if (selected && doomed.some((p) => selected.startsWith(`${p.id}.`))) onSelect(null);
   }
 
+  function removeBlob(blob: Blob) {
+    if (blob.growthId === undefined) return;
+    const ids = [`Blob${blob.growthId}`, `Blob${blob.growthId}Mirror`];
+    const lost = ids.filter((id) => build.slots[id]?.organelle).length;
+    if (lost > 0 && !window.confirm(`Remove this blob and the organelle in it?`)) return;
+    dispatch({ type: 'removeGrowth', id: blob.growthId });
+    if (selected && ids.includes(selected)) onSelect(null);
+  }
+
+  /** Mouse position in editor units. */
+  function toBody(e: MouseEvent<SVGSVGElement>): Vec | null {
+    const svg = svgRef.current;
+    const m = svg?.getScreenCTM();
+    if (!svg || !m) return null;
+    const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
+    return { x: p.x / S, y: p.y / S };
+  }
+
   const hasMirrors = body.slots.some((s) => s.mirrorOf);
   const hint =
     activeTool.kind === 'select'
       ? `Click a slot to equip it. Large circles are internal slots, small ones external.${hasMirrors ? ' Dashed slots copy the organelle from the matching slot on the other side.' : ''}`
       : activeTool.kind === 'add'
         ? `Click a dashed outline to attach a ${addType?.name.toLowerCase() ?? 'module'}. Orange outlines cover an equipped organelle, which gets removed.`
-        : 'Click a module to remove it and everything attached to it. The core stays.';
+        : activeTool.kind === 'grow'
+          ? `Click where to grow a blob with ${activeTool.slot === 'internal' ? 'an internal' : 'an external'} slot. Off the middle line it's mirrored. Dashed lines show what it will connect to (up to 3 slots, never across the middle).`
+          : freeform
+            ? 'Click a grown blob to remove it. Later blobs keep their place but may connect differently.'
+            : 'Click a module to remove it and everything attached to it. The core stays.';
 
   return (
     <section className="panel editor" aria-label="Body editor">
       {modular ? (
         <ModularToolbar body={modular} tool={tool} setTool={setTool} />
+      ) : freeform ? (
+        <FreeformToolbar tool={tool} setTool={setTool} blobs={(build.growth ?? []).length} />
       ) : (
         <EvolutionPicker data={data} build={build} body={cls.body as EvolvingBody} dispatch={dispatch} />
       )}
       <p className="hint">{hint}</p>
 
       <svg
-        className={`body-svg tool-${activeTool.kind} ${plan ? 'fixed' : 'modular'}`}
+        ref={svgRef}
+        className={`body-svg tool-${activeTool.kind} ${plan ? 'fixed' : 'modular'} ${freeform ? 'freeform' : ''}`}
         viewBox={viewBox.box}
         style={plan ? { aspectRatio: String(viewBox.aspect) } : undefined}
-        onClick={() => activeTool.kind === 'select' && onSelect(null)}
+        onMouseMove={(e) => activeTool.kind === 'grow' && setCursor(toBody(e))}
+        onMouseLeave={() => setCursor(null)}
+        onClick={(e) => {
+          if (activeTool.kind === 'select') onSelect(null);
+          if (activeTool.kind === 'grow') {
+            const p = toBody(e);
+            if (!p || !blobs) return;
+            const at = placeBlob(blobs, p);
+            dispatch({ type: 'addGrowth', kind: activeTool.slot, x: at.x, y: at.y });
+          }
+        }}
       >
         <defs>
           {['attack', 'gun', 'overcharge'].map((k) => (
@@ -164,8 +223,50 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
           ))}
         </defs>
 
-        {plan && <BodyArt plan={plan} />}
+        {plan && !blobs && <BodyArt plan={plan} />}
 
+        {blobs && (
+          <g className="blobs">
+            <defs>
+              {/* The game tiles this pattern 4 times across its 512px blob canvas. */}
+              <pattern id="amoeba-texture" patternUnits="userSpaceOnUse" width={128} height={128}>
+                <image href={art('art/classes/amoeba-pattern.webp')} width={128} height={128} />
+              </pattern>
+            </defs>
+            {['outer', 'inner'].map((ring) =>
+              blobs.map((b, i) => <circle key={`${ring}${i}`} className={`blob-outline ${ring}`} cx={b.x * S} cy={b.y * S} r={b.r * S} />),
+            )}
+            {blobs.map((b, i) => (
+              <circle
+                key={`f${i}`}
+                className={`blob ${b.growthId === undefined ? 'first' : 'grown'}`}
+                cx={b.x * S}
+                cy={b.y * S}
+                r={b.r * S}
+                onClick={(e) => {
+                  if (activeTool.kind !== 'remove') return;
+                  e.stopPropagation();
+                  removeBlob(b);
+                }}
+              >
+                {b.growthId !== undefined && <title>Grown blob</title>}
+              </circle>
+            ))}
+            {growPreview?.blobs.map((b, i) => <circle key={`g${i}`} className="blob-ghost" cx={b.x * S} cy={b.y * S} r={b.r * S} />)}
+            {growPreview?.links.map(([a, b]) => {
+              const p = growPreview.next.slotById.get(a)!.position;
+              const q = growPreview.next.slotById.get(b)!.position;
+              return <line key={`${a}|${b}`} className="connector ghost-link" x1={p.x * S} y1={p.y * S} x2={q.x * S} y2={q.y * S} />;
+            })}
+            {growPreview?.fresh.map((s) => (
+              <circle key={s.id} className={`slot-ghost slot-${s.kind}`} cx={s.position.x * S} cy={s.position.y * S} r={radius(s) * S} />
+            ))}
+          </g>
+        )}
+
+        {body.placed.map((piece) => (
+          <PieceArt key={`art-${piece.id}`} vertices={piece.vertices} center={piece.center} />
+        ))}
         {body.placed.map((piece) => (
           <polygon
             key={piece.id}
@@ -291,6 +392,47 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
   );
 }
 
+/**
+ * A Nanobot module's texture. In the game a square's sprite is 1.03 modules
+ * wide; a triangle's is 1.06 x 0.94, drawn apex up, 0.15 modules above its centre.
+ */
+function PieceArt({ vertices, center }: { vertices: Vec[]; center: Vec }) {
+  if (vertices.length === 4) {
+    const a = (Math.atan2(vertices[1].y - vertices[0].y, vertices[1].x - vertices[0].x) * 180) / Math.PI;
+    const w = 1.029;
+    return (
+      <image
+        href={art('art/classes/nanobot-square.webp')}
+        x={(center.x - w / 2) * S}
+        y={(center.y - w / 2) * S}
+        width={w * S}
+        height={w * S}
+        transform={`rotate(${a} ${center.x * S} ${center.y * S})`}
+        className="piece-art"
+        preserveAspectRatio="none"
+      />
+    );
+  }
+  if (vertices.length !== 3) return null;
+  // Turn the texture's apex toward one of the triangle's corners (all three look alike).
+  const apex = vertices[0];
+  const a = (Math.atan2(apex.y - center.y, apex.x - center.x) * 180) / Math.PI + 90;
+  const w = 1.0615;
+  const h = 0.944;
+  return (
+    <image
+      href={art('art/classes/nanobot-triangle.webp')}
+      x={(center.x - w / 2 + 0.008) * S}
+      y={(center.y - h / 2 - 0.146) * S}
+      width={w * S}
+      height={h * S}
+      transform={`rotate(${a} ${center.x * S} ${center.y * S})`}
+      className="piece-art"
+      preserveAspectRatio="none"
+    />
+  );
+}
+
 function BodyArt({ plan }: { plan: BodyPlan }) {
   if (plan.sprite) {
     const s = plan.sprite;
@@ -329,6 +471,24 @@ function ModularToolbar({ body, tool, setTool }: { body: ModularBody; tool: Tool
   );
 }
 
+function FreeformToolbar({ tool, setTool, blobs }: { tool: Tool; setTool: (t: Tool) => void; blobs: number }) {
+  const is = (t: Tool) => t.kind === tool.kind && (t.kind !== 'grow' || (tool.kind === 'grow' && tool.slot === t.slot));
+  const button = (t: Tool, label: string, extra = '') => (
+    <button className={`${extra} ${is(t) ? 'active' : ''}`} aria-pressed={is(t)} onClick={() => setTool(t)}>
+      {label}
+    </button>
+  );
+  return (
+    <div className="toolbar" role="toolbar" aria-label="Editing tools" onKeyDown={(e) => e.key === 'Escape' && setTool({ kind: 'select' })}>
+      {button({ kind: 'select' }, 'Select')}
+      {button({ kind: 'grow', slot: 'external' }, 'Grow external slot')}
+      {button({ kind: 'grow', slot: 'internal' }, 'Grow internal slot')}
+      {blobs > 0 && button({ kind: 'remove' }, 'Remove blob', 'danger')}
+      <span className="toolbar-note muted small">Ectoplasmic Bulge grows an external slot, Endomembrane Folding an internal one.</span>
+    </div>
+  );
+}
+
 function EvolutionPicker({ data, build, body, dispatch }: { data: GameData; build: Build; body: EvolvingBody; dispatch: Dispatch<Action> }) {
   const current = evolutionPath(build, data).at(-1);
   if (body.tiers.length === 0) {
@@ -349,7 +509,11 @@ function EvolutionPicker({ data, build, body, dispatch }: { data: GameData; buil
                 const plan = data.bodies[id];
                 if (!plan) return null;
                 const active = picked === id;
-                const perks = [plan.bonusDamage ? `+${Math.round(plan.bonusDamage * 100)}% damage` : '', plan.bonusHp ? `+${plan.bonusHp} max HP` : '']
+                const perks = [
+                  plan.bonusDamage ? `+${Math.round(plan.bonusDamage * 100)}% damage` : '',
+                  plan.bonusHp ? `+${plan.bonusHp} max HP` : '',
+                  plan.bonusStamina ? `+${plan.bonusStamina} stamina` : '',
+                ]
                   .filter(Boolean)
                   .join(', ');
                 return (

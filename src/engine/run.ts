@@ -37,9 +37,13 @@ export interface RunState {
   cores: number;
   hp: number;
   bossesBeaten: number;
-  /** Weapons equipped (anything the game counts as a gun). */
+  /** Weapons equipped (anything the game counts as a gun), mirrored copies included. */
   weapons: number;
   emptyInternal: number;
+  /** Pseudopods reaching for enemies. */
+  pseudopods: number;
+  /** Thrust from flagella. */
+  thrust: number;
 }
 
 export interface RunModel {
@@ -59,6 +63,12 @@ export interface RunModel {
   generatorStrength: number;
   /** Share less Overcharge that actives need. */
   activeCost: number;
+  /** Extra Overcharge strength for actives. */
+  activeCharge: number;
+  /** Overcharge actives get on their own. */
+  activeFlatCharge: number;
+  /** Multiplies all damage. */
+  damageMultiplier: number;
   /** Stamina added to the pool. */
   extraStamina: number;
   noStamina: boolean;
@@ -90,6 +100,9 @@ export function runModel(build: Build, data: GameData, cls: ClassDef, state: Run
     attackSpeed: [],
     generatorStrength: 0,
     activeCost: 0,
+    activeCharge: 0,
+    activeFlatCharge: 0,
+    damageMultiplier: 1,
     extraStamina: 0,
     noStamina: false,
     summary: [],
@@ -127,6 +140,18 @@ export function runModel(build: Build, data: GameData, cls: ClassDef, state: Run
     if (e.perCore) damage(e.perCore * n * state.cores, `${state.cores} cores`);
     if (e.perEmptyInternal) damage(e.perEmptyInternal * n * state.emptyInternal, `${state.emptyInternal} empty internal slots`);
     if (e.perBoss) damage(e.perBoss * n * state.bossesBeaten, `${state.bossesBeaten} bosses beaten`);
+    if (e.perPseudopod) {
+      if (state.pseudopods) damage(e.perPseudopod * n * state.pseudopods, `${state.pseudopods} pseudopod${state.pseudopods === 1 ? '' : 's'}`);
+      else idle.push('no pseudopods');
+    }
+    if (e.perThrust) {
+      if (state.thrust) damage(e.perThrust * n * state.thrust, `${state.thrust} thrust`);
+      else idle.push('no flagella');
+    }
+    if (e.damageMultiplier !== undefined) {
+      model.damageMultiplier *= e.damageMultiplier ** n;
+      lines.push(`x${(e.damageMultiplier ** n).toFixed(2)} damage`);
+    }
     if (e.focused) {
       // Each stack adds its own bonus, floored separately.
       const f = e.focused;
@@ -154,6 +179,7 @@ export function runModel(build: Build, data: GameData, cls: ClassDef, state: Run
         opposite: (z.opposite ?? 0) * n,
         generatorStrength: (z.generatorStrength ?? 0) * n,
         activeCost: (z.activeCost ?? 0) * n,
+        activeCharge: (z.activeCharge ?? 0) * n,
       };
       model.zones.push(scaled);
       const where = { left: 'on the left', right: 'on the right', top: 'in front', bottom: 'at the back' };
@@ -163,6 +189,7 @@ export function runModel(build: Build, data: GameData, cls: ClassDef, state: Run
       if (scaled.opposite) lines.push(`${pct(scaled.opposite)} ${what} ${where[other[z.side]]}`);
       if (scaled.generatorStrength) lines.push(`${pct(scaled.generatorStrength)} Overcharge strength for mitochondria ${where[z.side]}`);
       if (scaled.activeCost) lines.push(`actives ${where[z.side]} need ${pct(scaled.activeCost).replace('+', '')} less Overcharge`);
+      if (scaled.activeCharge) lines.push(`actives ${where[z.side]} charge ${pct(scaled.activeCharge).replace('+', '')} faster`);
     }
     if (e.perActiveMito) {
       model.perActiveMito.push({ source: s.name, share: e.perActiveMito * n });
@@ -183,6 +210,14 @@ export function runModel(build: Build, data: GameData, cls: ClassDef, state: Run
     if (e.activeCost) {
       model.activeCost += e.activeCost * n;
       lines.push(`actives need ${pct(e.activeCost * n).replace('+', '')} less Overcharge`);
+    }
+    if (e.activeCharge) {
+      model.activeCharge += e.activeCharge * n;
+      lines.push(`actives charge ${pct(e.activeCharge * n).replace('+', '')} faster`);
+    }
+    if (e.activeFlatCharge) {
+      model.activeFlatCharge += e.activeFlatCharge * n;
+      lines.push(`actives get ${Number((e.activeFlatCharge * n).toFixed(2))} Overcharge on their own`);
     }
     if (e.staminaContainers) {
       model.extraStamina += 100 * e.staminaContainers * n;

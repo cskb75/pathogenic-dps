@@ -5,6 +5,7 @@
 // the catalogue: names, slots, categories, rarities, traits, grafts, and the
 // fight assumptions the player can tune.
 
+import type { Growth } from './amoeba';
 import type { SlotKind, PieceShape } from './body';
 import type { PieceInstance } from './geometry';
 
@@ -25,8 +26,8 @@ export interface OrganelleInfo {
   subtype?: 'attack' | 'projectile' | 'weapon' | 'melee' | 'ranged';
   /** In-game description. */
   description: string;
-  /** Internal id in the game files, when the organelle exists in the demo build. */
-  demoId?: string;
+  /** Internal name in the game files. */
+  gameId?: string;
 }
 
 export interface TraitDef {
@@ -96,6 +97,8 @@ export interface BodyPlan {
   /** Share of base damage added to every attack from then on. */
   bonusDamage?: number;
   bonusHp?: number;
+  /** Stamina containers (100 stamina each) added. */
+  bonusStamina?: number;
   description?: string;
 }
 
@@ -104,6 +107,13 @@ export interface ModularBody {
   kind: 'modular';
   corePiece: string;
   pieceTypes: PieceTypeDef[];
+}
+
+/** Bodies that grow blobs where you place them (the Amoeba). */
+export interface FreeformBody {
+  kind: 'freeform';
+  /** Body plan id of the starting body. */
+  start: string;
 }
 
 /** Bodies with fixed layouts that change when you evolve. */
@@ -144,6 +154,16 @@ export interface RunEffects {
   generatorStrength?: number;
   /** Active organelles need this much less Overcharge to use (0.25 = 25% less). */
   activeCost?: number;
+  /** Extra Overcharge strength for active organelles (0.35 = they charge 35% faster). */
+  activeCharge?: number;
+  /** Overcharge active organelles get on their own. */
+  activeFlatCharge?: number;
+  /** Share of base damage per pseudopod reaching for an enemy. */
+  perPseudopod?: number;
+  /** Share of base damage per point of thrust from flagella. */
+  perThrust?: number;
+  /** Multiplies all damage (Glycogen Funnel: 0.7). */
+  damageMultiplier?: number;
   /** Extra stamina containers (100 stamina each). */
   staminaContainers?: number;
   /** Share of base damage per empty stamina container. */
@@ -170,6 +190,8 @@ export interface ZoneEffect {
   generatorStrength?: number;
   /** Active organelles in the zone need this much less Overcharge. */
   activeCost?: number;
+  /** Active organelles in the zone charge this much faster. */
+  activeCharge?: number;
 }
 
 export interface MutationDef {
@@ -182,6 +204,7 @@ export interface MutationDef {
   notes?: string;
 }
 
+/** A node of a pathogen's plasmid tree. */
 export interface PlasmidDef {
   id: string;
   name: string;
@@ -190,6 +213,15 @@ export interface PlasmidDef {
   /** Start the run with this mutation (counts as one stack of it). */
   mutation?: string;
   notes?: string;
+  /** Position in the tree, in game pixels (y down). */
+  x: number;
+  y: number;
+  /** Nodes this one unlocks. */
+  links: string[];
+  /** Icon path relative to the site root. */
+  icon?: string;
+  /** The tree's root: always owned. */
+  root?: boolean;
 }
 
 export interface ClassDef {
@@ -204,7 +236,7 @@ export interface ClassDef {
   portrait?: string;
   /** Where the class's data comes from. */
   source: string;
-  body: ModularBody | EvolvingBody;
+  body: ModularBody | EvolvingBody | FreeformBody;
   plasmids: PlasmidDef[];
 }
 
@@ -258,6 +290,8 @@ export interface Build {
   pieces: PieceInstance[];
   /** Evolving classes: the evolution picked at each tier ('' = not yet, or skipped). */
   evolutions: string[];
+  /** Freeform classes (Amoeba): the blobs grown, in order. */
+  growth?: Growth[];
   slots: Record<string, SlotState>;
   /** Mutations picked this run (DNA upgrades): id -> times picked. */
   mutations: Record<string, number>;

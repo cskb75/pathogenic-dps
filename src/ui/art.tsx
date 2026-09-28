@@ -1,4 +1,5 @@
-// Game art: icons from pathogenic.wiki and body sprites from the demo build,
+// Game art: organelle and mutation icons from pathogenic.wiki; body sprites,
+// plasmid icons and class textures from the game files,
 // served from public/art (see tools/extract).
 
 import { useState, type CSSProperties } from 'react';
@@ -12,7 +13,8 @@ export const mutationIcon = (id: string) => art(`art/mutations/${id}.webp`);
 
 /** Plasmids that start you with a mutation have no icon of their own: they use the mutation's. */
 export function plasmidIcon(p: PlasmidDef, data: GameData): string {
-  return p.mutation && data.mutations.some((m) => m.id === p.mutation) ? mutationIcon(p.mutation) : art(`art/plasmids/${p.id}.webp`);
+  if (p.icon) return art(p.icon);
+  return p.mutation && data.mutations.some((m) => m.id === p.mutation) ? mutationIcon(p.mutation) : '';
 }
 
 interface IconProps {
@@ -68,6 +70,7 @@ export function PlanThumb({ plan, size }: { plan: BodyPlan; size: number }) {
 /** A pathogen's portrait: its starting body, or a drawing for modular bodies. */
 export function ClassPortrait({ cls, data, size = 56 }: { cls: ClassDef; data: GameData; size?: number }) {
   const start = cls.body.kind === 'evolving' ? data.bodies[cls.body.start] : undefined;
+  if (cls.body.kind === 'freeform') return <Icon src={art('art/classes/amoeba.webp')} size={size} className="portrait" />;
   if (start?.sprite) return <PlanThumb plan={start} size={size} />;
   if (cls.portrait) return <Icon src={art(cls.portrait)} size={size} className="portrait" />;
   return (

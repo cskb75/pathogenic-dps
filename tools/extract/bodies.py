@@ -31,11 +31,15 @@ from gdc import decompile  # noqa: E402
 from gdres import parse, scene_nodes  # noqa: E402
 from gdtr import Translation  # noqa: E402
 
-# Playable classes: id -> starting body scene (see get_parasite_scene in scn/globals.gd).
+# Classes with fixed bodies: id -> (starting body scene, class config). See
+# get_parasite_scene in scn/globals.gd and each player script's get_config().
+# The demo has no configs: its evolutions are read from the class script.
 CLASSES = {
-    'bacterium': 'res://scn/player/player.tscn',
-    'fungal-spore': 'res://scn/player/player_strafer/player_strafer.tscn',
-    'helminth': 'res://scn/player/player_worm/player_worm_long.tscn',
+    'bacterium': ('res://scn/player/player.tscn', 'res://scn/player/player_config_bacteria.tres'),
+    'fungal-spore': ('res://scn/player/player_strafer/player_strafer.tscn', 'res://scn/player/player_strafer/player_config_strafer.tres'),
+    'helminth': ('res://scn/player/player_worm/player_worm_long.tscn', 'res://scn/player/player_worm/player_config_worm.tres'),
+    'diatom': ('res://scn/player/player_coop/player_coop.tscn', 'res://scn/player/player_coop/player_config_coop.tres'),
+    'lil-collector': ('res://scn/player/player_collector/player_collector.tscn', 'res://scn/player/player_collector/player_config_collector.tres'),
 }
 SPECIAL = {'slot_damage.tscn': 'volatile', 'slot_energy.tscn': 'conductive', 'slot_turret.tscn': 'omni'}
 
@@ -129,8 +133,11 @@ def read_body(pack, scene_path, key, out_dir):
     return body
 
 
-def evolution_tiers(pack, scene_path):
-    """Reads get_evolutions() from the class script: a list of tiers, each a list of evolution resources."""
+def evolution_tiers(pack, scene_path, config_path):
+    """A list of tiers, each a list of evolution resources: from the class config
+    (full game) or from get_evolutions() in the class script (demo)."""
+    if config_path.replace('res://', '') + '.remap' in pack.index or config_path.replace('res://', '') in pack.index:
+        return clean(pack.resource(config_path)['resources'][-1]['props'].get('evolutions', []), [])
     res = pack.resource(scene_path)
     script = clean(scene_nodes(res)[0]['props'].get('script'), res['ext'])
     src = decompile(pack.raw(script.replace('res://', '').replace('.gd', '.gdc')))
@@ -142,14 +149,15 @@ def evolution_tiers(pack, scene_path):
 
 def main(pck_path, out_dir):
     pack = Pack(pck_path)
-    tr_name = next(n for n in pack.index if n.endswith('.en.translation') and not n.startswith('addons/'))
+    en = [n for n in pack.index if n.endswith('.en.translation') and not n.startswith(('addons/', 'mod_example/'))]
+    tr_name = max(en, key=lambda n: pack.index[n][1])
     t = Translation(parse(pack.raw(tr_name))['resources'][-1]['props'])
     out = {'classes': [], 'bodies': {}}
-    for cid, base in CLASSES.items():
+    for cid, (base, config) in CLASSES.items():
         key = f'{cid}-start'
         out['bodies'][key] = {**read_body(pack, base, key, out_dir), 'name': 'Starting body', 'tier': 0}
         tiers = []
-        for i, tier in enumerate(evolution_tiers(pack, base)):
+        for i, tier in enumerate(evolution_tiers(pack, base, config)):
             keys = []
             for evo in tier:
                 props = pack.resource(evo)['resources'][-1]['props']
@@ -163,6 +171,7 @@ def main(pck_path, out_dir):
                     'tier': i + 1,
                     'bonusDamage': props.get('bonus_damage', 0.0),
                     'bonusHp': props.get('bonus_hp', 0),
+                    'bonusStamina': props.get('bonus_stamina', 0),
                     **({'description': desc} if desc else {}),
                 }
                 keys.append(ekey)

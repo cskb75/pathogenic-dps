@@ -105,9 +105,14 @@ describe('slot graph', () => {
     // 3 free edges on each square
     expect(body.slots.filter((s) => s.kind === 'external')).toHaveLength(6);
     expect(body.connections.get(centerSlotId('c'))).toContain(centerSlotId('s'));
-    // An edge slot only connects to its own piece's centre.
-    const edge = body.slots.find((s) => s.pieceId === 's' && s.kind === 'external')!;
-    expect(body.connections.get(edge.id)).toEqual([centerSlotId('s')]);
+    // Side edges reach both centres; the far edge faces away from the core and reaches only its own.
+    const far = body.slots.find((s) => s.pieceId === 's' && s.facing && s.facing.x > 0.9)!;
+    expect(body.connections.get(far.id)).toEqual([centerSlotId('s')]);
+    const side = body.slots.find((s) => s.pieceId === 's' && s.facing && s.facing.y < -0.9)!;
+    expect(body.connections.get(side.id)).toEqual([centerSlotId('s'), centerSlotId('c')]);
+    // The body's centre is the average of the module centres; a module is 102.4 game pixels.
+    expect(body.frame.center.x).toBeCloseTo(0.5);
+    expect(body.frame.scale).toBeCloseTo(1.024);
   });
 
   it('detects edges shared with pieces other than the parent (closing a ring)', () => {

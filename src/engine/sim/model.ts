@@ -119,6 +119,8 @@ export interface Item {
 export interface GunState {
   /** Sum of attack speed bonuses from weapon infusers: rate x (1 + bonus). */
   bonus: number;
+  /** Multipliers on top of that (Photoreceptor). */
+  mult: number;
   trace: TraceLine[];
   /** Seconds between this weapon's attacks, for organelles that care. */
   interval: number;
@@ -147,8 +149,8 @@ export interface WeaponProfile {
   kind: AttackKind;
   /** Damage of one projectile / slash before rarity. */
   base: number;
-  /** Damage multiplier by rarity. Default 1 + 0.4 x rarity. */
-  damageMult?: (r: number) => number;
+  /** Damage multiplier by rarity (and the weapon's Overcharge). Default 1 + 0.4 x rarity. */
+  damageMult?: (r: number, charge: number) => number;
   /** Damage set directly by the organelle; `base` stays the attack's base damage for bonuses. */
   damage?: (r: number) => number;
   /** Seconds between attacks at this rarity. */
@@ -170,8 +172,8 @@ export interface WeaponProfile {
   explodes?: boolean;
   /** Only fires with at least this much Overcharge. */
   minCharge?: number;
-  /** Random extra delay per attack, averaged. */
-  extraDelay?: number;
+  /** The next attack comes up to this many seconds sooner, at random (Galvanic Conduit). */
+  randomAdvance?: number;
   /** Every third attack deals 3x damage but comes 0.4s later. */
   combo?: boolean;
   /** Spins up: consecutive attacks come up to this much sooner. */
@@ -183,6 +185,30 @@ export interface WeaponProfile {
   energyCost?: (r: number) => number;
   /** Uses per second set by the organelle itself, instead of an attack interval. */
   rate?: (ctx: Ctx, r: number, charge: number) => number;
+  /** Not an attack the player makes (pseudopods, zappers): Turgosome ignores it. */
+  passive?: boolean;
+  /**
+   * Attacks made by minions: how many of them are alive on average, given
+   * how often they're spawned (uses per second). Symbiotic Pseudopod's buff is
+   * spread over all of them.
+   */
+  minions?: (ctx: Ctx, r: number, rate: number) => number;
+  /** Changes the attack after every connected organelle has modified it (random damage rolls, the weapon's own burn...). */
+  onFire?: (ctx: Ctx, self: Item, a: Attack, charge: number) => void;
+}
+
+/**
+ * Exocytotic Chamber: the weapon charges up instead of firing and releases a
+ * cluster worth `mult` times its own damage for the time spent charging.
+ */
+export interface ChargeCluster {
+  /** Seconds of charge for a full cluster. */
+  maxTime: number;
+  mult: number;
+  /** Charging speed per point of the chamber's Overcharge. */
+  speedPerCharge: number;
+  /** Shots per cluster: charge time / attack interval x this x 2 (1 to 15). */
+  burst: (r: number) => number;
 }
 
 export interface MitoProfile {
@@ -206,6 +232,12 @@ export interface Behaviour {
   deferred?: boolean;
   /** Refunds the stamina of connected weapons (Glycogen Synthesizer). */
   staminaRefund?: (r: number, charge: number) => number;
+  /** Replaces a connected weapon's firing with a charged cluster. */
+  chargeCluster?: ChargeCluster;
+  /** Mitotic Nidus: a minion that fires the connected weapons at this share of their speed. */
+  minionGunner?: (r: number) => number;
+  /** Symbiotic Pseudopod: extra damage multiplier for the minion it supports. */
+  minionSupport?: (r: number) => number;
   modifyAttack?(ctx: Ctx, self: Item, a: Attack, chain: Item[], times: number): void;
   modifyGun?(ctx: Ctx, self: Item, gun: GunState, times: number): void;
   /** How faithfully this organelle is modeled, shown in the UI. */
