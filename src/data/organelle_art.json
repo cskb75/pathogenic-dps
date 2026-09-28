@@ -1,0 +1,3533 @@
+{
+ "slots": {
+  "internal": {
+   "src": "art/body-parts/organelle-internal-slot.webp",
+   "x": -1.085,
+   "y": -1.075,
+   "w": 2.17,
+   "h": 2.15,
+   "m": [
+    0.186,
+    0.0,
+    0.0,
+    0.186,
+    0.0,
+    0.0
+   ],
+   "opacity": 0.6
+  },
+  "external": {
+   "src": "art/body-parts/organelle-external-slot.webp",
+   "x": -1.09,
+   "y": -1.94,
+   "w": 2.17,
+   "h": 3.02,
+   "m": [
+    -0.0022,
+    0.186,
+    -0.186,
+    -0.0022,
+    0.0,
+    0.0
+   ],
+   "opacity": 0.749
+  }
+ },
+ "organelles": {
+  "ablative-mitochondrion": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-charge-mitochondrion-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/ablative-mitochondrion.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.03,
+      0.0
+     ]
+    }
+   ]
+  },
+  "actin-whip": {
+   "layers": [
+    {
+     "src": "art/body-parts/plasma-whip.webp",
+     "x": -0.32,
+     "y": -0.45,
+     "w": 2.99,
+     "h": 0.9
+    }
+   ]
+  },
+  "apex-nidus": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-glycogen-synthesizer-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/minion-heavy.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "apoptosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-gibs-detonation-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/explosive-enemies.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "attractor": {
+   "layers": [
+    {
+     "src": "art/body-parts/attractor.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "autolytic-oxysome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-extensor-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/recycling-dmg.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      -0.0542
+     ]
+    }
+   ]
+  },
+  "autophagic-mitochondrion": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-autophagic-mitochondrion-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/autophagic-mitochondrion.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "axopodium": {
+   "layers": [
+    {
+     "src": "art/body-parts/axopodium.webp",
+     "x": -0.31,
+     "y": -0.3,
+     "w": 3.85,
+     "h": 0.6
+    }
+   ]
+  },
+  "bacteriophage-launcher": {
+   "layers": [
+    {
+     "src": "art/body-parts/minion-gun-bacteriophage.webp",
+     "x": -0.26,
+     "y": -0.5,
+     "w": 1.55,
+     "h": 1.0
+    }
+   ]
+  },
+  "ballistic-flagellum": {
+   "layers": [
+    {
+     "src": "art/body-parts/bullet-lash-body.webp",
+     "x": 0.01,
+     "y": -0.4,
+     "w": 1.85,
+     "h": 0.8
+    },
+    {
+     "src": "art/body-parts/bullet-lash-connection.webp",
+     "x": -0.225,
+     "y": -0.225,
+     "w": 0.725,
+     "h": 0.45
+    }
+   ]
+  },
+  "berserk-mitochondrion": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-berserk-mitochondrion-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/berserk-mitochondrion.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "bifurcator": {
+   "layers": [
+    {
+     "src": "art/body-parts/bifurcator.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "blastocyst-mortar": {
+   "layers": [
+    {
+     "src": "art/body-parts/player-weapon-rocket-launcher.webp",
+     "x": -0.29,
+     "y": -0.35,
+     "w": 2.6,
+     "h": 0.7
+    }
+   ]
+  },
+  "capsid-flail": {
+   "layers": [
+    {
+     "src": "art/body-parts/flail.webp",
+     "x": -0.23,
+     "y": -0.8,
+     "w": 3.49,
+     "h": 1.6
+    }
+   ]
+  },
+  "caustic-secretor": {
+   "layers": [
+    {
+     "src": "art/body-parts/caustic-secretor.webp",
+     "x": -0.225,
+     "y": -0.225,
+     "w": 2.15,
+     "h": 0.45
+    }
+   ]
+  },
+  "chemoreceptor-antenna": {
+   "layers": [
+    {
+     "src": "art/body-parts/secret-path-weapon.webp",
+     "x": -0.28,
+     "y": -0.35,
+     "w": 1.98,
+     "h": 0.7
+    }
+   ]
+  },
+  "chitin-shield": {
+   "layers": [
+    {
+     "src": "art/body-parts/player-weapon-4.webp",
+     "x": -0.745,
+     "y": -0.73,
+     "w": 1.49,
+     "h": 1.46,
+     "m": [
+      0.0,
+      0.883,
+      -0.763,
+      0.0,
+      0.37,
+      0.0
+     ]
+    }
+   ]
+  },
+  "chromatophore-gland": {
+   "layers": [
+    {
+     "src": "art/body-parts/chromatophore.webp",
+     "x": -0.29,
+     "y": -0.4,
+     "w": 1.7,
+     "h": 0.8
+    }
+   ]
+  },
+  "chromatophore-lens": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-projectile-surge-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/laser.webp",
+     "x": -0.405,
+     "y": -0.405,
+     "w": 0.81,
+     "h": 0.81,
+     "m": [
+      0.6,
+      0.0,
+      0.0,
+      0.6,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "chronosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-chronosome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/chronosome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      -0.03,
+      0.02
+     ]
+    }
+   ]
+  },
+  "ciliate-strike": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-ciliate-strike-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/ciliate-strike.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "cluster-ejector": {
+   "layers": [
+    {
+     "src": "art/body-parts/spreadshot2.webp",
+     "x": -0.24,
+     "y": -0.3,
+     "w": 1.3,
+     "h": 0.6
+    }
+   ]
+  },
+  "cnidocyst": {
+   "layers": [
+    {
+     "src": "art/body-parts/harpoon.webp",
+     "x": -0.25,
+     "y": -0.3,
+     "w": 2.84,
+     "h": 0.6
+    }
+   ]
+  },
+  "conal-burst": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-projectile-surge-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/conal-burst.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "concussive-tendril": {
+   "layers": [
+    {
+     "src": "art/body-parts/concussive-tentril.webp",
+     "x": -0.3,
+     "y": -0.3,
+     "w": 3.49,
+     "h": 0.6
+    }
+   ]
+  },
+  "cryoflagellum": {
+   "layers": [
+    {
+     "src": "art/body-parts/freeze-lash-body.webp",
+     "x": 0.235,
+     "y": -0.175,
+     "w": 2.45,
+     "h": 0.35
+    },
+    {
+     "src": "art/body-parts/freeze-lash-connection.webp",
+     "x": -0.225,
+     "y": -0.225,
+     "w": 0.725,
+     "h": 0.45
+    }
+   ]
+  },
+  "cryophore": {
+   "layers": [
+    {
+     "src": "art/body-parts/freeze-ray.webp",
+     "x": -0.26,
+     "y": -0.35,
+     "w": 1.9,
+     "h": 0.7
+    }
+   ]
+  },
+  "cryopseudopod": {
+   "layers": [
+    {
+     "src": "art/body-parts/cryopseudopod-tentacle.webp",
+     "x": -0.3,
+     "y": -0.3,
+     "w": 3.57,
+     "h": 0.6
+    }
+   ]
+  },
+  "cryopulse": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-cryosome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/cryopulse.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "cryosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/cryosome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "cryptobiotic-core": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-cryptobiotic-core-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/cryptobiotic-core.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "cyst-depositor": {
+   "layers": [
+    {
+     "src": "art/body-parts/mine-launcher.webp",
+     "x": -0.27,
+     "y": -0.41,
+     "w": 1.4,
+     "h": 0.8
+    }
+   ]
+  },
+  "dehiscence-lobber": {
+   "layers": [
+    {
+     "src": "art/body-parts/grenade-launcher.webp",
+     "x": -0.21,
+     "y": -0.35,
+     "w": 1.9,
+     "h": 0.7
+    }
+   ]
+  },
+  "dorsal-lysosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-dorsal-lysosome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/dorsal-lysosome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.31,
+      0.0,
+      0.0,
+      0.31,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "echosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/echosome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "elastosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-elastosome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/elastosome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "elusive-mitochondrion": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-dodge-mitochondrion-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/dash-mitochondrion.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.325,
+      0.0,
+      0.0,
+      0.325,
+      0.0,
+      0.03
+     ]
+    }
+   ]
+  },
+  "endospore": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-endospore-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/endospore.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "entrant-mitochondrion": {
+   "layers": [
+    {
+     "src": "art/body-parts/entrant-mitochondrion.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "exocytotic-chamber": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-triosome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/charge-bullets.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "explosive-charge": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-explosive-charge-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/explosive-charge.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "extensor": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-extensor-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/extensor.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "flagellum": {
+   "layers": [
+    {
+     "points": [
+      [
+       0.0,
+       -0.1255
+      ],
+      [
+       0.0208,
+       -0.1311
+      ],
+      [
+       0.0417,
+       -0.1362
+      ],
+      [
+       0.0625,
+       -0.1402
+      ],
+      [
+       0.0833,
+       -0.1432
+      ],
+      [
+       0.1042,
+       -0.1454
+      ],
+      [
+       0.125,
+       -0.1467
+      ],
+      [
+       0.1458,
+       -0.1472
+      ],
+      [
+       0.1667,
+       -0.1471
+      ],
+      [
+       0.1875,
+       -0.1464
+      ],
+      [
+       0.2083,
+       -0.1452
+      ],
+      [
+       0.2292,
+       -0.1435
+      ],
+      [
+       0.25,
+       -0.1415
+      ],
+      [
+       0.2708,
+       -0.1391
+      ],
+      [
+       0.2917,
+       -0.1366
+      ],
+      [
+       0.3125,
+       -0.134
+      ],
+      [
+       0.3333,
+       -0.1312
+      ],
+      [
+       0.3542,
+       -0.1286
+      ],
+      [
+       0.375,
+       -0.126
+      ],
+      [
+       0.3958,
+       -0.1236
+      ],
+      [
+       0.4167,
+       -0.1214
+      ],
+      [
+       0.4375,
+       -0.1197
+      ],
+      [
+       0.4583,
+       -0.1183
+      ],
+      [
+       0.4792,
+       -0.1174
+      ],
+      [
+       0.5,
+       -0.1171
+      ],
+      [
+       0.5448,
+       -0.1082
+      ],
+      [
+       0.5828,
+       -0.0828
+      ],
+      [
+       0.6082,
+       -0.0448
+      ],
+      [
+       0.6171,
+       0.0
+      ],
+      [
+       0.6082,
+       0.0448
+      ],
+      [
+       0.5828,
+       0.0828
+      ],
+      [
+       0.5448,
+       0.1082
+      ],
+      [
+       0.5,
+       0.1171
+      ],
+      [
+       0.4792,
+       0.1174
+      ],
+      [
+       0.4583,
+       0.1183
+      ],
+      [
+       0.4375,
+       0.1197
+      ],
+      [
+       0.4167,
+       0.1214
+      ],
+      [
+       0.3958,
+       0.1236
+      ],
+      [
+       0.375,
+       0.126
+      ],
+      [
+       0.3542,
+       0.1286
+      ],
+      [
+       0.3333,
+       0.1312
+      ],
+      [
+       0.3125,
+       0.134
+      ],
+      [
+       0.2917,
+       0.1366
+      ],
+      [
+       0.2708,
+       0.1391
+      ],
+      [
+       0.25,
+       0.1415
+      ],
+      [
+       0.2292,
+       0.1435
+      ],
+      [
+       0.2083,
+       0.1452
+      ],
+      [
+       0.1875,
+       0.1464
+      ],
+      [
+       0.1667,
+       0.1471
+      ],
+      [
+       0.1458,
+       0.1472
+      ],
+      [
+       0.125,
+       0.1467
+      ],
+      [
+       0.1042,
+       0.1454
+      ],
+      [
+       0.0833,
+       0.1432
+      ],
+      [
+       0.0625,
+       0.1402
+      ],
+      [
+       0.0417,
+       0.1362
+      ],
+      [
+       0.0208,
+       0.1311
+      ],
+      [
+       0.0,
+       0.1255
+      ],
+      [
+       -0.048,
+       0.1159
+      ],
+      [
+       -0.0887,
+       0.0887
+      ],
+      [
+       -0.1159,
+       0.048
+      ],
+      [
+       -0.1255,
+       0.0
+      ],
+      [
+       -0.1159,
+       -0.048
+      ],
+      [
+       -0.0887,
+       -0.0887
+      ],
+      [
+       -0.048,
+       -0.1159
+      ]
+     ],
+     "fill": "parasite"
+    },
+    {
+     "points": [
+      [
+       0.5,
+       -0.1162
+      ],
+      [
+       0.6188,
+       -0.1097
+      ],
+      [
+       0.7375,
+       -0.1003
+      ],
+      [
+       0.8562,
+       -0.0899
+      ],
+      [
+       0.975,
+       -0.0803
+      ],
+      [
+       1.0938,
+       -0.0734
+      ],
+      [
+       1.2125,
+       -0.0709
+      ],
+      [
+       1.3313,
+       -0.0687
+      ],
+      [
+       1.45,
+       -0.0657
+      ],
+      [
+       1.5688,
+       -0.0624
+      ],
+      [
+       1.6875,
+       -0.0591
+      ],
+      [
+       1.8062,
+       -0.0564
+      ],
+      [
+       1.925,
+       -0.0545
+      ],
+      [
+       2.0438,
+       -0.0536
+      ],
+      [
+       2.1625,
+       -0.0534
+      ],
+      [
+       2.2812,
+       -0.0536
+      ],
+      [
+       2.4,
+       -0.0541
+      ],
+      [
+       2.5187,
+       -0.0547
+      ],
+      [
+       2.6375,
+       -0.0552
+      ],
+      [
+       2.7563,
+       -0.0553
+      ],
+      [
+       2.875,
+       -0.055
+      ],
+      [
+       2.9937,
+       -0.0541
+      ],
+      [
+       3.1125,
+       -0.0523
+      ],
+      [
+       3.2313,
+       -0.0495
+      ],
+      [
+       3.35,
+       -0.0455
+      ],
+      [
+       3.3955,
+       -0.0455
+      ],
+      [
+       3.3955,
+       0.0455
+      ],
+      [
+       3.35,
+       0.0455
+      ],
+      [
+       3.2313,
+       0.0495
+      ],
+      [
+       3.1125,
+       0.0523
+      ],
+      [
+       2.9937,
+       0.0541
+      ],
+      [
+       2.875,
+       0.055
+      ],
+      [
+       2.7563,
+       0.0553
+      ],
+      [
+       2.6375,
+       0.0552
+      ],
+      [
+       2.5187,
+       0.0547
+      ],
+      [
+       2.4,
+       0.0541
+      ],
+      [
+       2.2812,
+       0.0536
+      ],
+      [
+       2.1625,
+       0.0534
+      ],
+      [
+       2.0438,
+       0.0536
+      ],
+      [
+       1.925,
+       0.0545
+      ],
+      [
+       1.8062,
+       0.0564
+      ],
+      [
+       1.6875,
+       0.0591
+      ],
+      [
+       1.5688,
+       0.0624
+      ],
+      [
+       1.45,
+       0.0657
+      ],
+      [
+       1.3313,
+       0.0687
+      ],
+      [
+       1.2125,
+       0.0709
+      ],
+      [
+       1.0938,
+       0.0734
+      ],
+      [
+       0.975,
+       0.0803
+      ],
+      [
+       0.8562,
+       0.0899
+      ],
+      [
+       0.7375,
+       0.1003
+      ],
+      [
+       0.6188,
+       0.1097
+      ],
+      [
+       0.5,
+       0.1162
+      ],
+      [
+       0.3838,
+       0.1162
+      ],
+      [
+       0.3838,
+       -0.1162
+      ]
+     ],
+     "fill": "parasite"
+    }
+   ],
+   "colors": [
+    [
+     0.0,
+     0.2667,
+     0.3529
+    ],
+    [
+     0.3018,
+     0.0651,
+     0.31
+    ],
+    [
+     0.65,
+     0.3467,
+     0.0
+    ]
+   ]
+  },
+  "galvanic-cnidocyst": {
+   "layers": [
+    {
+     "src": "art/body-parts/electric-harpoon.webp",
+     "x": -0.25,
+     "y": -0.3,
+     "w": 3.0,
+     "h": 0.6
+    }
+   ]
+  },
+  "galvanic-conduit": {
+   "layers": [
+    {
+     "src": "art/body-parts/galvanic-conduit.webp",
+     "x": -0.28,
+     "y": -0.35,
+     "w": 2.38,
+     "h": 0.7
+    }
+   ]
+  },
+  "galvanic-flagellum": {
+   "layers": [
+    {
+     "src": "art/body-parts/galvanic-lash-body.webp",
+     "x": 0.235,
+     "y": -0.175,
+     "w": 2.45,
+     "h": 0.35
+    },
+    {
+     "src": "art/body-parts/galvanic-lash-connection.webp",
+     "x": -0.225,
+     "y": -0.225,
+     "w": 0.725,
+     "h": 0.45
+    }
+   ]
+  },
+  "galvanic-infuser": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-lightning1-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8308,
+      0.0,
+      0.0,
+      0.8308,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/lightning.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.425,
+      0.0,
+      0.0,
+      0.425,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "galvanic-node": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-proximity-coil-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/galvanic-node.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "galvanic-sac": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-proximity-coil-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/galvanic-sac2.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "galvanic-weave": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-galvanic-weave-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8308,
+      0.0,
+      0.0,
+      0.8308,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/galvanic-weaves.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.2875,
+      0.0,
+      0.0,
+      0.2875,
+      0.0,
+      0.02
+     ]
+    }
+   ]
+  },
+  "glycocalyx": {
+   "layers": [
+    {
+     "src": "art/body-parts/glycocalyx.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "src": "art/body-parts/orbital-connection-line2.webp",
+     "x": -1.1993,
+     "y": -2.5638,
+     "w": 2.38,
+     "h": 2.68,
+     "m": [
+      1.525,
+      0.0,
+      0.0,
+      1.63,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "glycogen-synthesizer": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-glycogen-synthesizer-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/stamina-full.webp",
+     "x": -0.545,
+     "y": -0.545,
+     "w": 1.09,
+     "h": 1.09,
+     "m": [
+      0.5606,
+      0.0,
+      0.0,
+      0.5606,
+      -0.0015,
+      0.024
+     ]
+    }
+   ]
+  },
+  "golgi-apparatus": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-golgi-apparatus-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/golgi-apparatus.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "gyrase-wheel": {
+   "layers": [
+    {
+     "src": "art/body-parts/pizza-cutter-longer.webp",
+     "x": -0.25,
+     "y": -0.6,
+     "w": 4.6,
+     "h": 1.2
+    }
+   ]
+  },
+  "gyrosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-magnetosome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/gyrosome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "helical-proboscis": {
+   "layers": [
+    {
+     "src": "art/body-parts/drill.webp",
+     "x": -0.26,
+     "y": -0.4,
+     "w": 2.75,
+     "h": 0.8
+    }
+   ]
+  },
+  "iridophore-membrane": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-iridiphore-membrane-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/iridophore-membrane.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "katanosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-oxysome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/katanosome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      -0.02,
+      -0.04
+     ]
+    }
+   ]
+  },
+  "kinetic-pseudopod": {
+   "layers": [
+    {
+     "src": "art/body-parts/tentacle2.webp",
+     "x": -0.3,
+     "y": -0.3,
+     "w": 3.35,
+     "h": 0.6
+    }
+   ]
+  },
+  "kinetosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-cryptobiotic-core-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/kinetosome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "lacerator-tendril": {
+   "layers": [
+    {
+     "src": "art/body-parts/player-weapon-5.webp",
+     "x": -0.3,
+     "y": -0.3,
+     "w": 3.15,
+     "h": 0.6
+    }
+   ]
+  },
+  "lateral-emitter": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-sympathetic-detonator-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/side-laser.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "lateral-vent": {
+   "layers": [
+    {
+     "src": "art/body-parts/side-shot.webp",
+     "x": -0.21,
+     "y": -0.46,
+     "w": 1.1,
+     "h": 0.9
+    }
+   ]
+  },
+  "luciferase-pump": {
+   "layers": [
+    {
+     "src": "art/body-parts/luciferase-pump.webp",
+     "x": -0.27,
+     "y": -0.35,
+     "w": 2.1,
+     "h": 0.7
+    }
+   ]
+  },
+  "magnetosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-magnetosome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/magnetosome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "metabolic-mitochondrion": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-pickup-mitochondrion-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/pickup-mitochondrion.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3625,
+      0.0,
+      0.0,
+      0.3625,
+      0.0,
+      0.06
+     ]
+    }
+   ]
+  },
+  "mitotic-nidus": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-glycogen-synthesizer-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/minion-sharedgun.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "mucus-emitter": {
+   "layers": [
+    {
+     "src": "art/body-parts/slow-orb.webp",
+     "x": -0.25,
+     "y": -0.45,
+     "w": 1.7,
+     "h": 0.9
+    }
+   ]
+  },
+  "mutagen": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-mutagen-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/mutagen.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "necrolytic-igniter": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-gibs-detonation-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/gibs-detonation.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3375,
+      0.0,
+      0.0,
+      0.3375,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "nidublast": {
+   "layers": [
+    {
+     "src": "art/body-parts/minion-gun.webp",
+     "x": -0.25,
+     "y": -0.45,
+     "w": 1.55,
+     "h": 0.9
+    }
+   ]
+  },
+  "operculum": {
+   "layers": [
+    {
+     "src": "art/body-parts/operculum.webp",
+     "x": -0.215,
+     "y": -0.475,
+     "w": 1.07,
+     "h": 0.95
+    }
+   ]
+  },
+  "opisthoblast": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-elastosome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/splash-behind-hit.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "opsonin-arc": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-sinoatrial-node-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/opsonin-arc.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "opulentor": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-opulentor-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/opulentor.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "ossificator": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-ossificator-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/ossificator.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      -0.0015,
+      0.024
+     ]
+    }
+   ]
+  },
+  "oxidator": {
+   "layers": [
+    {
+     "src": "art/body-parts/player-weapon-flame-ejector.webp",
+     "x": -0.27,
+     "y": -0.25,
+     "w": 1.6,
+     "h": 0.5
+    }
+   ]
+  },
+  "oxysome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-oxysome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/oxysome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      -0.04
+     ]
+    }
+   ]
+  },
+  "perforator-tendril": {
+   "layers": [
+    {
+     "src": "art/body-parts/spear.webp",
+     "x": -0.25,
+     "y": -0.25,
+     "w": 4.07,
+     "h": 0.5
+    }
+   ]
+  },
+  "perforin-infuser": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-chitin-infuser-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/chitin-infuser.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "peroxisome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-turgosome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/explosive-bullets.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "phagolysosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-phagosome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/organelle-eater.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "phagosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-phagosome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/phagosome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      -0.0542
+     ]
+    }
+   ]
+  },
+  "photoreceptor": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-photoreceptor-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/photoreceptor.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "pressurized-spicule": {
+   "layers": [
+    {
+     "src": "art/body-parts/player-weapon-sniper.webp",
+     "x": -0.31,
+     "y": -0.3,
+     "w": 3.0,
+     "h": 0.6
+    }
+   ]
+  },
+  "pristine-mitochondrion": {
+   "layers": [
+    {
+     "src": "art/body-parts/pristine-mitochondrion.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "projectile-surge": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-projectile-surge-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/projectile-surge.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "pulsar-gland": {
+   "layers": [
+    {
+     "src": "art/body-parts/player-weapon-3-shot-burst.webp",
+     "x": -0.29,
+     "y": -0.34,
+     "w": 2.2,
+     "h": 0.7
+    }
+   ]
+  },
+  "pyrocyst": {
+   "layers": [
+    {
+     "src": "art/body-parts/pyrocist.webp",
+     "x": -0.235,
+     "y": -0.365,
+     "w": 1.63,
+     "h": 0.73
+    }
+   ]
+  },
+  "pyroflagellum": {
+   "layers": [
+    {
+     "src": "art/body-parts/fire-lash-body.webp",
+     "x": 0.21,
+     "y": -0.2,
+     "w": 2.5,
+     "h": 0.4
+    },
+    {
+     "src": "art/body-parts/fire-lash-connection.webp",
+     "x": -0.225,
+     "y": -0.225,
+     "w": 0.725,
+     "h": 0.45
+    }
+   ]
+  },
+  "pyrosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pyrosome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "recuperative-mitochondrion": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-recuperative-mitochondrion-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/recuperative-mitochondrion.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "refiner": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-refiner-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/refiner.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      -0.0015,
+      0.024
+     ]
+    }
+   ]
+  },
+  "regenerator": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-regenerator-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/regenerator.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "resilinoplast": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-resilinoplast-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/resilinoplast.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "resonant-cavity": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-resonant-cavity-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/resonant-cavity.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "rotary-extruder": {
+   "layers": [
+    {
+     "src": "art/body-parts/machine-gun.webp",
+     "x": -0.24,
+     "y": -0.44,
+     "w": 2.55,
+     "h": 0.9
+    }
+   ]
+  },
+  "ruptusome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-chronosome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.02,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/fractosome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3375,
+      0.0,
+      0.0,
+      0.3375,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "scatter-ejector": {
+   "layers": [
+    {
+     "src": "art/body-parts/player-weapon-spreadshot.webp",
+     "x": -0.3,
+     "y": -0.3,
+     "w": 1.7,
+     "h": 0.6
+    }
+   ]
+  },
+  "sentry-nidus": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-sentry-polyp-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/sentry-polyp.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "sequence-scrambler": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-sequence-scrambler-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/sequence-scrambler.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "sinoatrial-node": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-sinoatrial-node-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/sinoatrial-node.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      -0.02,
+      -0.0158
+     ]
+    }
+   ]
+  },
+  "spore-cannon": {
+   "layers": [
+    {
+     "src": "art/body-parts/player-weapon-2.webp",
+     "x": -0.275,
+     "y": -0.275,
+     "w": 1.95,
+     "h": 0.55
+    }
+   ]
+  },
+  "starved-oxysome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-starved-oxysome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/starved-oxysome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      -0.0542
+     ]
+    }
+   ]
+  },
+  "staurolobber": {
+   "layers": [
+    {
+     "src": "art/body-parts/staurolobber.webp",
+     "x": -0.22,
+     "y": -0.35,
+     "w": 1.435,
+     "h": 0.7
+    }
+   ]
+  },
+  "stinger-tendril": {
+   "layers": [
+    {
+     "src": "art/body-parts/dagger.webp",
+     "x": -0.25,
+     "y": -0.25,
+     "w": 1.34,
+     "h": 0.5
+    }
+   ]
+  },
+  "swarm-nidus": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-endospore-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/minion-heavy-shooter.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "symbiotic-pseudopod": {
+   "layers": [
+    {
+     "src": "art/body-parts/symbiotic-pseudopod.webp",
+     "x": -0.25,
+     "y": -0.25,
+     "w": 4.34,
+     "h": 0.5
+    }
+   ]
+  },
+  "sympathetic-detonator": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-sympathetic-detonator-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/sympathetic-detonator.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "thermal-lance": {
+   "layers": [
+    {
+     "src": "art/body-parts/player-weapon-3.webp",
+     "x": -0.21,
+     "y": -0.35,
+     "w": 1.6,
+     "h": 0.7
+    }
+   ]
+  },
+  "toxic-flagellum": {
+   "layers": [
+    {
+     "src": "art/body-parts/toxin-lash-body.webp",
+     "x": 0.21,
+     "y": -0.2,
+     "w": 2.5,
+     "h": 0.4
+    },
+    {
+     "src": "art/body-parts/toxin-lash-connection.webp",
+     "x": -0.225,
+     "y": -0.225,
+     "w": 0.725,
+     "h": 0.45
+    }
+   ]
+  },
+  "toxisome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-poison-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/poison.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3375,
+      0.0,
+      0.0,
+      0.3375,
+      -0.04,
+      -0.01
+     ]
+    }
+   ]
+  },
+  "tri-phase-tendril": {
+   "layers": [
+    {
+     "src": "art/body-parts/dual-blades2.webp",
+     "x": -0.24,
+     "y": -0.9,
+     "w": 2.52,
+     "h": 1.8,
+     "tile": 1.4738
+    }
+   ]
+  },
+  "triosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-triosome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/triosome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "trophic-pseudopod": {
+   "layers": [
+    {
+     "src": "art/body-parts/tentacle-energy.webp",
+     "x": -0.28,
+     "y": -0.28,
+     "w": 3.31,
+     "h": 0.56
+    }
+   ]
+  },
+  "turgosome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-turgosome-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/turgosome.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "vacuole": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-charge-mitochondrion-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      0.0,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/charge-mitochondrion.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "vengeful-mitochondrion": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-vengeful-mitochondrion-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/vengeful-mitochondrion.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "vesicle": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-vesicle-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/vesicle.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.37,
+      0.0,
+      0.0,
+      0.37,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  },
+  "vortisome": {
+   "layers": [
+    {
+     "src": "art/body-parts/pattern-chitin-infuser-pattern.webp",
+     "x": -0.65,
+     "y": -0.65,
+     "w": 1.3,
+     "h": 1.3,
+     "m": [
+      0.8,
+      0.0,
+      0.0,
+      0.8,
+      -0.03,
+      0.0
+     ],
+     "masked": true
+    },
+    {
+     "src": "art/body-parts/magnetic-bullets.webp",
+     "x": -0.8,
+     "y": -0.8,
+     "w": 1.6,
+     "h": 1.6,
+     "m": [
+      0.3,
+      0.0,
+      0.0,
+      0.3,
+      0.0,
+      0.0
+     ]
+    }
+   ]
+  }
+ }
+}
