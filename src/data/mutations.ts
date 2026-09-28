@@ -46,7 +46,7 @@ export const mutations: MutationDef[] = [
   { id: "mitochondrial-augmentation", name: "Mitochondrial Augmentation", category: "Build", description: "+15% overcharge strength from mitochondria", effects: { generatorStrength: 0.15 }, notes: "Formula from the game code." },
   { id: "molecular-deconstruction", name: "Molecular Deconstruction", category: "Economy", description: "+3 DNA and +3 cores for recycling organelles" },
   { id: "myofibrillar-hypertrophy", name: "Myofibrillar Hypertrophy", category: "Offense", description: "+15% damage of melee attacks", effects: { meleeDamage: 0.15 }, notes: "Formula from the game code." },
-  { id: "nidal-degranulation", name: "Nidal Degranulation", category: "Offense", description: "Your minions release a 100 damage splash attack every time they're hit", notes: "Minions are not modeled." },
+  { id: "nidal-degranulation", name: "Nidal Degranulation", category: "Offense", description: "Your minions release a 100 damage splash attack every time they're hit", notes: "Only triggers when a minion is hit, so it is not counted in DPS." },
   { id: "offensive-adaptation", name: "Offensive Adaptation", category: "Offense", description: "Gain a random weapon" },
   { id: "osmotic-bargaining", name: "Osmotic Bargaining", category: "Economy", description: "Shop prices are 25% cheaper" },
   { id: "ossification", name: "Ossification", category: "Survival", description: "+3 armor." },
