@@ -299,6 +299,25 @@ describe('minions', () => {
     expect(dps(b, 'core.c')).toBeCloseTo(((1 / 1.5 + 1 / 5) * 50 + (0.5 / 0.8) * 15) / 2);
   });
 
+  it('minions and pseudopods keep attacking while your weapons wait for stamina', () => {
+    // Two Pulsar Glands and a held Luciferase Pump beam drain stamina; only what you fire yourself stops when it runs out.
+    const slots = {
+      'core.e0': org('pulsar-gland'),
+      's.e1': org('pulsar-gland'),
+      'core.e2': org('luciferase-pump'),
+      'core.c': org('apex-nidus'),
+      's.e2': org('kinetic-pseudopod'),
+    };
+    const free = calculate(build(slots, { params: engagedAll() }), gameData);
+    const limited = calculate(build(slots, { params: { minionEngagement: 1 } }), gameData);
+    expect(limited.staminaDuty).toBeLessThan(0.9);
+    for (const held of ['core.e0', 'core.e2']) {
+      expect(limited.items.get(held)!.weapon!.dps).toBeCloseTo(free.items.get(held)!.weapon!.dps * limited.staminaDuty);
+    }
+    expect(limited.items.get('core.c')!.weapon!.dps).toBeCloseTo(free.items.get('core.c')!.weapon!.dps);
+    expect(limited.items.get('s.e2')!.weapon!.dps).toBeCloseTo(free.items.get('s.e2')!.weapon!.dps);
+  });
+
   it('Sentry Nidus: sentries pile up through the room, each firing a shell a second', () => {
     // 1 Overcharge: a sentry every 10s, each alive min(20s, 30s room / 2) = 15s on average.
     const b = build({ 'core.c': org('sentry-nidus'), 's.c': { ...org('entrant-mitochondrion'), uptime: 1 } }, { params: engagedAll() });

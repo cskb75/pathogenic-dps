@@ -338,6 +338,8 @@ export function calculate(build: Build, data: GameData): CalcResult {
     multi: number;
     rate: number;
     stamina: number;
+    /** Fired with the attack button (guns, held beams), so it stops while stamina refills. Minions, passives and actives don't. */
+    gated: boolean;
     nodes: AttackNode[];
     gunTrace: TraceLine[];
     charge: number;
@@ -442,14 +444,14 @@ export function calculate(build: Build, data: GameData): CalcResult {
         rate += r;
         ctx.gun = null;
       }
-      return { single, multi, rate, stamina: 0, nodes, gunTrace: trace, charge: ctx.charge(nidus) };
+      return { single, multi, rate, stamina: 0, gated: false, nodes, gunTrace: trace, charge: ctx.charge(nidus) };
     }
 
     const results = new Map<Item, WeaponEval>();
     for (const w of weaponItems) {
       const prof = w.behaviour.weapon!;
       const c = ctx.charge(w);
-      const zero: WeaponEval = { single: 0, multi: 0, rate: 0, stamina: 0, nodes: [], gunTrace: [], charge: c };
+      const zero: WeaponEval = { single: 0, multi: 0, rate: 0, stamina: 0, gated: false, nodes: [], gunTrace: [], charge: c };
       if (w.behaviour.minionGunner) {
         results.set(w, ctx.works(w) ? fireAsMinion(ctx, w) : zero);
         continue;
@@ -602,7 +604,7 @@ export function calculate(build: Build, data: GameData): CalcResult {
       const single = nodes.reduce((s, n) => s + n.single, 0) * rate * damageMult;
       const multi = nodes.reduce((s, n) => s + n.multi, 0) * rate * damageMult;
       if (ctx.budget.exhausted) chainsCut.add(w.info.name);
-      results.set(w, { single, multi, rate, stamina: run.noStamina ? 0 : stamina, nodes, gunTrace: gun.trace, charge: c });
+      results.set(w, { single, multi, rate, stamina: run.noStamina ? 0 : stamina, gated: !selfTimed || prof.stamina > 0, nodes, gunTrace: gun.trace, charge: c });
       ctx.gun = null;
     }
 
@@ -647,9 +649,10 @@ export function calculate(build: Build, data: GameData): CalcResult {
     for (const [item, c] of charges) chargeAvg.set(item, (chargeAvg.get(item) ?? 0) + p * c);
     for (const [w, r] of results) {
       const a = avg.get(w) ?? { single: 0, multi: 0, rate: 0, stamina: 0, charge: 0 };
-      a.single += p * r.single * duty;
-      a.multi += p * r.multi * duty;
-      a.rate += p * r.rate * duty;
+      const d = r.gated ? duty : 1;
+      a.single += p * r.single * d;
+      a.multi += p * r.multi * d;
+      a.rate += p * r.rate * d;
       a.stamina += p * r.stamina;
       a.charge += p * r.charge;
       avg.set(w, a);
@@ -663,7 +666,8 @@ export function calculate(build: Build, data: GameData): CalcResult {
 
   const view = (label: string, s: ReturnType<typeof evaluateState>, w: Item): StateView => {
     const r = s.results.get(w)!;
-    return { label, dps: r.single * s.duty, multiDps: r.multi * s.duty, attacksPerSecond: r.rate * s.duty, charge: r.charge, gunTrace: r.gunTrace, nodes: r.nodes };
+    const d = r.gated ? s.duty : 1;
+    return { label, dps: r.single * d, multiDps: r.multi * d, attacksPerSecond: r.rate * d, charge: r.charge, gunTrace: r.gunTrace, nodes: r.nodes };
   };
 
   // --- Results ----------------------------------------------------------------

@@ -76,6 +76,7 @@ It follows the game's attack flow:
 6. **Stamina.**
    - Every weapon attack costs stamina, and stamina does not regenerate while you keep firing.
    - When it runs out you wait about 1.5 s to refill. Sustained DPS includes these pauses.
+   - Only attacks you fire yourself (weapons and held beams) stop. Minions, passive attacks such as pseudopods, and actives keep going, as in the game: `gun.gd` checks stamina only when you press attack.
 
 **This run** holds what changes during a run:
 - the mutations you've picked (DNA upgrades), with a counter for picking one more than once
