@@ -34,7 +34,10 @@ export function Results({ data, build, result, selected, onSelect }: Props) {
         )}
       </div>
       {result.staminaDuty < 0.995 && (
-        <p className="small muted">Stamina lets you fire {fmtPct(result.staminaDuty)} of the time; the numbers include the pauses.</p>
+        <p className="small muted">
+          Stamina lets you fire {fmtPct(result.staminaDuty)} of the time; the numbers include the pauses. Minions, pseudopods and actives don't need
+          stamina, so they keep going.
+        </p>
       )}
 
       {result.weapons.length === 0 ? (
