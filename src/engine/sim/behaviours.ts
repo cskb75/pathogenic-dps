@@ -742,6 +742,111 @@ const mitochondria: Record<string, Behaviour> = {
 };
 
 // ---------------------------------------------------------------------------
+// Minions
+//
+// Minions follow behaviour trees (scn/player/minions/*.tscn). Their attacks go
+// through the organelle that spawned them: it sets the damage, its connected
+// infusers modify it and mutations add their share of the projectile's own
+// base damage. The calculator turns each minion's attack pattern into a rate
+// and assumes it spends "Minion engagement" of the fight attacking. Minions
+// spawned by actives stay until the room ends or they die: on average
+// min("Minion lifetime", half a room) seconds.
+
+const engaged = (ctx: Ctx) => ctx.param('minionEngagement');
+const spawnedLife = (ctx: Ctx) => Math.min(ctx.param('minionLifetime'), ctx.param('roomLength') / 2);
+
+const minions: Record<string, Behaviour> = {
+  'apex-nidus': weapon(
+    {
+      kind: 'slash',
+      // The heavy minion's slash: 70 base damage in the game files, set to 50 (+20 per rarity).
+      base: 70,
+      damage: (r) => 50 + 20 * r,
+      interval: fixed(1),
+      // A slash every 1.5s in reach, and a charge ending in another slash every 5s.
+      rate: (ctx) => (1 / 1.5 + 1 / 5) * engaged(ctx),
+      stamina: 0,
+      reach: 'area',
+      minions: () => 1,
+      onFire(_ctx, self, a) {
+        // Bumping into enemies also hurts them (15 +5 per rarity, at most every 0.8s); assumed half as often.
+        const touch = newAttack({ kind: 'slash', label: 'Contact', base: 15 + 5 * self.r, copies: 0.5 / 0.8 / (1 / 1.5 + 1 / 5) });
+        touch.trace.push({ source: self.info.name, text: 'contact damage, about every 1.6s while fighting' });
+        a.siblings.push(touch);
+      },
+    },
+    'One heavy minion that slashes every 1.5s and charges every 5s; it comes back each room. Uses "Minion engagement".',
+  ),
+  'sentry-nidus': weapon(
+    {
+      kind: 'bullet',
+      base: 95,
+      damage: (r) => 80 + 50 * r,
+      interval: fixed(1),
+      energyCost: () => 10,
+      // Each sentry fires a shell a second for as long as it lives.
+      hits: (ctx) => spawnedLife(ctx) * engaged(ctx),
+      stamina: 0,
+      reach: 'single',
+      speed: 2000,
+      minions: (ctx, _r, rate) => rate * spawnedLife(ctx),
+    },
+    'Active: places a spinning sentry for every 10 Overcharge-seconds; each fires a shell a second. Uses "Minion lifetime" and "Minion engagement".',
+  ),
+  'swarm-nidus': weapon(
+    {
+      kind: 'bullet',
+      base: 6.5,
+      damage: (r) => 9 + 5 * r,
+      interval: fixed(1),
+      energyCost: () => 4,
+      // Volleys of 9 shots over 0.9s, then a 0.1-1.5s pause: about 5.3 shots a second.
+      hits: (ctx) => spawnedLife(ctx) * (9 / 1.7) * engaged(ctx),
+      stamina: 0,
+      reach: 'single',
+      minions: (ctx, _r, rate) => rate * spawnedLife(ctx),
+    },
+    'Active: spawns a fast-shooting minion for every 4 Overcharge-seconds. Uses "Minion lifetime" and "Minion engagement".',
+  ),
+  nidublast: weapon(
+    {
+      kind: 'slash',
+      base: 20,
+      interval: scaled(4),
+      stamina: 20,
+      // Each minion lives 5s and slashes every 0.15s when it reaches an enemy.
+      hits: (ctx) => (5 / 0.15) * engaged(ctx),
+      reach: 'single',
+      minions: (_ctx, _r, rate) => rate * 5,
+    },
+    'Fires a minion that lives 5s, slashing every 0.15s. Its infusers apply to every slash. Uses "Minion engagement".',
+  ),
+  'bacteriophage-launcher': weapon(
+    {
+      kind: 'slash',
+      base: 20,
+      damage: (r) => (8 + r) * (1 + 0.4 * r),
+      interval: scaled(3),
+      stamina: 25,
+      hits: (ctx) => (3 / 0.15) * engaged(ctx),
+      reach: 'single',
+      minions: (_ctx, _r, rate) => rate * 3,
+    },
+    'Fires a phage that lives 3s, slashing every 0.15s. Infected enemies that die release more phages (not counted). Uses "Minion engagement".',
+  ),
+  'mitotic-nidus': {
+    // Its "weapon" is whatever it's connected to; the calculator fires those for it.
+    weapon: { kind: 'bullet', base: 0, interval: fixed(1), rate: () => 0, stamina: 0, reach: 'single', minions: () => 1 },
+    minionGunner: (r) => 0.4 + 0.1 * r,
+    notes: 'A minion that fires each connected weapon at 40% (+10% per rarity) of its speed, without stamina. Both organelles\' infusers apply. Uses "Minion engagement".',
+  },
+  'symbiotic-pseudopod': {
+    minionSupport: (r) => 2 + 0.5 * r,
+    notes: 'Gives the nearest minion +200% damage (+50% per rarity); spread over all your minions. Its own infusers on the buffed minion are not counted.',
+  },
+};
+
+// ---------------------------------------------------------------------------
 // Everything else: no effect on damage, or not modeled yet (and why).
 
 const none = (notes: string): Behaviour => ({ noDps: true, notes });
@@ -760,13 +865,6 @@ const others: Record<string, Behaviour> = {
   'iridophore-membrane': none('Invulnerability.'),
   'sequence-scrambler': none('Rerolls rewards.'),
   'chemoreceptor-antenna': none('Finds secrets.'),
-  'apex-nidus': later('Minions follow their own AI (attack timing, chasing), which the calculator does not simulate.'),
-  'mitotic-nidus': later('Minions follow their own AI, which the calculator does not simulate.'),
-  'sentry-nidus': later('Minions follow their own AI, which the calculator does not simulate.'),
-  'swarm-nidus': later('Minions follow their own AI, which the calculator does not simulate.'),
-  nidublast: later('Shoots minions, which follow their own AI.'),
-  'bacteriophage-launcher': later('Shoots multiplying minions, which follow their own AI.'),
-  'symbiotic-pseudopod': later('Gives the nearest minion +200% damage (+50% per rarity); minions are not simulated yet.'),
   pyroflagellum: later('Leaves burning puddles (7, +3 per rarity) where you dodge: depends on where enemies walk.'),
   'toxic-flagellum': later('Leaves toxic puddles (5, +2 per rarity) as you move: depends on where enemies walk.'),
   cryoflagellum: later('Freezes enemies near your tail when you dodge (20, +10 per rarity damage): depends on positioning.'),
@@ -778,7 +876,7 @@ const others: Record<string, Behaviour> = {
   'necrolytic-igniter': later('Active: explodes nearby corpses for 200 (+100 per rarity): depends on kills.'),
 };
 
-export const behaviours: Record<string, Behaviour> = { ...weapons, ...infusers, ...weaponInfusers, ...mitochondria, ...others };
+export const behaviours: Record<string, Behaviour> = { ...weapons, ...infusers, ...weaponInfusers, ...mitochondria, ...minions, ...others };
 
 export const EMPTY_BEHAVIOUR: Behaviour = {};
 
@@ -789,7 +887,7 @@ export function behaviourFor(id: string): Behaviour {
 /** True when the calculator knows what the organelle does to damage. */
 export function isModeled(id: string): boolean {
   const b = behaviours[id];
-  return !!b && !!(b.weapon || b.mito || b.modifyAttack || b.modifyGun || b.staminaRefund || b.chargeCluster || b.conduit || b.noDps);
+  return !!b && !!(b.weapon || b.mito || b.modifyAttack || b.modifyGun || b.staminaRefund || b.chargeCluster || b.minionGunner || b.minionSupport || b.conduit || b.noDps);
 }
 
 export type { Attack, Ctx, Item };

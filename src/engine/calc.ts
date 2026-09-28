@@ -41,6 +41,7 @@ const STAMINA_DELAY = 1;
 const EXPLOSION_LEVEL_SCALING = 0.75;
 const OPPOSITE = { left: 'right', right: 'left', top: 'bottom', bottom: 'top' } as const;
 const TICK = 1 / 60;
+const pct = (x: number) => `${Math.round(x * 100)}%`;
 /** How long a cooldown really takes: the game checks it once per physics tick. */
 const tick = (seconds: number) => Math.max(1, Math.ceil(seconds / TICK - 1e-6)) * TICK;
 /** Excitable organelles only work at this much Overcharge. */
@@ -395,11 +396,64 @@ export function calculate(build: Build, data: GameData): CalcResult {
       budget: { left: CHAIN_BUDGET, exhausted: false },
     };
 
+    /** Mitotic Nidus: its minion fires each connected weapon at a share of its base speed, without stamina. */
+    function fireAsMinion(ctx: Ctx, nidus: Item): WeaponEval {
+      const share = nidus.behaviour.minionGunner!(nidus.r);
+      const guns = neighbours(nidus).filter((g) => g.info.category === 'weapon' && g.behaviour.weapon && !g.behaviour.weapon.rate && !g.behaviour.weapon.energyCost && ctx.works(g));
+      const trace: TraceLine[] = [{ source: nidus.info.name, text: `fires ${guns.length ? guns.map((g) => g.info.name).join(', ') : 'nothing: connect weapons to it'} at ${pct(share)} speed` }];
+      const nodes: AttackNode[] = [];
+      let single = 0;
+      let multi = 0;
+      let rate = 0;
+      for (const g of guns) {
+        const prof = g.behaviour.weapon!;
+        const cg = ctx.charge(g);
+        // The minion tries to fire about every 0.05s once a weapon's own (rarity-only) cooldown has passed.
+        const r = (1 / (prof.interval(g.r) / share + 0.025)) * param('minionEngagement');
+        const shots = prof.shots ? prof.shots(g.r, cg) : 1;
+        const mult = prof.damageMult ? prof.damageMult(g.r, cg) : 1 + 0.4 * g.r;
+        const a = newAttack({
+          kind: prof.kind,
+          label: `${g.info.name} (minion)`,
+          base: prof.base * mult,
+          copies: shots,
+          aim: prof.aimParam ? param(prof.aimParam) : 1,
+          hits: prof.hits ? prof.hits(ctx) : 1,
+          reach: prof.reach,
+          bullet: prof.kind === 'bullet',
+          melee: prof.kind === 'slash',
+          speed: prof.speed ?? 0,
+        });
+        if (prof.damage) {
+          a.base = prof.base;
+          a.damage = prof.damage(g.r);
+        }
+        ctx.gun = { bonus: 0, mult: 1, trace: [], interval: 1 / r };
+        ctx.budget = { left: CHAIN_BUDGET, exhausted: false };
+        announce(ctx, a, g);
+        applyModifiers(ctx, a, [g], neighbours(g), 1);
+        applyModifiers(ctx, a, [nidus], neighbours(nidus), 1);
+        prof.onFire?.(ctx, g, a, cg);
+        ctx.link(g, nidus, 'attack');
+        const n = evaluateRoot(ctx, a, param('angledHit'));
+        nodes.push(...n);
+        single += n.reduce((s, x) => s + x.single, 0) * r * damageMult;
+        multi += n.reduce((s, x) => s + x.multi, 0) * r * damageMult;
+        rate += r;
+        ctx.gun = null;
+      }
+      return { single, multi, rate, stamina: 0, nodes, gunTrace: trace, charge: ctx.charge(nidus) };
+    }
+
     const results = new Map<Item, WeaponEval>();
     for (const w of weaponItems) {
       const prof = w.behaviour.weapon!;
       const c = ctx.charge(w);
       const zero: WeaponEval = { single: 0, multi: 0, rate: 0, stamina: 0, nodes: [], gunTrace: [], charge: c };
+      if (w.behaviour.minionGunner) {
+        results.set(w, ctx.works(w) ? fireAsMinion(ctx, w) : zero);
+        continue;
+      }
       if (!ctx.works(w) || (prof.minCharge && c < prof.minCharge)) {
         results.set(w, zero);
         continue;
@@ -550,6 +604,24 @@ export function calculate(build: Build, data: GameData): CalcResult {
       if (ctx.budget.exhausted) chainsCut.add(w.info.name);
       results.set(w, { single, multi, rate, stamina: run.noStamina ? 0 : stamina, nodes, gunTrace: gun.trace, charge: c });
       ctx.gun = null;
+    }
+
+    // Symbiotic Pseudopod: each one buffs the minion nearest to it, so the buff is spread over all minions alive.
+    const supporters = [...items.values()].filter((i) => i.behaviour.minionSupport && ctx.works(i));
+    if (supporters.length) {
+      const minionWeapons = weaponItems.filter((w) => w.behaviour.weapon!.minions && results.get(w)!.rate > 0);
+      const alive = minionWeapons.reduce((s, w) => s + w.behaviour.weapon!.minions!(ctx, w.r, results.get(w)!.rate), 0);
+      if (alive > 0) {
+        const bonus = supporters.reduce((s, i) => s + i.behaviour.minionSupport!(i.r), 0) / supporters.length;
+        const mult = 1 + bonus * Math.min(1, supporters.length / alive);
+        for (const w of minionWeapons) {
+          const r = results.get(w)!;
+          r.single *= mult;
+          r.multi *= mult;
+          r.gunTrace.push({ source: supporters[0].info.name, text: `x${mult.toFixed(2)} minion damage (${fmt(alive)} minions share the buff)` });
+          for (const s of supporters) ctx.link(s, w, 'attack');
+        }
+      }
     }
 
     // Stamina: all weapons fire together and share one pool.

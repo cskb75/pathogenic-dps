@@ -21,6 +21,7 @@ const GROUPS: { title: string; ids: string[] }[] = [
     ids: ['angledHit', 'pelletHit', 'sideHit', 'mineHit', 'orbContact', 'stauroLasers', 'fireballContact', 'targetDistance', 'backstabChance', 'beatSync', 'nearbyTime'],
   },
   { title: 'Overcharge triggers', ids: ['roomLength', 'killRate', 'hitsTakenRate', 'dodgeRate', 'dodgeRateAll', 'blockRate', 'slashRate', 'pickupRate', 'perfectRooms'] },
+  { title: 'Minions', ids: ['minionEngagement', 'minionLifetime'] },
   { title: 'Stamina and stacking organelles', ids: ['staminaLimits', 'maxStamina', 'resonantStacks'] },
 ];
 

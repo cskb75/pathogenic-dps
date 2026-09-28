@@ -62,6 +62,8 @@ export const gameData: GameData = {
     { id: 'blockRate', name: 'Shots blocked per second', description: 'Enemy projectiles a Glycocalyx arc blocks.', default: 0.3, min: 0, max: 3, step: 0.05 },
     { id: 'slashRate', name: 'Shots slashed per second', description: 'Enemy projectiles your melee attacks cut (Ablative Mitochondrion).', default: 0.2, min: 0, max: 3, step: 0.05 },
     { id: 'pickupRate', name: 'Pickups per second', description: 'For Metabolic Mitochondrion.', default: 0.1, min: 0, max: 2, step: 0.05 },
+    { id: 'minionEngagement', name: 'Minion engagement', description: 'Share of the fight each minion spends attacking: in reach of an enemy and facing it.', default: 0.6, min: 0, max: 1, step: 0.05, percent: true },
+    { id: 'minionLifetime', name: 'Minion lifetime (s)', description: 'How long a minion from an active (Sentry, Swarm Nidus) survives; they are gone when the room ends either way.', default: 20, min: 1, max: 180, step: 1 },
     { id: 'nearbyTime', name: 'Enemies next to you', description: 'Share of the fight an enemy is right next to you (Galvanic Sac, Kinetosome).', default: 0.3, min: 0, max: 1, step: 0.05, percent: true },
     { id: 'perfectRooms', name: 'Rooms without losing HP', description: 'For Pristine Mitochondrion.', default: 0.5, min: 0, max: 1, step: 0.05, percent: true },
     { id: 'cores', name: 'Cores held', description: 'Cores you are carrying right now (Argentic Coating).', default: 0, min: 0, max: 9999, step: 1 },

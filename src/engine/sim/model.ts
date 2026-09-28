@@ -187,6 +187,12 @@ export interface WeaponProfile {
   rate?: (ctx: Ctx, r: number, charge: number) => number;
   /** Not an attack the player makes (pseudopods, zappers): Turgosome ignores it. */
   passive?: boolean;
+  /**
+   * Attacks made by minions: how many of them are alive on average, given
+   * how often they're spawned (uses per second). Symbiotic Pseudopod's buff is
+   * spread over all of them.
+   */
+  minions?: (ctx: Ctx, r: number, rate: number) => number;
   /** Changes the attack after every connected organelle has modified it (random damage rolls, the weapon's own burn...). */
   onFire?: (ctx: Ctx, self: Item, a: Attack, charge: number) => void;
 }
@@ -228,6 +234,10 @@ export interface Behaviour {
   staminaRefund?: (r: number, charge: number) => number;
   /** Replaces a connected weapon's firing with a charged cluster. */
   chargeCluster?: ChargeCluster;
+  /** Mitotic Nidus: a minion that fires the connected weapons at this share of their speed. */
+  minionGunner?: (r: number) => number;
+  /** Symbiotic Pseudopod: extra damage multiplier for the minion it supports. */
+  minionSupport?: (r: number) => number;
   modifyAttack?(ctx: Ctx, self: Item, a: Attack, chain: Item[], times: number): void;
   modifyGun?(ctx: Ctx, self: Item, gun: GunState, times: number): void;
   /** How faithfully this organelle is modeled, shown in the UI. */

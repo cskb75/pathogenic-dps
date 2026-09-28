@@ -288,6 +288,43 @@ describe('actives and self-charging organelles', () => {
   });
 });
 
+describe('minions', () => {
+  const engagedAll = () => ({ staminaLimits: 0, minionEngagement: 1 });
+
+  it('Apex Nidus: a slash every 1.5s, a charge every 5s, and contact damage', () => {
+    const b = build({ 'core.c': org('apex-nidus') }, { params: engagedAll() });
+    expect(dps(b, 'core.c')).toBeCloseTo((1 / 1.5 + 1 / 5) * 50 + (0.5 / 0.8) * 15);
+    // Half the time engaged: half the damage.
+    b.params.minionEngagement = 0.5;
+    expect(dps(b, 'core.c')).toBeCloseTo(((1 / 1.5 + 1 / 5) * 50 + (0.5 / 0.8) * 15) / 2);
+  });
+
+  it('Sentry Nidus: sentries pile up through the room, each firing a shell a second', () => {
+    // 1 Overcharge: a sentry every 10s, each alive min(20s, 30s room / 2) = 15s on average.
+    const b = build({ 'core.c': org('sentry-nidus'), 's.c': { ...org('entrant-mitochondrion'), uptime: 1 } }, { params: engagedAll() });
+    expect(dps(b, 'core.c')).toBeCloseTo(0.1 * 15 * 80);
+  });
+
+  it('Nidublast: each minion slashes every 0.15s for 5s, with the gun\'s infusers', () => {
+    const b = build({ 'core.e0': org('nidublast') }, { params: engagedAll() });
+    expect(dps(b, 'core.e0')).toBeCloseTo((1 / 4) * (5 / 0.15) * 20);
+    b.slots['core.c'] = org('oxysome');
+    expect(dps(b, 'core.e0')).toBeCloseTo((1 / 4) * (5 / 0.15) * 25);
+  });
+
+  it('Mitotic Nidus: its minion fires connected weapons at 40% speed', () => {
+    const r = calculate(build({ 'core.c': org('mitotic-nidus'), 'core.e0': org('caustic-secretor') }, { params: engagedAll() }), gameData);
+    expect(r.items.get('core.c')!.weapon!.dps).toBeCloseTo(6.5 / (0.105 / 0.4 + 0.025));
+    expect(r.items.get('core.e0')!.weapon!.dps).toBeCloseTo(BASE);
+  });
+
+  it('Symbiotic Pseudopod: +200% damage for the minion it supports', () => {
+    const plain = dps(build({ 'core.c': org('apex-nidus') }, { params: engagedAll() }), 'core.c');
+    const buffed = dps(build({ 'core.c': org('apex-nidus'), 'core.e0': org('symbiotic-pseudopod') }, { params: engagedAll() }), 'core.c');
+    expect(buffed).toBeCloseTo(3 * plain);
+  });
+});
+
 describe('stamina', () => {
   it('pauses about 1.5s after draining 100 stamina', () => {
     const b = build({ 'core.e0': org('caustic-secretor') }, { params: {} });
