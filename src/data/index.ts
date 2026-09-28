@@ -20,12 +20,13 @@ function withEvolutions(cls: ClassDef): ClassDef {
 
 export const gameData: GameData = {
   dataSource: 'Full release game files (September 2026 build)',
+  // The game's rarity colours (bodypart.gd, get_rarity_color).
   rarities: [
-    { id: 'common', name: 'Common', color: '#9ca3af' },
-    { id: 'rare', name: 'Rare', color: '#3b82f6' },
-    { id: 'epic', name: 'Epic', color: '#a855f7' },
-    { id: 'legendary', name: 'Legendary', color: '#f59e0b' },
-    { id: 'mythic', name: 'Mythic', color: '#ef4444' },
+    { id: 'common', name: 'Common', color: '#ffffff' },
+    { id: 'rare', name: 'Rare', color: '#1e90ff' },
+    { id: 'epic', name: 'Epic', color: '#a020f0' },
+    { id: 'legendary', name: 'Legendary', color: '#ffa500' },
+    { id: 'mythic', name: 'Mythic', color: '#db143d' },
   ],
   organelles,
   traits: [

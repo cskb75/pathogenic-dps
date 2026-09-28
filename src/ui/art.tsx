@@ -3,13 +3,41 @@
 // served from public/art (see tools/extract).
 
 import { useState, type CSSProperties } from 'react';
-import type { BodyPlan, ClassDef, GameData, PlasmidDef } from '../engine/types';
+import type { BodyPlan, Category, ClassDef, GameData, PlasmidDef, SlotKind } from '../engine/types';
 
 /** URL for a file under public/. */
 export const art = (path: string) => `${import.meta.env.BASE_URL}${path}`;
 
 export const organelleIcon = (id: string) => art(`art/organelles/${id}.webp`);
 export const mutationIcon = (id: string) => art(`art/mutations/${id}.webp`);
+
+/** The game's UI art (frames, type icons, plasmid menu), from tools/extract/ui_art.py. */
+export const uiArt = (name: string) => art(`art/ui/${name}.webp`);
+
+/** The icon the game's tooltip shows for an organelle's type; some types have an external variant. */
+export function typeIconName(category: Category, slot: SlotKind): string {
+  const external = slot === 'external';
+  switch (category) {
+    case 'weapon':
+      return 'type-weapons';
+    case 'infuser':
+      return 'type-modifiers';
+    case 'mitochondrion':
+      return external ? 'type-mitochondria-external' : 'type-mitochondria';
+    case 'active':
+      return external ? 'type-actives-external' : 'type-actives';
+    case 'flagellum':
+    case 'pseudopod':
+      return 'type-lashes';
+    default:
+      return external ? 'type-support-external' : 'type-support';
+  }
+}
+
+/** A small organelle type icon (the icons are 7:10). */
+export function TypeIcon({ category, slot, height = 20 }: { category: Category; slot: SlotKind; height?: number }) {
+  return <img className="type-icon" src={uiArt(typeIconName(category, slot))} width={Math.round(height * 0.7)} height={height} alt="" draggable={false} />;
+}
 
 /** Plasmids that start you with a mutation have no icon of their own: they use the mutation's. */
 export function plasmidIcon(p: PlasmidDef, data: GameData): string {

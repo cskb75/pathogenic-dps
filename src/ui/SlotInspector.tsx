@@ -3,10 +3,10 @@ import type { CalcResult, Link, MitoResult } from '../engine/calc';
 import { findClass, slotState } from '../engine/calc';
 import type { Build, GameData, Rarity, SlotKind } from '../engine/types';
 import type { Action } from '../state/build';
-import { Icon, organelleIcon } from './art';
+import { Icon, organelleIcon, TypeIcon } from './art';
 import { WeaponBreakdown } from './Breakdown';
 import { OrganellePicker } from './OrganellePicker';
-import { CATEGORY_LABELS, fmtNum, fmtPct } from './format';
+import { CATEGORY_LABELS, CATEGORY_TYPE, fmtNum, fmtPct } from './format';
 
 interface Props {
   data: GameData;
@@ -118,11 +118,15 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
       </fieldset>
 
       {info && inst && !picking ? (
-        <div className="organelle-card" style={{ '--rarity': data.rarities.find((r) => r.id === inst.rarity)?.color } as CSSProperties}>
+        <div
+          className={`organelle-card type-${CATEGORY_TYPE[info.category]}`}
+          style={{ '--rarity': data.rarities.find((r) => r.id === inst.rarity)?.color } as CSSProperties}
+        >
           <Icon src={organelleIcon(info.id)} size={64} className="organelle-card-icon" />
           <div className="organelle-card-text">
-            <strong>{info.name}</strong>
-            <span className="muted small">
+            <strong className="organelle-card-name">{info.name}</strong>
+            <span className="organelle-card-type small">
+              <TypeIcon category={info.category} slot={info.slot} height={20} />
               {CATEGORY_LABELS[info.category]} · {info.slot}
             </span>
             <span className="small">{info.description}</span>

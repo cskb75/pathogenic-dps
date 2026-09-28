@@ -221,6 +221,14 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
               <path d="M0,0 L10,5 L0,10 z" className={`arrowhead ${k}`} />
             </marker>
           ))}
+          {/* Empty slots, coloured like the game's slot sprites (gfx/organelle_internal_slot.png, organelle_external_slot.png). */}
+          {['internal', 'external'].map((k) => (
+            <radialGradient key={k} id={`slot-${k}`}>
+              <stop offset="0.38" style={{ stopColor: 'var(--slot-centre)' }} />
+              <stop offset="0.52" style={{ stopColor: `var(--slot-${k})` }} />
+              <stop offset="1" style={{ stopColor: `var(--slot-${k})` }} />
+            </radialGradient>
+          ))}
         </defs>
 
         {plan && !blobs && <BodyArt plan={plan} />}
