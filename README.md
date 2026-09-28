@@ -126,7 +126,7 @@ The code is split into three parts:
 The app is styled after the game's own menus, so it reads as Pathogenic rather than a generic web app. `src/ui/tokens.css` holds the design tokens, each traced to where it comes from in the game files:
 
 - **Palette:** the pause menu's navy frames and thin light frame lines, with the plasmid menu's glows (cyan for what you can take next, orange for what you own).
-- **Colours:** rarity colours and organelle type colours come from `bodypart.gd`; empty slot colours come from the slot sprites.
+- **Colours:** rarity colours and organelle type colours come from `bodypart.gd`.
 - **Fonts:** Exo 2 for text, Teko for titles, VT323 for readouts.
 
 The art the styles use is in `public/art/ui`, copied from the game by `tools/extract/ui_art.py`:
@@ -134,6 +134,16 @@ The art the styles use is in `public/art/ui`, copied from the game by `tools/ext
 - the 9-patch menu frames, used for panels and buttons
 - the tooltip frame and icon for each organelle type
 - the plasmid menu's node frames, DNA-strand links and backdrop
+
+The body editor draws organelles the way the game does, from `src/data/organelle_art.json` and `public/art/body-parts` (written by `tools/extract/organelle_art.py`):
+
+- **External organelles** stick straight out of their slot, along the slot's facing. Each is the texture its scene draws at rest, at the game's size, with its round end on the slot. Flagella are a connector plus a body; the plain Flagellum is a tapered line in your pathogen's colour, brighter with rarity.
+- **Internal organelles** show their sprite on the slot and tint the body around it with their pattern.
+- **Rarity:** above Common, an outline in the rarity's colour, like the game's outline shaders.
+- **Empty slots** are the game's slot sprites: a disc inside the body, a teardrop pointing out for external slots.
+- **Framing:** the view zooms out to fit every organelle, like the game's camera. Slot rings keep a readable size on screen.
+
+Animation (wiggle, recoil) and the game's lighting are left out. Everywhere else (the picker, the slot panel, the results) organelles keep their wiki icons.
 
 Components pick an organelle's type (weapon, active, modifier, energy or lash) with `CATEGORY_TYPE` in `src/ui/format.ts`. The theme is dark only, like the game.
 

@@ -1,6 +1,6 @@
 # Game data extraction
 
-Scripts for reading Pathogenic's Godot 4 export (`.pck`) so organelle numbers can be checked against the game files. They handle the demo (compiled `.gdc` scripts) and the full release (plain `.gd` scripts, pck format 4). **Decompiled scripts and the raw JSON dumps must never be committed**: keep that output outside the repo. Only `app_data.py`, `plasmids.py`, `ui_art.py` and `wiki_icons.py` write into the repo, and only app data: body plan geometry, plasmid trees and art.
+Scripts for reading Pathogenic's Godot 4 export (`.pck`) so organelle numbers can be checked against the game files. They handle the demo (compiled `.gdc` scripts) and the full release (plain `.gd` scripts, pck format 4). **Decompiled scripts and the raw JSON dumps must never be committed**: keep that output outside the repo. Only `app_data.py`, `plasmids.py`, `organelle_art.py`, `ui_art.py` and `wiki_icons.py` write into the repo, and only app data: body plan geometry, plasmid trees, how organelles are drawn, and art.
 
 ```sh
 pip install zstandard pillow
@@ -18,6 +18,7 @@ python3 tools/extract/extract.py path/to/pathogenic.pck /tmp/pathogenic-out
 | `bodies.py` | Extracts each pathogen's body plans: starting body and evolutions (slots, connections, mirroring, special slots, outline, centre bone) and their sprites. |
 | `app_data.py` | Turns `bodies.py`'s output into `src/data/bodies.json` and `public/art/bodies`. |
 | `plasmids.py` | Writes every pathogen's plasmid tree (positions, links, text, icons, damage effects) to `src/data/plasmids.json` and `public/art/plasmids`. |
+| `organelle_art.py` | Reads how each organelle is drawn on the body (the textured lines and sprites in its scene, at rest) and the empty slot sprites. Writes `src/data/organelle_art.json` and the textures to `public/art/body-parts`. |
 | `ui_art.py` | Copies the game's UI art the app's theme uses (menu frames, organelle type frames and icons, plasmid node frames, DNA links, the plasmid menu backdrop) into `public/art/ui`. |
 | `wiki_icons.py` | Downloads organelle, mutation and plasmid icons from pathogenic.wiki into `public/art`. |
 
@@ -27,6 +28,7 @@ To refresh the body plans and plasmid trees after a game update:
 python3 tools/extract/bodies.py path/to/pathogenic.pck /tmp/pathogenic-bodies
 python3 tools/extract/app_data.py /tmp/pathogenic-bodies
 python3 tools/extract/plasmids.py path/to/pathogenic.pck
+python3 tools/extract/organelle_art.py path/to/pathogenic.pck
 python3 tools/extract/ui_art.py path/to/pathogenic.pck
 ```
 

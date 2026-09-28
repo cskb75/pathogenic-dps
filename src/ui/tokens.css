@@ -65,11 +65,6 @@
   --type-lash-glow: #2fe0cc;
 
   /* Organelle slots */
-  --slot-centre: #eae0a3;
-  --slot-internal: #b0b988;
-  --slot-internal-edge: #78775e;
-  --slot-external: #c78877;
-  --slot-external-edge: #7e575c;
   --slot-fill: #0a0d18;
   --graft-volatile: #fa172c;
   --graft-conductive: #ffe03c;

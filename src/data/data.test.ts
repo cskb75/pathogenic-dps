@@ -1,8 +1,10 @@
+import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { calculate } from '../engine/calc';
 import { validateData } from '../engine/validate';
 import { RARITIES, type SlotState } from '../engine/types';
 import { gameData } from './index';
+import organelleArt from './organelle_art.json';
 
 describe('game data', () => {
   it('has no broken references', () => {
@@ -61,6 +63,19 @@ describe('game data', () => {
         expect(result.items.size, plan.id).toBe(plan.slots.length);
         expect(result.totalDps, plan.id).toBeGreaterThan(0);
       }
+    }
+  });
+
+  it('knows how every organelle looks on the body, and ships its textures', () => {
+    type Layer = { src?: string; points?: unknown };
+    const looks = organelleArt.organelles as Record<string, { layers: Layer[] }>;
+    const slots = organelleArt.slots as Record<string, Record<string, Layer>>;
+    for (const g of ['plain', ...gameData.grafts.map((g) => g.id)]) expect(Object.keys(slots[g] ?? {}).sort(), g).toEqual(['external', 'internal']);
+    const layers: Layer[] = [...Object.values(slots).flatMap((s) => Object.values(s)), ...Object.values(looks).flatMap((a) => a.layers)];
+    for (const o of gameData.organelles) expect(looks[o.id]?.layers.length, o.id).toBeGreaterThan(0);
+    for (const l of layers) {
+      expect(l.src || l.points, JSON.stringify(l)).toBeTruthy();
+      if (l.src) expect(existsSync(new URL(`../../public/${l.src}`, import.meta.url)), l.src).toBe(true);
     }
   });
 });

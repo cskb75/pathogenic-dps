@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type CSSProperties, type Dispatch, type KeyboardEvent, type MouseEvent } from 'react';
+import { useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type KeyboardEvent, type MouseEvent } from 'react';
 import { buildAmoebaBody, nextGrowthId, placeBlob, type AmoebaBody, type Blob } from '../engine/amoeba';
 import { placementOptions, removePieceTree, type PlacementOption, type Slot, type SlotKind } from '../engine/body';
 import type { CalcResult } from '../engine/calc';
@@ -6,7 +6,8 @@ import { evolutionPath, findClass, slotState } from '../engine/calc';
 import type { Vec } from '../engine/geometry';
 import type { BodyPlan, Build, EvolvingBody, GameData, ModularBody } from '../engine/types';
 import type { Action } from '../state/build';
-import { art, organelleIcon, PlanThumb } from './art';
+import { art, PlanThumb } from './art';
+import { ArtLayers, flagellumColor, layerCorners, organelleArt, slotArt } from './organelleArt';
 
 type Tool = { kind: 'select' } | { kind: 'add'; pieceType: string } | { kind: 'grow'; slot: SlotKind } | { kind: 'remove' };
 
@@ -23,6 +24,14 @@ interface Props {
 const S = 100;
 const R_INTERNAL = 0.17;
 const R_EXTERNAL = { modular: 0.12, fixed: 0.145 };
+/** When the view zooms out to fit long organelles, slots stay at least this big on screen (radius in pixels). */
+const MIN_SLOT_PX: Record<SlotKind, number> = { internal: 11, external: 9 };
+/** Screen pixels per editor unit that line widths are drawn for (a bare body fills the view at about this scale). */
+const REF_UNIT_PX = 150;
+/** Room around organelle art at the edges of the view. */
+const ART_PAD = 0.15;
+/** The game's rarity outline is about 2.5 game pixels (0.025 units) wide; keep it visible when zoomed out. */
+const OUTLINE = { units: 0.025, minPx: 1.3 };
 /** Nanobot edge slots sit slightly outside the module. */
 const EXTERNAL_OFFSET = 0.08;
 
@@ -47,11 +56,36 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
   const svgRef = useRef<SVGSVGElement>(null);
   const [cursor, setCursor] = useState<Vec | null>(null);
   const organelles = useMemo(() => new Map(data.organelles.map((o) => [o.id, o])), [data]);
-  const rarityColor = useMemo(() => new Map(data.rarities.map((r) => [r.id, r.color])), [data]);
-  const rExternal = plan ? R_EXTERNAL.fixed : R_EXTERNAL.modular;
-  const radius = (slot: Slot) => (slot.kind === 'internal' ? R_INTERNAL : rExternal);
+  const rarityIndex = useMemo(() => new Map(data.rarities.map((r, i) => [r.id, i])), [data]);
+  const ids = useId().replace(/[^\w-]/g, '');
   const slotCenter = (slot: Slot): Vec =>
     plan || !slot.facing ? slot.position : { x: slot.position.x + slot.facing.x * EXTERNAL_OFFSET, y: slot.position.y + slot.facing.y * EXTERNAL_OFFSET };
+
+  // Organelle art is in hundreds of game pixels; a Nanobot editor unit is one module.
+  const artScale = 1 / body.frame.scale;
+  /** Where a slot's art goes: at the slot, turned to face out along the slot. */
+  function placement(slot: Slot) {
+    const c = slotCenter(slot);
+    const angle = slot.facing ? Math.atan2(slot.facing.y, slot.facing.x) : 0;
+    const toBody = (p: Vec): Vec => ({
+      x: c.x + (p.x * Math.cos(angle) - p.y * Math.sin(angle)) * artScale,
+      y: c.y + (p.x * Math.sin(angle) + p.y * Math.cos(angle)) * artScale,
+    });
+    return { toBody, transform: `translate(${c.x * S} ${c.y * S}) rotate(${(angle * 180) / Math.PI}) scale(${S * artScale})` };
+  }
+
+  /** Each filled slot's organelle art and rarity (empty slots show the game's slot sprite). */
+  const equipped = useMemo(
+    () =>
+      new Map(
+        body.slots.map((slot) => {
+          const state = slotState(build, body, slot.id);
+          const look = state?.organelle && organelleArt(state.organelle.id);
+          return [slot.id, look ? { look, rarity: rarityIndex.get(state.organelle!.rarity) ?? 0, excluded: !!state.excluded } : undefined];
+        }),
+      ),
+    [body, build, rarityIndex],
+  );
 
   /** Line between two slots, trimmed so it starts and ends at their edges. */
   function trimmedLine(a: Slot, b: Slot) {
@@ -110,14 +144,38 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
       all = [...body.placed.flatMap((p) => p.vertices), ...frame.flatMap((o) => o.vertices)];
       pad = 0.35;
     }
-    const xs = all.map((v) => v.x);
-    const ys = all.map((v) => v.y);
-    const minX = Math.min(...xs) - pad;
-    const minY = Math.min(...ys) - pad;
-    const w = Math.max(...xs) + pad - minX;
-    const h = Math.max(...ys) + pad - minY;
-    return { box: `${minX * S} ${minY * S} ${w * S} ${h * S}`, aspect: w / h };
-  }, [body, plan, blobs]);
+    // Zoom out to fit every organelle, like the game's camera: long ones reach
+    // several body widths out.
+    const art = body.slots.flatMap((slot) => {
+      const e = equipped.get(slot.id);
+      const layers = e ? e.look.layers.filter((l) => !l.masked) : [slotArt(slot.kind)];
+      const { toBody } = placement(slot);
+      return layers.flatMap((l) => layerCorners(l).map(toBody));
+    });
+    const xs = [...all.map((v) => v.x - pad), ...all.map((v) => v.x + pad), ...art.map((v) => v.x - ART_PAD), ...art.map((v) => v.x + ART_PAD)];
+    const ys = [...all.map((v) => v.y - pad), ...all.map((v) => v.y + pad), ...art.map((v) => v.y - ART_PAD), ...art.map((v) => v.y + ART_PAD)];
+    const minX = Math.min(...xs);
+    const minY = Math.min(...ys);
+    const w = Math.max(...xs) - minX;
+    const h = Math.max(...ys) - minY;
+    return { box: `${minX * S} ${minY * S} ${w * S} ${h * S}`, aspect: w / h, w, h };
+  }, [body, plan, blobs, equipped]);
+
+  // Screen pixels per editor unit, so slots and outlines stay readable when zoomed out.
+  const [screen, setScreen] = useState({ w: 600, h: 500 });
+  useLayoutEffect(() => {
+    const svg = svgRef.current;
+    if (!svg || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(([entry]) => setScreen({ w: entry.contentRect.width, h: entry.contentRect.height }));
+    ro.observe(svg);
+    return () => ro.disconnect();
+  }, []);
+  const unitPx = Math.max(1, Math.min(screen.w / viewBox.w, screen.h / viewBox.h));
+  /** How much further out than usual the view is: lines and rings get this much thicker to keep their size on screen. */
+  const zoom = Math.max(1, REF_UNIT_PX / unitPx);
+  const rExternal = plan ? R_EXTERNAL.fixed : R_EXTERNAL.modular;
+  const radius = (slot: Slot) => Math.max(slot.kind === 'internal' ? R_INTERNAL : rExternal, MIN_SLOT_PX[slot.kind] / unitPx);
+  const outline = Math.max(OUTLINE.units, OUTLINE.minPx / (unitPx * artScale));
 
   const removal = useMemo(() => {
     if (activeTool.kind !== 'remove' || !hoverPiece || hoverPiece === build.pieces[0]?.id) return new Set<string>();
@@ -178,7 +236,7 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
   const hasMirrors = body.slots.some((s) => s.mirrorOf);
   const hint =
     activeTool.kind === 'select'
-      ? `Click a slot to equip it. Large circles are internal slots, small ones external.${hasMirrors ? ' Dashed slots copy the organelle from the matching slot on the other side.' : ''}`
+      ? `Click a slot or an organelle to equip it. Round slots are internal. External slots point the way their organelle will stick out.${hasMirrors ? ' Dashed slots copy the organelle from the matching slot on the other side.' : ''}`
       : activeTool.kind === 'add'
         ? `Click a dashed outline to attach a ${addType?.name.toLowerCase() ?? 'module'}. Orange outlines cover an equipped organelle, which gets removed.`
         : activeTool.kind === 'grow'
@@ -202,7 +260,7 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
         ref={svgRef}
         className={`body-svg tool-${activeTool.kind} ${plan ? 'fixed' : 'modular'} ${freeform ? 'freeform' : ''}`}
         viewBox={viewBox.box}
-        style={plan ? { aspectRatio: String(viewBox.aspect) } : undefined}
+        style={{ ...(plan ? { aspectRatio: String(viewBox.aspect) } : {}), '--k': zoom } as CSSProperties}
         onMouseMove={(e) => activeTool.kind === 'grow' && setCursor(toBody(e))}
         onMouseLeave={() => setCursor(null)}
         onClick={(e) => {
@@ -221,14 +279,27 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
               <path d="M0,0 L10,5 L0,10 z" className={`arrowhead ${k}`} />
             </marker>
           ))}
-          {/* Empty slots, coloured like the game's slot sprites (gfx/organelle_internal_slot.png, organelle_external_slot.png). */}
-          {['internal', 'external'].map((k) => (
-            <radialGradient key={k} id={`slot-${k}`}>
-              <stop offset="0.38" style={{ stopColor: 'var(--slot-centre)' }} />
-              <stop offset="0.52" style={{ stopColor: `var(--slot-${k})` }} />
-              <stop offset="1" style={{ stopColor: `var(--slot-${k})` }} />
-            </radialGradient>
+          {/* Organelles above Common get an outline in their rarity's colour, like the game's outline shaders (scn/shaders/outline_*.tres). */}
+          {data.rarities.slice(1).map((r) => (
+            <filter key={r.id} id={`${ids}-outline-${r.id}`} x="-25%" y="-25%" width="150%" height="150%">
+              <feMorphology in="SourceAlpha" operator="dilate" radius={outline} result="grown" />
+              <feFlood floodColor={r.color} />
+              <feComposite in2="grown" operator="in" result="outline" />
+              <feMerge>
+                <feMergeNode in="outline" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
           ))}
+          {/* The body's silhouette: internal organelles' patterns only show inside it. */}
+          <mask id={`${ids}-body`} style={{ maskType: 'alpha' }}>
+            {plan?.sprite && !blobs && <image href={art(plan.sprite.src)} x={plan.sprite.x * S} y={plan.sprite.y * S} width={plan.sprite.w * S} height={plan.sprite.h * S} preserveAspectRatio="none" />}
+            {plan && !plan.sprite && !blobs && <polygon points={plan.outline.map(([x, y]) => `${x * S},${y * S}`).join(' ')} fill="#fff" />}
+            {blobs?.map((b, i) => <circle key={i} cx={b.x * S} cy={b.y * S} r={b.r * S} fill="#fff" />)}
+            {body.placed.map((piece) => (
+              <polygon key={piece.id} points={pts(piece.vertices)} fill="#fff" />
+            ))}
+          </mask>
         </defs>
 
         {plan && !blobs && <BodyArt plan={plan} />}
@@ -292,10 +363,66 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
           </polygon>
         ))}
 
+        {/* Internal organelles tint the body around them (each scene's "Masked" pattern). */}
+        <g mask={`url(#${ids}-body)`} className="organelle-patterns">
+          {body.slots.map((slot) => {
+            const e = equipped.get(slot.id);
+            const layers = e?.look.layers.filter((l) => l.masked);
+            if (!layers?.length) return null;
+            return (
+              <g key={slot.id} transform={placement(slot).transform}>
+                <ArtLayers layers={layers} />
+              </g>
+            );
+          })}
+        </g>
+
         {body.links.map(([a, b]) => {
           const key = [a, b].sort().join('|');
           return <line key={key} {...trimmedLine(body.slotById.get(a)!, body.slotById.get(b)!)} className={`connector ${selectedLinks.has(key) ? 'near' : ''}`} />;
         })}
+
+        {/* The game's slot sprites: a disc inside, a teardrop pointing out for external slots, with their own
+            art for Volatile, Conductive and Omni slots (built in or grafted). Organelles cover them. */}
+        <g className="slot-sprites">
+          {body.slots.map((slot) => (
+            <g key={slot.id} transform={placement(slot).transform}>
+              <ArtLayers layers={[slotArt(slot.kind, slotState(build, body, slot.id)?.graft ?? slot.special)]} />
+            </g>
+          ))}
+        </g>
+
+        {/* Organelles as the game draws them: external ones stick straight out of their slot, internal ones sit on it. */}
+        {(['external', 'internal'] as const).map((kind) => (
+          <g key={kind} className={`organelle-art organelle-art-${kind}`}>
+            {body.slots
+              .filter((slot) => slot.kind === kind)
+              .map((slot) => {
+                const e = equipped.get(slot.id);
+                if (!e) return null;
+                const item = result.items.get(slot.id);
+                const dim = (!!item?.weapon && item.weapon.dps === 0) || e.excluded;
+                const layers = e.look.layers.filter((l) => !l.masked);
+                const rarity = data.rarities[Math.min(e.rarity, data.rarities.length - 1)];
+                return (
+                  <g
+                    key={slot.id}
+                    transform={placement(slot).transform}
+                    className={`organelle ${dim ? 'dim' : ''} ${selected === slot.id ? 'selected' : ''}`}
+                    onClick={(ev) => {
+                      if (activeTool.kind !== 'select') return;
+                      ev.stopPropagation();
+                      onSelect(slot.id);
+                    }}
+                  >
+                    <g filter={e.rarity > 0 ? `url(#${ids}-outline-${rarity.id})` : undefined}>
+                      <ArtLayers layers={layers} color={flagellumColor(e.look, build.classId, e.rarity)} />
+                    </g>
+                  </g>
+                );
+              })}
+          </g>
+        ))}
 
         {result.links.map((l) => {
           const dim = selected && l.from !== selected && l.to !== selected;
@@ -348,14 +475,12 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
             slot.mirrorOf ? `, copy of ${slot.mirrorOf}` : ''
           }: ${def ? `${def.name}, ${inst!.rarity}${unmodeled ? ' (not modeled yet)' : ''}` : 'empty'}`;
           const select = () => activeTool.kind === 'select' && onSelect(slot.id);
-          const iconSize = r * 1.55;
           return (
             <g
               key={slot.id}
               className={`slot slot-${slot.kind} ${def ? `filled cat-${def.category}` : 'empty'} ${selected === slot.id ? 'selected' : ''} ${
                 invalid ? 'invalid' : ''
               } ${inactive ? 'inactive' : ''} ${unmodeled ? 'unmodeled' : ''} ${state?.excluded ? 'excluded' : ''} ${slot.mirrorOf ? 'mirror' : ''}`}
-              style={def ? ({ '--rarity': rarityColor.get(inst!.rarity) } as CSSProperties) : undefined}
               role="button"
               tabIndex={activeTool.kind === 'select' ? 0 : -1}
               aria-label={label}
@@ -367,29 +492,7 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
               onKeyDown={onActivate(select)}
             >
               <title>{label}</title>
-              {slot.facing && def?.category === 'weapon' && (
-                <polygon
-                  className="facing"
-                  points={pts([
-                    { x: c.x + slot.facing.x * (r + 0.13), y: c.y + slot.facing.y * (r + 0.13) },
-                    { x: c.x + slot.facing.y * 0.06 + slot.facing.x * (r + 0.03), y: c.y - slot.facing.x * 0.06 + slot.facing.y * (r + 0.03) },
-                    { x: c.x - slot.facing.y * 0.06 + slot.facing.x * (r + 0.03), y: c.y + slot.facing.x * 0.06 + slot.facing.y * (r + 0.03) },
-                  ])}
-                />
-              )}
-              {graft && <circle className={`graft graft-${graft.id} ${slot.special && !state?.graft ? 'built-in' : ''}`} cx={c.x * S} cy={c.y * S} r={(r + 0.045) * S} />}
               <circle className="slot-body" cx={c.x * S} cy={c.y * S} r={r * S} />
-              {def && (
-                <image
-                  href={organelleIcon(def.id)}
-                  x={(c.x - iconSize / 2) * S}
-                  y={(c.y - iconSize / 2) * S}
-                  width={iconSize * S}
-                  height={iconSize * S}
-                  preserveAspectRatio="xMidYMid meet"
-                  className="slot-icon"
-                />
-              )}
             </g>
           );
         })}
@@ -569,7 +672,7 @@ function Legend({ data, mirrors }: { data: GameData; mirrors: boolean }) {
       </li>
       {data.grafts.map((g) => (
         <li key={g.id}>
-          <span className={`swatch ring graft-${g.id}`} />
+          <img className="swatch slot-sprite" src={art(slotArt('internal', g.id).src!)} width={16} height={16} alt="" />
           {g.name} slot
         </li>
       ))}

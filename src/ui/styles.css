@@ -360,7 +360,7 @@ input[type='range'] {
 .piece {
   fill: var(--piece);
   stroke: var(--piece-stroke);
-  stroke-width: 2;
+  stroke-width: calc(2px * var(--k, 1));
   stroke-linejoin: round;
 }
 .piece-core {
@@ -379,8 +379,8 @@ input[type='range'] {
 
 .connector {
   stroke: var(--piece-stroke);
-  stroke-width: 1.5;
-  stroke-dasharray: 3 4;
+  stroke-width: calc(1.5px * var(--k, 1));
+  stroke-dasharray: calc(3px * var(--k, 1)) calc(4px * var(--k, 1));
   opacity: 0.7;
 }
 .connector.near {
@@ -388,6 +388,7 @@ input[type='range'] {
   opacity: 0.9;
 }
 
+/* Flows scale with the body (they run slot to slot); only rings and hit targets keep their screen size. */
 .flow {
   stroke-width: 3.5;
   stroke-linecap: round;
@@ -418,8 +419,8 @@ input[type='range'] {
 .ghost {
   fill: color-mix(in srgb, var(--accent) 10%, transparent);
   stroke: var(--accent);
-  stroke-width: 2;
-  stroke-dasharray: 6 5;
+  stroke-width: calc(2px * var(--k, 1));
+  stroke-dasharray: calc(6px * var(--k, 1)) calc(5px * var(--k, 1));
   cursor: pointer;
 }
 .ghost:hover,
@@ -441,7 +442,7 @@ input[type='range'] {
 }
 .slot.slot:focus-visible .slot-body {
   stroke: var(--accent);
-  stroke-width: 5;
+  stroke-width: calc(5px * var(--k, 1));
 }
 
 .slot {
@@ -488,46 +489,33 @@ input[type='range'] {
 .blob-ghost {
   fill: color-mix(in srgb, var(--amoeba) 45%, transparent);
   stroke: var(--accent);
-  stroke-width: 2;
-  stroke-dasharray: 6 5;
+  stroke-width: calc(2px * var(--k, 1));
+  stroke-dasharray: calc(6px * var(--k, 1)) calc(5px * var(--k, 1));
   pointer-events: none;
 }
 .slot-ghost {
   fill: color-mix(in srgb, var(--accent) 25%, transparent);
   stroke: var(--accent);
-  stroke-width: 2;
+  stroke-width: calc(2px * var(--k, 1));
   pointer-events: none;
 }
 .connector.ghost-link {
   stroke: var(--accent);
-  stroke-width: 2.5;
-  stroke-dasharray: 6 5;
+  stroke-width: calc(2.5px * var(--k, 1));
+  stroke-dasharray: calc(6px * var(--k, 1)) calc(5px * var(--k, 1));
   opacity: 0.9;
   pointer-events: none;
 }
 .toolbar-note {
   align-self: center;
 }
+/* Slots are drawn with the game's sprites (and organelles over them): the marker
+   on top is a click target that only shows a ring for hover, selection and warnings. */
 .slot-body {
-  fill: var(--slot-fill);
-  stroke: color-mix(in srgb, var(--line) 35%, transparent);
-  stroke-width: 2;
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: calc(2.5px * var(--k, 1));
   transition: stroke 0.12s, filter 0.12s;
-}
-/* Empty slots look like the game's: a cream centre in an olive (internal) or salmon (external) ring. */
-.slot.empty .slot-body {
-  fill: url(#slot-internal);
-  stroke: var(--slot-internal-edge);
-  stroke-width: 2.5;
-}
-.slot.empty.slot-external .slot-body {
-  fill: url(#slot-external);
-  stroke: var(--slot-external-edge);
-}
-.slot.filled .slot-body {
-  stroke: var(--rarity);
-  stroke-width: 3.5;
-  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--rarity) 70%, transparent));
 }
 .slot:hover .slot-body {
   stroke: var(--accent);
@@ -535,18 +523,33 @@ input[type='range'] {
 }
 .slot.selected .slot-body {
   stroke: var(--accent);
-  stroke-width: 5;
+  stroke-width: calc(4px * var(--k, 1));
   filter: drop-shadow(0 0 8px var(--accent));
 }
 .slot.invalid .slot-body {
   stroke: var(--danger);
 }
-.slot.inactive,
-.slot.excluded {
+.slot.unmodeled .slot-body {
+  stroke: color-mix(in srgb, var(--line) 70%, transparent);
+  stroke-dasharray: calc(5px * var(--k, 1)) calc(3px * var(--k, 1));
+}
+.slot-sprites,
+.organelle-patterns {
+  pointer-events: none;
+}
+.organelle {
+  cursor: pointer;
+}
+.tool-add .organelle,
+.tool-remove .organelle,
+.tool-grow .organelle {
+  pointer-events: none;
+}
+.organelle.dim {
   opacity: 0.5;
 }
-.slot.unmodeled .slot-body {
-  stroke-dasharray: 5 3;
+.organelle.selected {
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--accent) 80%, transparent));
 }
 .slot-label {
   fill: var(--text);
@@ -554,28 +557,6 @@ input[type='range'] {
   pointer-events: none;
   user-select: none;
 }
-.facing {
-  fill: var(--text);
-  opacity: 0.75;
-}
-.graft {
-  fill: none;
-  stroke-width: 2.5;
-}
-.graft-volatile {
-  stroke: var(--graft-volatile);
-  border-color: var(--graft-volatile);
-}
-.graft-conductive {
-  stroke: var(--graft-conductive);
-  border-color: var(--graft-conductive);
-}
-.graft-omni {
-  stroke: var(--graft-omni);
-  border-color: var(--graft-omni);
-  stroke-dasharray: 4 3;
-}
-
 .legend {
   display: flex;
   flex-wrap: wrap;
@@ -1273,19 +1254,17 @@ summary:hover {
   stroke: color-mix(in srgb, var(--text) 55%, transparent);
   opacity: 0.55;
 }
-.slot-icon {
-  pointer-events: none;
-  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.6));
-}
 .slot.mirror .slot-body {
-  stroke-dasharray: 6 4;
+  stroke: color-mix(in srgb, var(--line) 45%, transparent);
+  stroke-dasharray: calc(6px * var(--k, 1)) calc(4px * var(--k, 1));
 }
-.slot.mirror .slot-icon {
-  opacity: 0.85;
+.slot.mirror:hover .slot-body,
+.slot.mirror.selected .slot-body {
+  stroke: var(--accent);
 }
-.graft.built-in {
-  stroke-width: 3.5;
-  opacity: 0.9;
+.swatch.slot-sprite {
+  width: 16px;
+  height: 16px;
 }
 .swatch.ring.mirror {
   border-style: dashed;
@@ -1504,6 +1483,12 @@ summary:hover {
 }
 .graft-chip.graft-omni {
   --graft: var(--graft-omni);
+}
+.graft-chip-sprite {
+  width: 16px;
+  height: 16px;
+  margin-right: 5px;
+  vertical-align: -3px;
 }
 
 /* ---- Icons in lists ------------------------------------------------------------ */
