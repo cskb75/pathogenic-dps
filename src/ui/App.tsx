@@ -8,6 +8,7 @@ import { ClassPicker } from './ClassPicker';
 import { Results } from './Results';
 import { RunPanel } from './RunPanel';
 import { SlotInspector } from './SlotInspector';
+import { art, uiArt } from './art';
 
 const reducer = makeReducer(gameData);
 
@@ -58,8 +59,13 @@ export function App() {
     <div className="app">
       <header className="app-header">
         <div className="brand">
-          <img className="brand-mark" src={`${import.meta.env.BASE_URL}art/organelles/vesicle.webp`} alt="" width={36} height={36} />
-          <h1>Pathogenic DPS</h1>
+          <img className="brand-mark" src={art('art/organelles/vesicle.webp')} alt="" width={44} height={44} />
+          <div className="brand-text">
+            <h1>
+              Pathogenic<span className="brand-dps">DPS</span>
+            </h1>
+            <span className="brand-tagline">Fan-made build planner · not affiliated with the game's developers</span>
+          </div>
         </div>
         <input
           className="build-name"
@@ -78,8 +84,11 @@ export function App() {
       <ClassPicker data={gameData} build={build} dispatch={dispatch} onSwitched={() => setSelected(null)} />
 
       <p className="banner" role="note">
-        Numbers, body plans and plasmid trees come from the full game's files (September 2026 build). Things that depend on how you play (aim,
-        positioning, how often mitochondria trigger) are fight assumptions you can change below; each organelle says what it assumes.
+        <img className="banner-icon" src={uiArt('type-dna')} alt="" width={22} height={32} />
+        <span>
+          Numbers, body plans and plasmid trees come from the full game's files (September 2026 build). Things that depend on how you play (aim,
+          positioning, how often mitochondria trigger) are fight assumptions you can change below; each organelle says what it assumes.
+        </span>
       </p>
 
       <main className="layout">

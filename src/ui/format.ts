@@ -25,6 +25,20 @@ export const CATEGORY_LABELS: Record<Category, string> = {
 
 export const CATEGORY_ORDER: Category[] = ['weapon', 'flagellum', 'pseudopod', 'infuser', 'mitochondrion', 'active', 'minion', 'support'];
 
+/** The game's tooltip type for each category, which sets its colour and frame (tooltip.gd). */
+export type OrganelleType = 'weapon' | 'active' | 'modifier' | 'energy' | 'lash';
+
+export const CATEGORY_TYPE: Record<Category, OrganelleType> = {
+  weapon: 'weapon',
+  flagellum: 'lash',
+  pseudopod: 'lash',
+  infuser: 'modifier',
+  mitochondrion: 'energy',
+  active: 'active',
+  minion: 'lash',
+  support: 'lash',
+};
+
 /** Two-letter badge for an organelle drawn on the body. */
 export function abbreviate(name: string): string {
   const words = name.replace(/[()-]/g, ' ').split(/\s+/).filter(Boolean);

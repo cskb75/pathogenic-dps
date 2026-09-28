@@ -1,0 +1,94 @@
+/*
+ * Design tokens: Pathogenic's own look, read from the game files.
+ *
+ * - Surfaces and frame lines come from the pause menu's 9-patch buttons
+ *   (gfx/9patch_menuButtons*.png): navy fill #0d101e, light frame #bec7d7.
+ * - Accent colours are the plasmid menu's node glows: cyan for what you can
+ *   take next, orange for what you own (scn/metaprogression/plasmids).
+ * - Rarity colours are bodypart.gd's get_rarity_color(); type colours are its
+ *   get_tooltip_type_color(), with a brighter "glow" for lines and text.
+ * - Slot colours are the organelle slot sprites (gfx/organelle_*_slot*.png).
+ * - Fonts are the game's: Exo 2 for text, Teko for titles, VT323 for readouts.
+ *
+ * The art these tokens pair with lives in public/art/ui (tools/extract/ui_art.py).
+ */
+:root {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --bg: #05070d;
+  --panel: #0d101e;
+  --panel-2: #141a2e;
+  --panel-3: #1b2340;
+  --line: #bec7d7;
+  --line-focus: #94b0d6;
+  --line-rounded: #4c7cbb;
+  --line-soft: #242c46;
+
+  /* Text */
+  --text: #e8ecf6;
+  --muted: #8e99b6;
+
+  /* Accents */
+  --accent: #02b0ff;
+  --accent-soft: #6fd3ff;
+  --accent-deep: #0a5869;
+  --accent-ink: #021018;
+  --owned: #ff8309;
+  --owned-deep: #7b2b00;
+  --stamina: #d8f000;
+  --danger: #ff3d57;
+  --warn: #ffc53d;
+
+  /* Connection lines between organelles */
+  --flow-attack: #5fd8ff;
+  --flow-gun: #c08cff;
+  --flow-overcharge: #ffa040;
+
+  /* Rarity */
+  --rarity-common: #ffffff;
+  --rarity-rare: #1e90ff;
+  --rarity-epic: #a020f0;
+  --rarity-legendary: #ffa500;
+  --rarity-mythic: #db143d;
+
+  /* Organelle types: tooltip tint, and a bright glow of the same hue */
+  --type-weapon: #214a2f;
+  --type-weapon-glow: #3ee06a;
+  --type-active: #582863;
+  --type-active-glow: #d15cff;
+  --type-modifier: #10455c;
+  --type-modifier-glow: #2ec5ff;
+  --type-energy: #6e3800;
+  --type-energy-glow: #ff9a1f;
+  --type-lash: #1d4746;
+  --type-lash-glow: #2fe0cc;
+
+  /* Organelle slots */
+  --slot-centre: #eae0a3;
+  --slot-internal: #b0b988;
+  --slot-internal-edge: #78775e;
+  --slot-external: #c78877;
+  --slot-external-edge: #7e575c;
+  --slot-fill: #0a0d18;
+  --graft-volatile: #fa172c;
+  --graft-conductive: #ffe03c;
+  --graft-omni: #c7779c;
+
+  /* Nanobot modules and Amoeba blobs */
+  --piece: #1a2238;
+  --piece-core: #22304e;
+  --piece-triangle: #2a2442;
+  --piece-stroke: #4c5d86;
+  --amoeba: #2c7a6e;
+
+  /* Type */
+  --font: 'Exo 2', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Teko', 'Exo 2', system-ui, sans-serif;
+  --font-readout: 'VT323', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Shape */
+  --radius: 10px;
+  --glow: 0 0 12px color-mix(in srgb, var(--accent) 55%, transparent);
+}

@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { isModeled } from '../engine/sim/behaviours';
 import type { GameData, OrganelleInfo, SlotKind } from '../engine/types';
-import { Icon, organelleIcon } from './art';
-import { CATEGORY_LABELS, CATEGORY_ORDER } from './format';
+import { Icon, organelleIcon, TypeIcon } from './art';
+import { CATEGORY_LABELS, CATEGORY_ORDER, CATEGORY_TYPE } from './format';
 
 interface Props {
   data: GameData;
@@ -30,6 +30,7 @@ export function OrganellePicker({ data, accepts, current, onPick }: Props) {
         <div className="chips" role="group" aria-label="Category">
           {['all', ...categories].map((c) => (
             <button key={c} className={`chip ${category === c ? 'active' : ''}`} aria-pressed={category === c} onClick={() => setCategory(c)}>
+              {c !== 'all' && <TypeIcon category={c as OrganelleInfo['category']} slot={accepts[0]} height={16} />}
               {c === 'all' ? 'All' : CATEGORY_LABELS[c as OrganelleInfo['category']]}
             </button>
           ))}
@@ -44,7 +45,7 @@ export function OrganellePicker({ data, accepts, current, onPick }: Props) {
               key={o.id}
               role="option"
               aria-selected={o.id === current}
-              className={`organelle-tile ${o.id === current ? 'active' : ''} ${modeled ? '' : 'unmodeled'}`}
+              className={`organelle-tile type-${CATEGORY_TYPE[o.category]} ${o.id === current ? 'active' : ''} ${modeled ? '' : 'unmodeled'}`}
               title={`${o.name}: ${o.description}${modeled ? '' : ' (not counted in DPS yet)'}`}
               onClick={() => onPick(o.id)}
             >
