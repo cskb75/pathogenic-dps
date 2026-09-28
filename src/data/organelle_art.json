@@ -1,36 +1,140 @@
 {
  "slots": {
-  "internal": {
-   "src": "art/body-parts/organelle-internal-slot.webp",
-   "x": -1.085,
-   "y": -1.075,
-   "w": 2.17,
-   "h": 2.15,
-   "m": [
-    0.186,
-    0.0,
-    0.0,
-    0.186,
-    0.0,
-    0.0
-   ],
-   "opacity": 0.6
+  "plain": {
+   "internal": {
+    "src": "art/body-parts/organelle-internal-slot.webp",
+    "x": -1.085,
+    "y": -1.075,
+    "w": 2.17,
+    "h": 2.15,
+    "m": [
+     0.186,
+     0.0,
+     0.0,
+     0.186,
+     0.0,
+     0.0
+    ],
+    "opacity": 0.6
+   },
+   "external": {
+    "src": "art/body-parts/organelle-external-slot.webp",
+    "x": -1.09,
+    "y": -1.94,
+    "w": 2.17,
+    "h": 3.02,
+    "m": [
+     -0.0022,
+     0.186,
+     -0.186,
+     -0.0022,
+     0.0,
+     0.0
+    ],
+    "opacity": 0.749
+   }
   },
-  "external": {
-   "src": "art/body-parts/organelle-external-slot.webp",
-   "x": -1.09,
-   "y": -1.94,
-   "w": 2.17,
-   "h": 3.02,
-   "m": [
-    -0.0022,
-    0.186,
-    -0.186,
-    -0.0022,
-    0.0,
-    0.0
-   ],
-   "opacity": 0.749
+  "volatile": {
+   "internal": {
+    "src": "art/body-parts/organelle-internal-slot-damage.webp",
+    "x": -1.395,
+    "y": -1.395,
+    "w": 2.79,
+    "h": 2.79,
+    "m": [
+     0.186,
+     0.0,
+     0.0,
+     0.186,
+     0.0,
+     0.0
+    ],
+    "opacity": 0.6
+   },
+   "external": {
+    "src": "art/body-parts/organelle-external-slot-damage.webp",
+    "x": -1.31,
+    "y": -2.125,
+    "w": 2.61,
+    "h": 3.39,
+    "m": [
+     -0.0022,
+     0.186,
+     -0.186,
+     -0.0022,
+     -0.03,
+     -0.0
+    ],
+    "opacity": 0.749
+   }
+  },
+  "conductive": {
+   "internal": {
+    "src": "art/body-parts/organelle-internal-slot-energy.webp",
+    "x": -1.145,
+    "y": -1.145,
+    "w": 2.29,
+    "h": 2.29,
+    "m": [
+     0.186,
+     0.0,
+     0.0,
+     0.186,
+     0.0,
+     0.0
+    ],
+    "opacity": 0.6
+   },
+   "external": {
+    "src": "art/body-parts/organelle-external-slot-energy.webp",
+    "x": -1.13,
+    "y": -1.975,
+    "w": 2.25,
+    "h": 3.09,
+    "m": [
+     -0.0022,
+     0.186,
+     -0.186,
+     -0.0022,
+     -0.01,
+     -0.0
+    ],
+    "opacity": 0.749
+   }
+  },
+  "omni": {
+   "internal": {
+    "src": "art/body-parts/organelle-turret-slot2.webp",
+    "x": -1.365,
+    "y": -1.365,
+    "w": 2.73,
+    "h": 2.73,
+    "m": [
+     0.186,
+     0.0,
+     0.0,
+     0.186,
+     0.0,
+     0.0
+    ],
+    "opacity": 0.6
+   },
+   "external": {
+    "src": "art/body-parts/organelle-turret-slot.webp",
+    "x": -1.295,
+    "y": -1.5,
+    "w": 2.59,
+    "h": 3.0,
+    "m": [
+     0.0,
+     0.186,
+     -0.186,
+     0.0,
+     -0.01,
+     -0.0
+    ],
+    "opacity": 0.749
+   }
   }
  },
  "organelles": {

@@ -3,10 +3,11 @@ import type { CalcResult, Link, MitoResult } from '../engine/calc';
 import { findClass, slotState } from '../engine/calc';
 import type { Build, GameData, Rarity, SlotKind } from '../engine/types';
 import type { Action } from '../state/build';
-import { Icon, organelleIcon, TypeIcon } from './art';
+import { art, Icon, organelleIcon, TypeIcon } from './art';
 import { WeaponBreakdown } from './Breakdown';
 import { OrganellePicker } from './OrganellePicker';
 import { CATEGORY_LABELS, CATEGORY_TYPE, fmtNum, fmtPct } from './format';
+import { slotArt } from './organelleArt';
 
 interface Props {
   data: GameData;
@@ -99,6 +100,7 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
       <fieldset className="graft-picker">
         <legend>Slot type</legend>
         <button className={`chip ${!own.graft ? 'active' : ''}`} aria-pressed={!own.graft} onClick={() => dispatch({ type: 'setSlot', slotId: slot.id, patch: { graft: undefined } })}>
+          <img className="graft-chip-sprite" src={art(slotArt(slot.kind, special?.id).src!)} alt="" />
           {special ? `Built-in ${special.name}` : 'Plain'}
         </button>
         {data.grafts
@@ -111,6 +113,7 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
               title={g.description}
               onClick={() => dispatch({ type: 'setSlot', slotId: slot.id, patch: { graft: g.id } })}
             >
+              <img className="graft-chip-sprite" src={art(slotArt(slot.kind, g.id).src!)} alt="" />
               {g.name}
             </button>
           ))}

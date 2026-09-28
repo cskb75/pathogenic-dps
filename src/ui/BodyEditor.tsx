@@ -382,11 +382,12 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
           return <line key={key} {...trimmedLine(body.slotById.get(a)!, body.slotById.get(b)!)} className={`connector ${selectedLinks.has(key) ? 'near' : ''}`} />;
         })}
 
-        {/* The game's slot sprites: a disc inside, a teardrop pointing out for external slots. Organelles cover them. */}
+        {/* The game's slot sprites: a disc inside, a teardrop pointing out for external slots, with their own
+            art for Volatile, Conductive and Omni slots (built in or grafted). Organelles cover them. */}
         <g className="slot-sprites">
           {body.slots.map((slot) => (
             <g key={slot.id} transform={placement(slot).transform}>
-              <ArtLayers layers={[slotArt(slot.kind)]} />
+              <ArtLayers layers={[slotArt(slot.kind, slotState(build, body, slot.id)?.graft ?? slot.special)]} />
             </g>
           ))}
         </g>
@@ -491,7 +492,6 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
               onKeyDown={onActivate(select)}
             >
               <title>{label}</title>
-              {graft && <circle className={`graft graft-${graft.id} ${slot.special && !state?.graft ? 'built-in' : ''}`} cx={c.x * S} cy={c.y * S} r={r * S + 4.5 * zoom} />}
               <circle className="slot-body" cx={c.x * S} cy={c.y * S} r={r * S} />
             </g>
           );
@@ -672,7 +672,7 @@ function Legend({ data, mirrors }: { data: GameData; mirrors: boolean }) {
       </li>
       {data.grafts.map((g) => (
         <li key={g.id}>
-          <span className={`swatch ring graft-${g.id}`} />
+          <img className="swatch slot-sprite" src={art(slotArt('internal', g.id).src!)} width={16} height={16} alt="" />
           {g.name} slot
         </li>
       ))}

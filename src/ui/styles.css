@@ -557,24 +557,6 @@ input[type='range'] {
   pointer-events: none;
   user-select: none;
 }
-.graft {
-  fill: none;
-  stroke-width: calc(2.5px * var(--k, 1));
-}
-.graft-volatile {
-  stroke: var(--graft-volatile);
-  border-color: var(--graft-volatile);
-}
-.graft-conductive {
-  stroke: var(--graft-conductive);
-  border-color: var(--graft-conductive);
-}
-.graft-omni {
-  stroke: var(--graft-omni);
-  border-color: var(--graft-omni);
-  stroke-dasharray: calc(4px * var(--k, 1)) calc(3px * var(--k, 1));
-}
-
 .legend {
   display: flex;
   flex-wrap: wrap;
@@ -1280,9 +1262,9 @@ summary:hover {
 .slot.mirror.selected .slot-body {
   stroke: var(--accent);
 }
-.graft.built-in {
-  stroke-width: calc(3.5px * var(--k, 1));
-  opacity: 0.9;
+.swatch.slot-sprite {
+  width: 16px;
+  height: 16px;
 }
 .swatch.ring.mirror {
   border-style: dashed;
@@ -1501,6 +1483,12 @@ summary:hover {
 }
 .graft-chip.graft-omni {
   --graft: var(--graft-omni);
+}
+.graft-chip-sprite {
+  width: 16px;
+  height: 16px;
+  margin-right: 5px;
+  vertical-align: -3px;
 }
 
 /* ---- Icons in lists ------------------------------------------------------------ */

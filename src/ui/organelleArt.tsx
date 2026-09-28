@@ -33,10 +33,11 @@ interface OrganelleArtDef {
   colors?: number[][];
 }
 
-const DATA = artData as unknown as { slots: Record<SlotKind, ArtLayer>; organelles: Record<string, OrganelleArtDef> };
+/** Slot sprites per slot type: 'plain', or a graft id (Volatile, Conductive and Omni slots have their own art). */
+const DATA = artData as unknown as { slots: Record<string, Record<SlotKind, ArtLayer>>; organelles: Record<string, OrganelleArtDef> };
 
 export const organelleArt = (id: string): OrganelleArtDef | undefined => DATA.organelles[id];
-export const slotArt = (kind: SlotKind): ArtLayer => DATA.slots[kind];
+export const slotArt = (kind: SlotKind, type = 'plain'): ArtLayer => (DATA.slots[type] ?? DATA.slots.plain)[kind];
 
 /** The game's pathogen index (G.ParasiteType) for classes the Flagellum has a colour for. */
 const PARASITE_INDEX: Record<string, number> = { bacterium: 0, 'fungal-spore': 1, helminth: 2 };

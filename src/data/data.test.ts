@@ -69,7 +69,9 @@ describe('game data', () => {
   it('knows how every organelle looks on the body, and ships its textures', () => {
     type Layer = { src?: string; points?: unknown };
     const looks = organelleArt.organelles as Record<string, { layers: Layer[] }>;
-    const layers: Layer[] = [...Object.values(organelleArt.slots), ...Object.values(looks).flatMap((a) => a.layers)];
+    const slots = organelleArt.slots as Record<string, Record<string, Layer>>;
+    for (const g of ['plain', ...gameData.grafts.map((g) => g.id)]) expect(Object.keys(slots[g] ?? {}).sort(), g).toEqual(['external', 'internal']);
+    const layers: Layer[] = [...Object.values(slots).flatMap((s) => Object.values(s)), ...Object.values(looks).flatMap((a) => a.layers)];
     for (const o of gameData.organelles) expect(looks[o.id]?.layers.length, o.id).toBeGreaterThan(0);
     for (const l of layers) {
       expect(l.src || l.points, JSON.stringify(l)).toBeTruthy();

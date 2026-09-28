@@ -5,7 +5,8 @@
 Writes:
 
     src/data/organelle_art.json    per organelle, the layers the game draws at
-                                   its slot, in editor units (100 game pixels = 1)
+                                   its slot, and each slot type's sprites, in
+                                   editor units (100 game pixels = 1)
     public/art/body-parts/*.webp   the textures those layers use
 
 Each organelle's scene (scn/player/bodyparts/<internal|external>/<id>.tscn) is
@@ -44,7 +45,14 @@ SCALE = 100.0
 # (the body view never zooms past about 1 screen pixel per game pixel).
 MAX_DENSITY = 2.0
 RARITIES = ['common', 'rare', 'epic', 'legendary', 'mythic']
-SLOT_SCENE = 'res://scn/player/bodyparts/slot.tscn'
+# Slot scenes: a plain slot, and the special slots that grafts and built-in slots
+# turn a slot into (the same names as bodies.py's SPECIAL).
+SLOT_SCENES = {
+    'plain': 'res://scn/player/bodyparts/slot.tscn',
+    'volatile': 'res://scn/player/bodyparts/slot_damage.tscn',
+    'conductive': 'res://scn/player/bodyparts/slot_energy.tscn',
+    'omni': 'res://scn/player/bodyparts/slot_turret.tscn',
+}
 
 
 def u(v):
@@ -311,18 +319,22 @@ def organelle_layers(pack, scene_path, textures, warn):
 
 
 def slot_sprites(pack, textures):
-    """The empty slot sprites (slot.tscn): an olive disc inside, a salmon teardrop outside."""
-    scene = Scene(pack, SLOT_SCENE)
+    """Each slot type's sprites, internal and external. A plain slot is an olive disc
+    inside and a salmon teardrop outside; Volatile, Conductive and Omni slots have
+    their own."""
     out = {}
-    for i, n in enumerate(scene.nodes):
-        kind = {'CircleInternal': 'internal', 'CircleExternal': 'external'}.get(n['name'])
-        if not kind:
-            continue
-        layer = sprite_layer(scene, i, textures, print)
-        mod = n['props'].get('modulate')
-        if mod:
-            layer['opacity'] = round(mod[3], 3)
-        out[kind] = layer
+    for name, path in SLOT_SCENES.items():
+        scene = Scene(pack, path)
+        out[name] = {}
+        for i, n in enumerate(scene.nodes):
+            kind = {'CircleInternal': 'internal', 'CircleExternal': 'external'}.get(n['name'])
+            if not kind:
+                continue
+            layer = sprite_layer(scene, i, textures, print)
+            mod = n['props'].get('modulate')
+            if mod:
+                layer['opacity'] = round(mod[3], 3)
+            out[name][kind] = layer
     return out
 
 
