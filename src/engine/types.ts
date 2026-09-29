@@ -238,8 +238,6 @@ export interface ClassDef {
   description: string;
   /** Max HP at the start of a run. */
   hp: number;
-  /** Portrait image, relative to the site root. */
-  portrait?: string;
   /** Where the class's data comes from. */
   source: string;
   body: ModularBody | EvolvingBody | FreeformBody;

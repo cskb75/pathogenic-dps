@@ -132,6 +132,47 @@ export class TentacleRest {
 }
 
 /**
+ * scn/cells/hair.gd on a body that isn't moving (the character select's
+ * pathogens): its root direction sways by sin(t * 2π / period) * sway, the
+ * period 4 s x a random 0.7-1.3, and each later point eases toward the straight
+ * continuation of the one before it, with a half-life set by `stiffness`, then
+ * keeps its segment length. So the sway runs down the hair a little late.
+ * (`fluidity` only matters while the body moves.)
+ */
+export class HairRest {
+  readonly pts: Vec[];
+  private time: number;
+  private readonly period: number;
+  private readonly halfLife: number;
+
+  constructor(
+    private readonly m: { n: number; seg: number; stiffness: number; sway: number },
+    random = Math.random,
+  ) {
+    this.pts = straight(m.n, m.seg);
+    this.period = 4 * between(0.7, 1.3, random);
+    this.time = random() * this.period;
+    this.halfLife = -(1 / 60) / (Math.log(1 - m.stiffness) / Math.log(2));
+  }
+
+  step(dt: number) {
+    if (!(dt > 0)) return;
+    this.time += dt;
+    const { seg, sway } = this.m;
+    const pull = 1 - 2 ** (-dt / this.halfLife);
+    let lastDir = rotate({ x: 1, y: 0 }, sway * Math.sin((this.time * 2 * Math.PI) / this.period));
+    let last = this.pts[0];
+    for (let i = 1; i < this.pts.length; i++) {
+      const pos = lerp(this.pts[i], add(last, scale(lastDir, seg)), pull);
+      const dir = norm(sub(pos, last));
+      this.pts[i] = add(last, scale(dir, seg));
+      lastDir = dir;
+      last = this.pts[i];
+    }
+  }
+}
+
+/**
  * lash.gd in the organelle editor, plus the hair.gd body hanging off it.
  *
  * The connector's rotation eases toward 0 by 0.2 per tick (the slot's default

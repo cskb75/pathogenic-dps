@@ -19,7 +19,8 @@ python3 tools/extract/extract.py path/to/pathogenic.pck /tmp/pathogenic-out
 | `app_data.py` | Turns `bodies.py`'s output into `src/data/bodies.json` and `public/art/bodies`. |
 | `plasmids.py` | Writes every pathogen's plasmid tree (positions, links, text, icons, damage effects) to `src/data/plasmids.json` and `public/art/plasmids`. |
 | `organelle_art.py` | Reads how each organelle is drawn on the body (the textured lines and sprites in its scene, at rest), how it moves in the game's organelle editor (the values its scripts use), its rarity outline, its tags and connection-arrow colour, and the slot sprites. Writes `src/data/organelle_art.json` and the textures to `public/art/body-parts`. |
-| `ui_art.py` | Copies the game's UI art the app's theme uses (menu frames, organelle type frames and icons, plasmid node frames, DNA links, the plasmid menu backdrop) into `public/art/ui`. |
+| `ui_art.py` | Copies the game's UI art the app's theme uses (menu frames, organelle type frames and icons, plasmid node frames, DNA links, the plasmid menu backdrop, the character select's tubes, arrows and lab) into `public/art/ui`. |
+| `specimens.py` | Reads each pathogen as the character select shows it: its tube's size and light colour, and the hairs its scene attaches to the starting body (position, length, width curve, colour or texture, and the values `hair.gd` sways them with). Writes `src/data/specimens.json` and the hair textures to `public/art/specimens`. |
 | `wiki_icons.py` | Downloads organelle, mutation and plasmid icons from pathogenic.wiki into `public/art`. |
 
 To refresh the body plans and plasmid trees after a game update:
@@ -30,6 +31,7 @@ python3 tools/extract/app_data.py /tmp/pathogenic-bodies
 python3 tools/extract/plasmids.py path/to/pathogenic.pck
 python3 tools/extract/organelle_art.py path/to/pathogenic.pck
 python3 tools/extract/ui_art.py path/to/pathogenic.pck
+python3 tools/extract/specimens.py path/to/pathogenic.pck
 ```
 
 The Nanobot and the Amoeba have no fixed body plans: their rules live in `src/engine/body.ts` and `src/engine/amoeba.ts`.

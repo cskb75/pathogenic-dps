@@ -3,7 +3,7 @@
 // served from public/art (see tools/extract).
 
 import { useState, type CSSProperties } from 'react';
-import type { BodyPlan, Category, ClassDef, GameData, PlasmidDef, SlotKind } from '../engine/types';
+import type { BodyPlan, Category, GameData, PlasmidDef, SlotKind } from '../engine/types';
 
 /** URL for a file under public/. */
 export const art = (path: string) => `${import.meta.env.BASE_URL}${path}`;
@@ -91,24 +91,6 @@ export function PlanThumb({ plan, size }: { plan: BodyPlan; size: number }) {
   return (
     <svg className="portrait" width={size} height={size} viewBox={vb} aria-hidden="true">
       {s && <image href={art(s.src)} x={s.x} y={s.y} width={s.w} height={s.h} preserveAspectRatio="none" />}
-    </svg>
-  );
-}
-
-/** A pathogen's portrait: its starting body, or a drawing for modular bodies. */
-export function ClassPortrait({ cls, data, size = 56 }: { cls: ClassDef; data: GameData; size?: number }) {
-  const start = cls.body.kind === 'evolving' ? data.bodies[cls.body.start] : undefined;
-  if (cls.body.kind === 'freeform') return <Icon src={art('art/classes/amoeba.webp')} size={size} className="portrait" />;
-  if (start?.sprite) return <PlanThumb plan={start} size={size} />;
-  if (cls.portrait) return <Icon src={art(cls.portrait)} size={size} className="portrait" />;
-  return (
-    <svg className="portrait" width={size} height={size} viewBox="-2 -2 4 4" aria-hidden="true">
-      <polygon points="-0.6,-0.6 0.6,-0.6 0.6,0.6 -0.6,0.6" className="nb-core" />
-      <polygon points="0.6,-0.6 0.6,0.6 1.64,0" className="nb-tri" />
-      <polygon points="-0.6,-0.6 -0.6,0.6 -1.64,0" className="nb-tri" />
-      <polygon points="-0.6,-0.6 0.6,-0.6 0.6,-1.8 -0.6,-1.8" className="nb-square" />
-      <polygon points="-0.6,0.6 0.6,0.6 0,1.64" className="nb-tri" />
-      <circle r="0.3" className="nb-slot" />
     </svg>
   );
 }

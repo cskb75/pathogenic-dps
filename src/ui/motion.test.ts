@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { Vec } from '../engine/geometry';
 import organelleArt from '../data/organelle_art.json';
-import { GunRest, LashRest, PHYSICS_HZ, TentacleRest, type Motion } from './motion';
+import specimens from '../data/specimens.json';
+import { GunRest, HairRest, LashRest, PHYSICS_HZ, TentacleRest, type Motion } from './motion';
 
 const looks = organelleArt.organelles as unknown as Record<string, { motion?: Motion; layers: { chain?: { n: number; seg: number } }[] }>;
 const motionOf = <K extends Motion['kind']>(id: string, kind: K) => {
@@ -92,5 +93,27 @@ describe('organelle motion', () => {
     expect(widest).toBeLessThan(0.3);
     expect(bent).toBeGreaterThan(0.001);
     for (const l of lengths(lash.pts)) expect(l).toBeCloseTo(m.seg, 6);
+  });
+
+  it("sways a pathogen's hairs by up to 10°, the sway running down to the tip (hair.gd)", () => {
+    const helminth = specimens.helminth.hairs[0];
+    expect(helminth).toMatchObject({ n: 20, stiffness: 0.3 });
+    const hair = new HairRest(helminth, seeded(5));
+    let root = 0;
+    let lag = 0;
+    let spread = 0;
+    for (let f = 0; f < 10 * 60; f++) {
+      hair.step(1 / 60);
+      const a = angle(hair.pts[0], hair.pts[1]);
+      root = Math.max(root, Math.abs(a));
+      lag = Math.max(lag, Math.abs(angle(hair.pts.at(-2)!, hair.pts.at(-1)!) - a));
+      for (const p of hair.pts.slice(1)) spread = Math.max(spread, Math.abs(Math.atan2(p.y, p.x)));
+    }
+    expect(root).toBeGreaterThan(helminth.sway * 0.95);
+    expect(root).toBeLessThanOrEqual(helminth.sway + 1e-9);
+    // The tip whips behind the root, but the hair never folds back on itself.
+    expect(lag).toBeGreaterThan(0.1);
+    expect(spread).toBeLessThan(0.6);
+    for (const l of lengths(hair.pts)) expect(l).toBeCloseTo(helminth.seg, 6);
   });
 });

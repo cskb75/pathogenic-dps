@@ -14,7 +14,7 @@ import { ArtLayers, flatShape, Layer, type ArtLayer, type OrganelleArtDef } from
 import { useOutline, type Outline } from './outline';
 
 type Chain = NonNullable<ArtLayer['chain']>;
-type Update = MutableRefObject<((pts: Vec[]) => void) | null>;
+export type Update = MutableRefObject<((pts: Vec[]) => void) | null>;
 /** The plain Flagellum's colour, and the rarity outline's (none for Common). */
 interface Paint {
   color?: string;
@@ -126,7 +126,7 @@ function Lashing({ look, motion, paint }: { look: OrganelleArtDef; motion: Extra
 }
 
 /** A line through `pts`: its texture sliced along it, or (untextured) a tapered shape. */
-function Line({ layer, pts, update, paint }: { layer: ArtLayer; pts: Vec[]; update: Update; paint: Paint }) {
+export function Line({ layer, pts, update, paint }: { layer: ArtLayer; pts: Vec[]; update: Update; paint: Paint }) {
   return layer.src ? (
     <TexturedLine layer={layer} pts={pts} update={update} outline={paint.outline} />
   ) : (

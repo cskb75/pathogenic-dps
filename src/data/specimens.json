@@ -1,0 +1,376 @@
+{
+ "bacterium": {
+  "scale": 1.0,
+  "light": "#009c3c",
+  "hairs": [
+   {
+    "x": -0.274,
+    "y": -0.64,
+    "rot": 3.1416,
+    "n": 5,
+    "seg": 0.05,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#ffffff"
+   },
+   {
+    "x": 0.276,
+    "y": -0.65,
+    "rot": 0.0,
+    "n": 5,
+    "seg": 0.05,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#ffffff"
+   },
+   {
+    "x": -0.284,
+    "y": -0.09,
+    "rot": 3.1416,
+    "n": 5,
+    "seg": 0.05,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#62aa00"
+   },
+   {
+    "x": -0.354,
+    "y": 0.57,
+    "rot": 3.1416,
+    "n": 5,
+    "seg": 0.05,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#62aa00"
+   },
+   {
+    "x": 0.296,
+    "y": -0.11,
+    "rot": 0.0,
+    "n": 5,
+    "seg": 0.05,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#62aa00"
+   },
+   {
+    "x": 0.356,
+    "y": 0.56,
+    "rot": 0.0,
+    "n": 5,
+    "seg": 0.05,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#62aa00"
+   },
+   {
+    "x": -0.324,
+    "y": 0.78,
+    "rot": 2.618,
+    "n": 13,
+    "seg": 0.25,
+    "width": 0.3,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "widths": [
+     1.0,
+     0.816,
+     0.501,
+     0.376,
+     0.232,
+     0.235,
+     0.254,
+     0.278,
+     0.303,
+     0.321,
+     0.339,
+     0.602,
+     0.391
+    ],
+    "color": "#006166"
+   },
+   {
+    "x": 0.346,
+    "y": 0.77,
+    "rot": 0.5236,
+    "n": 13,
+    "seg": 0.25,
+    "width": 0.3,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "widths": [
+     1.0,
+     0.816,
+     0.501,
+     0.376,
+     0.232,
+     0.235,
+     0.254,
+     0.278,
+     0.303,
+     0.321,
+     0.339,
+     0.602,
+     0.391
+    ],
+    "color": "#006166"
+   }
+  ]
+ },
+ "fungal-spore": {
+  "scale": 0.8,
+  "light": "#9400a9",
+  "hairs": [
+   {
+    "x": -0.394,
+    "y": -0.9429,
+    "rot": 4.2782,
+    "n": 5,
+    "seg": 0.1,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#ff00ae"
+   },
+   {
+    "x": 0.416,
+    "y": -0.9229,
+    "rot": -1.0516,
+    "n": 5,
+    "seg": 0.1,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#ff00ae"
+   },
+   {
+    "x": -0.974,
+    "y": -0.3629,
+    "rot": -2.6817,
+    "n": 5,
+    "seg": 0.1,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#ff00ae"
+   },
+   {
+    "x": -0.954,
+    "y": 0.4271,
+    "rot": 2.6446,
+    "n": 5,
+    "seg": 0.1,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#ff00ae"
+   },
+   {
+    "x": 0.966,
+    "y": -0.3729,
+    "rot": -0.4092,
+    "n": 5,
+    "seg": 0.1,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#ff00ae"
+   },
+   {
+    "x": 0.356,
+    "y": 0.9871,
+    "rot": 1.1455,
+    "n": 5,
+    "seg": 0.1,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#ff00ae"
+   },
+   {
+    "x": -0.414,
+    "y": 0.9871,
+    "rot": 1.9987,
+    "n": 5,
+    "seg": 0.1,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#ff00ae"
+   },
+   {
+    "x": 0.956,
+    "y": 0.4271,
+    "rot": 0.4254,
+    "n": 5,
+    "seg": 0.1,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#ff00ae"
+   }
+  ]
+ },
+ "helminth": {
+  "scale": 0.65,
+  "light": "#d2ad00",
+  "hairs": [
+   {
+    "x": 0.14,
+    "y": 1.18,
+    "rot": 0.7332,
+    "n": 20,
+    "seg": 0.1964,
+    "width": 0.3142,
+    "stiffness": 0.3,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "src": "art/specimens/worm-tentacle1.webp",
+    "caps": [
+     1,
+     1
+    ],
+    "behind": true
+   },
+   {
+    "x": -0.14,
+    "y": 1.19,
+    "rot": 2.4144,
+    "n": 20,
+    "seg": 0.1964,
+    "width": 0.3142,
+    "stiffness": 0.3,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "src": "art/specimens/worm-tentacle1.webp",
+    "caps": [
+     1,
+     1
+    ],
+    "behind": true
+   },
+   {
+    "x": -0.17,
+    "y": -1.0576,
+    "rot": 4.3702,
+    "n": 4,
+    "seg": 0.1964,
+    "width": 0.2356,
+    "stiffness": 0.4,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "src": "art/specimens/worm-gun.webp",
+    "caps": [
+     1,
+     1
+    ],
+    "behind": true
+   },
+   {
+    "x": 0.19,
+    "y": -1.0776,
+    "rot": 5.1171,
+    "n": 4,
+    "seg": 0.1964,
+    "width": 0.2356,
+    "stiffness": 0.4,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "src": "art/specimens/worm-gun.webp",
+    "caps": [
+     1,
+     1
+    ],
+    "behind": true
+   }
+  ]
+ },
+ "diatom": {
+  "scale": 0.4,
+  "light": "#006eff",
+  "hairs": []
+ },
+ "lil-collector": {
+  "scale": 0.6,
+  "hairs": [
+   {
+    "x": -0.324,
+    "y": -0.76,
+    "rot": -2.1279,
+    "n": 5,
+    "seg": 0.08,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#ff00ae"
+   },
+   {
+    "x": 0.246,
+    "y": -0.76,
+    "rot": -0.9336,
+    "n": 5,
+    "seg": 0.08,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#ff00ae"
+   },
+   {
+    "x": -1.004,
+    "y": 0.25,
+    "rot": -3.8123,
+    "n": 5,
+    "seg": 0.08,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#ff00ae"
+   },
+   {
+    "x": 1.016,
+    "y": 0.22,
+    "rot": 0.708,
+    "n": 5,
+    "seg": 0.08,
+    "width": 0.1,
+    "stiffness": 0.5,
+    "fluidity": 0.9,
+    "sway": 0.1745,
+    "color": "#ff00ae"
+   }
+  ]
+ },
+ "nanobot": {
+  "scale": 0.8,
+  "hairs": []
+ },
+ "amoeba": {
+  "scale": 0.7,
+  "hairs": []
+ }
+}
