@@ -53,6 +53,13 @@ export interface Attack {
   /** Hits each copy lands on its target (orb ticks). */
   hits: number;
   reach: Reach;
+  /**
+   * Fired all around you (a ring or cone of shots): lands on each other enemy
+   * in range as often as on your target.
+   */
+  scattered: boolean;
+  /** Extra hits on other enemies for each copy that lands (lightning splits, bounces). */
+  extraOthers: number;
   /** Extra damage per hit added at the moment of impact (backstab, pierce bonus). */
   onHitDamage: number;
   onHit: Deriver[];
@@ -76,6 +83,8 @@ export function newAttack(p: Partial<Attack> & Pick<Attack, 'kind' | 'label' | '
     homing: false,
     hits: 1,
     reach: 'single',
+    scattered: false,
+    extraOthers: 0,
     onHitDamage: 0,
     onHit: [],
     siblings: [],
@@ -124,6 +133,8 @@ export interface GunState {
   trace: TraceLine[];
   /** Seconds between this weapon's attacks, for organelles that care. */
   interval: number;
+  /** The weapon being modified. */
+  weapon?: Item;
 }
 
 export interface Ctx {
@@ -135,12 +146,19 @@ export interface Ctx {
   /** Whether the organelle is doing anything (Excitable needs Overcharge). */
   works(item: Item): boolean;
   /** Records that an effect travelled from one slot to another, for the editor's arrows. */
-  link(from: Item, to: Item, kind: 'attack' | 'gun' | 'overcharge'): void;
+  link(from: Item, to: Item, kind: 'attack' | 'gun' | 'overcharge' | 'fires'): void;
   /** Shares of base damage the game adds to an attack as it's fired (mutations, plasmids, custom bonuses). */
   bonuses(a: Attack, emitter: Item): { source: string; share: number }[];
   gun: GunState | null;
   /** Marks a weapon's stamina as refunded (Glycogen Synthesizer). */
   refund(weapon: Item): void;
+  /** Multiplies the chance lightning splits (Galvanic Arborization). */
+  lightningSplit: number;
+  /**
+   * Golgi Apparatus: `perSecond` attacks reached it, each landing on the
+   * main target `aim` of the time. Each one can make it strike with a melee weapon.
+   */
+  trigger(golgi: Item, perSecond: number, aim: number): void;
   /** Modifier applications left before we stop following chains (dense Vesicle webs explode combinatorially). */
   budget: { left: number; exhausted: boolean };
 }
@@ -164,8 +182,8 @@ export interface WeaponProfile {
   reach: Reach;
   /** Param id giving the chance each projectile can hit the main target. */
   aimParam?: string;
-  /** Hits per projectile on its target (lingering orbs). */
-  hits?: (ctx: Ctx) => number;
+  /** Hits per projectile on its target (lingering orbs), at this rarity and uses per second. */
+  hits?: (ctx: Ctx, r: number, rate: number) => number;
   /** px/s. */
   speed?: number;
   /** Explodes: the explosion deals the shell's full damage in an area and scales with level. */
@@ -184,7 +202,7 @@ export interface WeaponProfile {
    */
   energyCost?: (r: number) => number;
   /** Uses per second set by the organelle itself, instead of an attack interval. */
-  rate?: (ctx: Ctx, r: number, charge: number) => number;
+  rate?: (ctx: Ctx, r: number, charge: number, self: Item) => number;
   /** Not an attack the player makes (pseudopods, zappers): Turgosome ignores it. */
   passive?: boolean;
   /**
@@ -238,6 +256,18 @@ export interface Behaviour {
   minionGunner?: (r: number) => number;
   /** Symbiotic Pseudopod: extra damage multiplier for the minion it supports. */
   minionSupport?: (r: number) => number;
+  /**
+   * Projectile Surge, Conal Burst: each use fires every connected weapon this
+   * many times, from the organelle, spread out so only `aimParam` of the
+   * shots can reach your target.
+   */
+  volley?: { shots: (r: number) => number; aimParam: string };
+  /**
+   * Golgi Apparatus: connected melee weapons stop attacking on their own and
+   * strike wherever an attack that reached it hits (or misses), with `damage`
+   * extra base damage, when their cooldown allows.
+   */
+  golgi?: { damage: (r: number) => number };
   modifyAttack?(ctx: Ctx, self: Item, a: Attack, chain: Item[], times: number): void;
   modifyGun?(ctx: Ctx, self: Item, gun: GunState, times: number): void;
   /** How faithfully this organelle is modeled, shown in the UI. */
@@ -316,7 +346,9 @@ export function evaluate(ctx: Ctx, a: Attack, atMain: number, atOthers: number, 
   const hitsOnTarget = atMain * a.hits;
   // Aimed at the main target: area/line attacks also reach the others.
   // Landing elsewhere: a single-target attack hits one other enemy, an area one hits all the others.
-  const hitsOnOthers = atMain * a.hits * (spreads ? others : 0) + atOthers * a.hits * (spreads ? Math.max(1, others) : 1);
+  // Splits and bounces add hits on other enemies for every copy that lands.
+  const hitsOnOthers =
+    atMain * a.hits * (spreads ? others : 0) + atOthers * a.hits * (spreads ? Math.max(1, others) : 1) + (others > 0 ? (atMain + atOthers) * a.extraOthers : 0);
   const perHit = a.damage + a.onHitDamage;
   const node: AttackNode = {
     label: a.label,
@@ -353,7 +385,10 @@ export function evaluate(ctx: Ctx, a: Attack, atMain: number, atOthers: number, 
 /** Evaluates a root attack and its split copies as seen from the weapon. */
 export function evaluateRoot(ctx: Ctx, a: Attack, angledHit: number): AttackNode[] {
   const aimed = (x: Attack) => x.copies * x.aim * (x.angled && !x.homing ? angledHit : 1);
-  const main = evaluate(ctx, a, aimed(a), 0, angledHit);
+  // Shots fired all around land on the other enemies as often as on the target
+  // (area and piercing ones already reach them from the target).
+  const elsewhere = (x: Attack) => (x.scattered && x.reach === 'single' ? aimed(x) * Math.max(0, ctx.targets - 1) : 0);
+  const main = evaluate(ctx, a, aimed(a), elsewhere(a), angledHit);
   const out = [main];
   for (const s of a.siblings) out.push(...evaluateRoot(ctx, s, angledHit));
   return out;

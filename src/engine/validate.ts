@@ -29,9 +29,11 @@ export function validateData(data: GameData): string[] {
       problems.push(`Behaviour for "${id}" has no catalogue entry`);
       continue;
     }
-    if (b.weapon && !['weapon', 'active', 'support', 'pseudopod', 'flagellum', 'minion'].includes(info.category)) problems.push(`"${id}" has a weapon profile but is a ${info.category}`);
+    // Infusers can attack on their own too (Resilinoplast's reflected shots), but never as something you fire.
+    const attackers = ['weapon', 'active', 'support', 'pseudopod', 'flagellum', 'minion', ...(b.weapon?.passive ? ['infuser'] : [])];
+    if (b.weapon && !attackers.includes(info.category)) problems.push(`"${id}" has a weapon profile but is a ${info.category}`);
     if (b.mito && !['mitochondrion', 'active', 'pseudopod', 'support'].includes(info.category)) problems.push(`"${id}" has a mitochondrion profile but is a ${info.category}`);
-    if (b.weapon?.aimParam && !params.has(b.weapon.aimParam)) problems.push(`"${id}" uses unknown parameter "${b.weapon.aimParam}"`);
+    for (const p of [b.weapon?.aimParam, b.volley?.aimParam]) if (p && !params.has(p)) problems.push(`"${id}" uses unknown parameter "${p}"`);
   }
   for (const [id, plan] of Object.entries(data.bodies)) {
     const slots = new Set<string>();

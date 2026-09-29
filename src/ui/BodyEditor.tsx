@@ -43,7 +43,7 @@ const loopsPath = (loops: Vec[][]) => loops.map((l) => `M${l.map((v) => `${(v.x 
 
 const ANIMATE_KEY = 'pathogenic-dps.animate';
 /** Flows sharing a connection get their arrows offset from each other. */
-const FLOW_LANE: Record<string, number> = { attack: 0, gun: 1, overcharge: 2 };
+const FLOW_LANE: Record<string, number> = { attack: 0, gun: 1, fires: 1.5, overcharge: 2 };
 
 /** Whether the body view animates: on unless turned off here, and never when the system asks for reduced motion. */
 function useAnimation() {
@@ -714,6 +714,10 @@ function Legend({ data, mirrors }: { data: GameData; mirrors: boolean }) {
       <li>
         <span className="swatch line gun" />
         Attack speed
+      </li>
+      <li>
+        <span className="swatch line fires" />
+        Fires a weapon
       </li>
       <li>
         <span className="swatch line overcharge" />
