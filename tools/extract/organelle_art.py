@@ -23,6 +23,23 @@ Slot.attach_bodypart places a bodypart (at the slot, unrotated).
 - Internal organelles draw a sprite, plus a pattern the game masks to the body.
 - `rarity` lists textures that replace the main layer's at higher rarities
   (Bodypart.rarity_textures); every other organelle gets a rarity outline.
+  Like the game (Bodypart.update_rarity_texture), only the main node is
+  outlined: its Sprite, else its Line2D, else its Hair2. `outline` is the
+  radius of scn/shaders/outline_*.tres (3 texels, 6 for internal organelles),
+  in the published texture's pixels.
+- `motion` says how the organelle moves at rest in the game's organelle editor
+  (the screen this app recreates), with the values its scripts use:
+    gun       every weapon (gun.gd): the aim sways by sin(t * speed) / 5 rad
+              and the line eases toward it, bending along its length. The
+              Chemoreceptor Antenna does the same with its own constants.
+    tentacle  pseudopods (scn/cells/tentacle.gd): the first segment wobbles and
+              the rest straighten after it, so a wave runs down the tentacle.
+    lash      flagella (lash.gd): the connector piece flutters, and the body
+              (a Hair, scn/cells/hair.gd) trails behind it.
+    pulse     internal organelles: an autoplayed AnimationPlayer scales the
+              Visual node (the sprite, not the masked pattern).
+  Animated Line2D layers carry `chain` (their points, spacing, caps, width) so
+  the app can bend them.
 """
 import io
 import json
@@ -45,6 +62,13 @@ SCALE = 100.0
 # (the body view never zooms past about 1 screen pixel per game pixel).
 MAX_DENSITY = 2.0
 RARITIES = ['common', 'rare', 'epic', 'legendary', 'mythic']
+# Script defaults (their @export values); scenes override them per organelle.
+GUN = {'segment_length': 10.0, 'num_segments': 20, 'stiffness': 0.7}  # gun.gd
+TENTACLE = {'segment_length': 25.0, 'num_segments': 12, 'fluidity': 0.9, 'straighten_force': 0.5, 'spring_stiffness': 1.5,
+            'wobble_amount': 10.0, 'wobble_speed': 3.0, 'min_stretch': 0.5, 'max_stretch': 12.0}  # scn/cells/tentacle.gd
+HAIR = {'segment_length': 5.0, 'num_segments': 5, 'stiffness': 0.5, 'fluidity': 0.9, 'sway_angle': math.radians(10)}  # scn/cells/hair.gd
+# chemoreceptor_antenna.gd's constants: its line rebuilds itself, and rests like a gun.
+ANTENNA = {'segment_length': 8.0, 'num_segments': 17, 'stiffness': 0.8, 'amp': 0.18}
 # Slot scenes: a plain slot, and the special slots that grafts and built-in slots
 # turn a slot into (the same names as bodies.py's SPECIAL).
 SLOT_SCENES = {
@@ -179,9 +203,11 @@ class Textures:
         for f in os.listdir(ART):
             os.remove(os.path.join(ART, f))
         total = 0
+        scales = {}
         for name, (path, drawn) in sorted(self.done.items()):
             fmt, data, (w, h) = export(self.pack, path)
             target = math.ceil(drawn * MAX_DENSITY)
+            scales[name] = min(1.0, target / w)
             if fmt != 'webp' or w > target:
                 im = Image.open(io.BytesIO(data)).convert('RGBA')
                 if w > target:
@@ -193,6 +219,7 @@ class Textures:
                 f.write(data)
             total += len(data)
         print(f'wrote {len(self.done)} textures ({total // 1024} KB) to {ART}')
+        return scales
 
 
 def rect_layer(src, m, x, y, w, h, extra=None):
@@ -220,6 +247,8 @@ def line_layer(scene, i, textures, warn):
     end = p.get('end_cap_mode', 0)
     x0, x1, y = pts[0][0], pts[-1][0], pts[0][1]
     tex = texture_path(p.get('texture'))
+    if not tex and str(p.get('script', '')).endswith('/hair.gd'):
+        begin = end = 2  # hair.gd gives untextured hairs round caps
     if not tex:
         # An untextured line with a width curve: the plain Flagellum.
         sample = curve_sampler(p['width_curve']) if p.get('width_curve') else (lambda t: 1.0)
@@ -243,7 +272,11 @@ def line_layer(scene, i, textures, warn):
 
         outline = top + cap(x1, width * sample(1) / 2, -math.pi / 2, end) + bottom[::-1] + cap(x0, width * sample(0) / 2, math.pi / 2, begin)
         poly = [apply(m, *q) for q in outline]
-        return {'points': [[u(a), u(b)] for a, b in poly], 'fill': 'parasite'}
+        layer = {'points': [[u(a), u(b)] for a, b in poly], 'fill': 'parasite'}
+        layer['chain'] = chain_info(m, pts, width, begin, end)
+        # Width at each point, so the app can rebuild the outline when the line bends.
+        layer['chain']['widths'] = [round(sample(k / (len(pts) - 1)), 3) for k in range(len(pts))]
+        return layer
     tw, th = textures.size(tex)
     left = x0 - (width / 2 if begin else 0)
     right = x1 + (width / 2 if end else 0)
@@ -256,7 +289,14 @@ def line_layer(scene, i, textures, warn):
         extra['tile'] = u(width * tw / th)
     elif p.get('texture_mode', 0) != 2:
         warn(f'{n["name"]}: texture mode {p.get("texture_mode", 0)}')
+    extra['chain'] = chain_info(m, pts, width, begin, end)
     return rect_layer(src, m, left, y - width / 2, right - left, width, extra)
+
+
+def chain_info(m, pts, width, begin, end):
+    """A straight Line2D's points, for bending it: origin, count, spacing, caps (0 none, 1 box, 2 round)."""
+    ox, oy = apply(m, pts[0][0], pts[0][1])
+    return {'x': u(ox), 'y': u(oy), 'n': len(pts), 'seg': u((pts[-1][0] - pts[0][0]) / (len(pts) - 1)), 'width': u(width), 'caps': [begin, end]}
 
 
 def sprite_layer(scene, i, textures, warn):
@@ -277,7 +317,45 @@ def sprite_layer(scene, i, textures, warn):
     return rect_layer(src, m, x, y, tw, th)
 
 
-def organelle_layers(pack, scene_path, textures, warn):
+def class_paths(pack):
+    """class_name -> script path, for following `extends Gun` and the like."""
+    out = {}
+    for n in pack.names('scn/', '.gd'):
+        m = re.search(rb'^(?:@tool\s+)?class_name\s+(\w+)', pack.raw(n), re.M)
+        if m:
+            out[m.group(1).decode()] = 'res://' + n
+    return out
+
+
+def script_chain(pack, path, classes):
+    """A script and the scripts it extends, as file names (gun.gd, bodypart.gd...)."""
+    chain = []
+    while isinstance(path, str) and path.startswith('res://') and len(chain) < 12:
+        chain.append(path.split('/')[-1])
+        src = pack.raw(path.replace('res://', '')).decode('utf8', 'replace')
+        m = re.search(r'^(?:class_name\s+\w+\s+)?extends\s+"?([\w./:]+)"?', src, re.M)
+        path = None if not m else (m.group(1) if m.group(1).startswith('res://') else classes.get(m.group(1)))
+    return chain
+
+
+def pulse_of(scene):
+    """The autoplayed animation that scales the Visual node, if any (the internal organelles' 'wiggle')."""
+    for n in scene.nodes:
+        if n['type'] != 'AnimationPlayer' or not n['props'].get('autoplay'):
+            continue
+        lib = n['props'].get('libraries/') or {}
+        anim = scene.local.get((lib.get('_data') or {}).get(n['props']['autoplay']))
+        if not anim:
+            continue
+        a = {k: scene.resolve(v) for k, v in anim['props'].items()}
+        for t in range(8):
+            if a.get(f'tracks/{t}/path') == 'Visual:scale':
+                keys = a[f'tracks/{t}/keys']
+                return {'dur': round(a.get('length', 1.0), 3), 'times': [round(x, 3) for x in keys['times']], 'scales': [round(v[0], 3) for v in keys['values']]}
+    return None
+
+
+def organelle_layers(pack, scene_path, textures, warn, classes):
     scene = Scene(pack, scene_path)
     root = scene.nodes[0]['props']
     layers, main = [], None
@@ -303,7 +381,13 @@ def organelle_layers(pack, scene_path, textures, warn):
         main = next((l for _, _, name, l in layers if name == want), None)
         if main:
             break
+    if main is not None and main.get('src'):
+        # The outline shaders' radius, in the game's texels (converted when textures are written).
+        main['outline'] = 6 if '/internal/' in scene_path else 3
     out = {'layers': [l for *_, l in layers]}
+    motion = organelle_motion(pack, scene, layers, classes, warn)
+    if motion:
+        out['motion'] = motion
     rarity = [texture_path(t) or t for t in root.get('rarity_textures') or []]
     if rarity and main is not None:
         out['rarity'] = {}
@@ -316,6 +400,51 @@ def organelle_layers(pack, scene_path, textures, warn):
     if colors:
         out['colors'] = [[round(c, 4) for c in col[:3]] for col in colors]
     return out
+
+
+def organelle_motion(pack, scene, layers, classes, warn):
+    """How the organelle moves at rest in the game's organelle editor (see the module docstring)."""
+    index = {}
+    for k, (_, i, name, _) in enumerate(layers):
+        index.setdefault(name, k)
+    node = {n['name']: n for n in scene.nodes}
+    chain = script_chain(pack, scene.nodes[0]['props'].get('script'), classes)
+    num = lambda v: round(v, 4)  # noqa: E731
+    tentacle = next((n for n in scene.nodes if str(n['props'].get('script', '')).endswith('/tentacle.gd')), None)
+    if tentacle and tentacle['name'] in index:
+        t = {**TENTACLE, **{k: v for k, v in tentacle['props'].items() if k in TENTACLE}}
+        return {'kind': 'tentacle', 'layer': index[tentacle['name']], 'n': int(t['num_segments']), 'seg': u(t['segment_length']),
+                'fluidity': num(t['fluidity']), 'straighten': num(t['straighten_force']), 'spring': num(t['spring_stiffness']),
+                'wobble': num(math.radians(t['wobble_amount'])), 'speed': num(t['wobble_speed']), 'stretch': [num(t['min_stretch']), num(t['max_stretch'])]}
+    if 'lash.gd' in chain and 'Hair' in index and 'Hair2' in index:
+        h = {**HAIR, **{k: v for k, v in node['Hair2']['props'].items() if k in HAIR}}
+        ox, oy = node['Hair2']['props'].get('position', (0, 0))
+        return {'kind': 'lash', 'hair': index['Hair'], 'body': index['Hair2'], 'origin': [u(ox), u(oy)], 'n': int(h['num_segments']),
+                'seg': u(h['segment_length']), 'stiffness': num(h['stiffness']), 'fluidity': num(h['fluidity']), 'sway': num(h['sway_angle'])}
+    if 'gun.gd' in chain and 'Line2D' in index:
+        g = {**GUN, **{k: v for k, v in scene.nodes[0]['props'].items() if k in GUN}}
+        points = layers[index['Line2D']][3]['chain']['n']
+        if points != g['num_segments']:
+            warn(f'line has {points} points, gun.gd moves {g["num_segments"]}')
+        return {'kind': 'gun', 'layer': index['Line2D'], 'n': min(points, int(g['num_segments'])), 'seg': u(g['segment_length']),
+                'stiffness': num(g['stiffness']), 'amp': 0.2}
+    if 'chemoreceptor_antenna.gd' in chain and 'Line2D' in index:
+        return {'kind': 'gun', 'layer': index['Line2D'], 'n': ANTENNA['num_segments'], 'seg': u(ANTENNA['segment_length']),
+                'stiffness': ANTENNA['stiffness'], 'amp': ANTENNA['amp']}
+    pulse = pulse_of(scene)
+    if pulse:
+        # Only what's under the Visual node pulses: the sprite, not the masked pattern.
+        visual = next((i for i, n in enumerate(scene.nodes) if n['name'] == 'Visual' and n['parent'] == 0), None)
+        def under_visual(i):
+            while i > 0:
+                if i == visual:
+                    return True
+                i = scene.nodes[i]['parent']
+            return False
+        moving = [k for k, (_, i, _, _) in enumerate(layers) if under_visual(i)]
+        if moving:
+            return {'kind': 'pulse', 'layers': moving, **pulse}
+    return None
 
 
 def slot_sprites(pack, textures):
@@ -347,14 +476,20 @@ def main(pck_path):
     pack = Pack(pck_path)
     textures = Textures(pack)
     out = {'slots': slot_sprites(pack, textures), 'organelles': {}}
+    classes = class_paths(pack)
     for oid, slot, gid in organelles():
         path = f'res://scn/player/bodyparts/{slot}/{gid}.tscn'
         warn = lambda msg, oid=oid: print(f'  {oid}: {msg}')  # noqa: E731
         if path.replace('res://', '') + '.remap' not in pack.index and path.replace('res://', '') not in pack.index:
             warn(f'no scene at {path}')
             continue
-        out['organelles'][oid] = organelle_layers(pack, path, textures, warn)
-    textures.write()
+        out['organelles'][oid] = organelle_layers(pack, path, textures, warn, classes)
+    scales = textures.write()
+    for o in out['organelles'].values():
+        for layer in o['layers']:
+            if 'outline' in layer:
+                name = layer['src'].split('/')[-1].rsplit('.', 1)[0]
+                layer['outline'] = round(layer['outline'] * scales[name], 2)
     with open(os.path.join(REPO, 'src', 'data', 'organelle_art.json'), 'w') as f:
         json.dump(out, f, indent=1)
     print(f'wrote {len(out["organelles"])} organelles to src/data/organelle_art.json')

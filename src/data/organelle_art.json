@@ -169,9 +169,27 @@
       0.3,
       0.03,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "actin-whip": {
    "layers": [
@@ -180,9 +198,29 @@
      "x": -0.32,
      "y": -0.45,
      "w": 2.99,
-     "h": 0.9
+     "h": 0.9,
+     "chain": {
+      "x": 0.13,
+      "y": 0.0,
+      "n": 20,
+      "seg": 0.11,
+      "width": 0.9,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 20,
+    "seg": 0.11,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "apex-nidus": {
    "layers": [
@@ -215,9 +253,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "apoptosome": {
    "layers": [
@@ -250,9 +306,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "attractor": {
    "layers": [
@@ -269,9 +343,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     0
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "autolytic-oxysome": {
    "layers": [
@@ -304,9 +396,27 @@
       0.3,
       0.0,
       -0.0542
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "autophagic-mitochondrion": {
    "layers": [
@@ -339,9 +449,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "axopodium": {
    "layers": [
@@ -350,9 +478,35 @@
      "x": -0.31,
      "y": -0.3,
      "w": 3.85,
-     "h": 0.6
+     "h": 0.6,
+     "chain": {
+      "x": -0.01,
+      "y": 0.0,
+      "n": 14,
+      "seg": 0.25,
+      "width": 0.6,
+      "caps": [
+       1,
+       1
+      ]
+     }
     }
-   ]
+   ],
+   "motion": {
+    "kind": "tentacle",
+    "layer": 0,
+    "n": 14,
+    "seg": 0.25,
+    "fluidity": 0.9,
+    "straighten": 0.5,
+    "spring": 1.5,
+    "wobble": 0.1745,
+    "speed": 3.0,
+    "stretch": [
+     0.5,
+     18.0
+    ]
+   }
   },
   "bacteriophage-launcher": {
    "layers": [
@@ -361,9 +515,29 @@
      "x": -0.26,
      "y": -0.5,
      "w": 1.55,
-     "h": 1.0
+     "h": 1.0,
+     "chain": {
+      "x": 0.24,
+      "y": 0.0,
+      "n": 6,
+      "seg": 0.11,
+      "width": 1.0,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 6,
+    "seg": 0.11,
+    "stiffness": 0.6,
+    "amp": 0.2
+   }
   },
   "ballistic-flagellum": {
    "layers": [
@@ -372,16 +546,53 @@
      "x": 0.01,
      "y": -0.4,
      "w": 1.85,
-     "h": 0.8
+     "h": 0.8,
+     "chain": {
+      "x": 0.41,
+      "y": 0.0,
+      "n": 8,
+      "seg": 0.15,
+      "width": 0.8,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     },
     {
      "src": "art/body-parts/bullet-lash-connection.webp",
      "x": -0.225,
      "y": -0.225,
      "w": 0.725,
-     "h": 0.45
+     "h": 0.45,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 5,
+      "seg": 0.125,
+      "width": 0.45,
+      "caps": [
+       1,
+       0
+      ]
+     }
     }
-   ]
+   ],
+   "motion": {
+    "kind": "lash",
+    "hair": 1,
+    "body": 0,
+    "origin": [
+     0.41,
+     0.0
+    ],
+    "n": 8,
+    "seg": 0.15,
+    "stiffness": 0.6,
+    "fluidity": 0.95,
+    "sway": 0.0
+   }
   },
   "berserk-mitochondrion": {
    "layers": [
@@ -414,9 +625,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "bifurcator": {
    "layers": [
@@ -433,9 +662,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     0
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "blastocyst-mortar": {
    "layers": [
@@ -444,9 +691,29 @@
      "x": -0.29,
      "y": -0.35,
      "w": 2.6,
-     "h": 0.7
+     "h": 0.7,
+     "chain": {
+      "x": 0.06,
+      "y": 0.0,
+      "n": 20,
+      "seg": 0.1,
+      "width": 0.7,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 20,
+    "seg": 0.1,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "capsid-flail": {
    "layers": [
@@ -455,9 +722,29 @@
      "x": -0.23,
      "y": -0.8,
      "w": 3.49,
-     "h": 1.6
+     "h": 1.6,
+     "chain": {
+      "x": 0.57,
+      "y": 0.0,
+      "n": 10,
+      "seg": 0.21,
+      "width": 1.6,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 10,
+    "seg": 0.21,
+    "stiffness": 0.5,
+    "amp": 0.2
+   }
   },
   "caustic-secretor": {
    "layers": [
@@ -466,9 +753,29 @@
      "x": -0.225,
      "y": -0.225,
      "w": 2.15,
-     "h": 0.45
+     "h": 0.45,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 18,
+      "seg": 0.1,
+      "width": 0.45,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 18,
+    "seg": 0.1,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "chemoreceptor-antenna": {
    "layers": [
@@ -477,9 +784,29 @@
      "x": -0.28,
      "y": -0.35,
      "w": 1.98,
-     "h": 0.7
+     "h": 0.7,
+     "chain": {
+      "x": 0.07,
+      "y": 0.0,
+      "n": 17,
+      "seg": 0.08,
+      "width": 0.7,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 17,
+    "seg": 0.08,
+    "stiffness": 0.8,
+    "amp": 0.18
+   }
   },
   "chitin-shield": {
    "layers": [
@@ -496,7 +823,8 @@
       0.0,
       0.37,
       0.0
-     ]
+     ],
+     "outline": 3.0
     }
    ]
   },
@@ -507,7 +835,19 @@
      "x": -0.29,
      "y": -0.4,
      "w": 1.7,
-     "h": 0.8
+     "h": 0.8,
+     "chain": {
+      "x": 0.11,
+      "y": 0.0,
+      "n": 10,
+      "seg": 0.1,
+      "width": 0.8,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
    ]
   },
@@ -542,9 +882,27 @@
       0.6,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 6.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "chronosome": {
    "layers": [
@@ -577,9 +935,27 @@
       0.3,
       -0.03,
       0.02
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "ciliate-strike": {
    "layers": [
@@ -612,9 +988,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "cluster-ejector": {
    "layers": [
@@ -623,9 +1017,29 @@
      "x": -0.24,
      "y": -0.3,
      "w": 1.3,
-     "h": 0.6
+     "h": 0.6,
+     "chain": {
+      "x": 0.06,
+      "y": 0.0,
+      "n": 8,
+      "seg": 0.1,
+      "width": 0.6,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 8,
+    "seg": 0.1,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "cnidocyst": {
    "layers": [
@@ -634,9 +1048,29 @@
      "x": -0.25,
      "y": -0.3,
      "w": 2.84,
-     "h": 0.6
+     "h": 0.6,
+     "chain": {
+      "x": 0.05,
+      "y": 0.0,
+      "n": 15,
+      "seg": 0.16,
+      "width": 0.6,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 15,
+    "seg": 0.16,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "conal-burst": {
    "layers": [
@@ -669,9 +1103,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "concussive-tendril": {
    "layers": [
@@ -680,9 +1132,29 @@
      "x": -0.3,
      "y": -0.3,
      "w": 3.49,
-     "h": 0.6
+     "h": 0.6,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 18,
+      "seg": 0.17,
+      "width": 0.6,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 18,
+    "seg": 0.17,
+    "stiffness": 0.6,
+    "amp": 0.2
+   }
   },
   "cryoflagellum": {
    "layers": [
@@ -691,16 +1163,53 @@
      "x": 0.235,
      "y": -0.175,
      "w": 2.45,
-     "h": 0.35
+     "h": 0.35,
+     "chain": {
+      "x": 0.41,
+      "y": 0.0,
+      "n": 15,
+      "seg": 0.15,
+      "width": 0.35,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     },
     {
      "src": "art/body-parts/freeze-lash-connection.webp",
      "x": -0.225,
      "y": -0.225,
      "w": 0.725,
-     "h": 0.45
+     "h": 0.45,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 5,
+      "seg": 0.125,
+      "width": 0.45,
+      "caps": [
+       1,
+       0
+      ]
+     }
     }
-   ]
+   ],
+   "motion": {
+    "kind": "lash",
+    "hair": 1,
+    "body": 0,
+    "origin": [
+     0.41,
+     0.0
+    ],
+    "n": 15,
+    "seg": 0.15,
+    "stiffness": 0.6,
+    "fluidity": 0.95,
+    "sway": 0.0
+   }
   },
   "cryophore": {
    "layers": [
@@ -709,9 +1218,29 @@
      "x": -0.26,
      "y": -0.35,
      "w": 1.9,
-     "h": 0.7
+     "h": 0.7,
+     "chain": {
+      "x": 0.09,
+      "y": 0.0,
+      "n": 13,
+      "seg": 0.1,
+      "width": 0.7,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 9,
+    "seg": 0.1,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "cryopseudopod": {
    "layers": [
@@ -720,9 +1249,35 @@
      "x": -0.3,
      "y": -0.3,
      "w": 3.57,
-     "h": 0.6
+     "h": 0.6,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 12,
+      "seg": 0.27,
+      "width": 0.6,
+      "caps": [
+       1,
+       1
+      ]
+     }
     }
-   ]
+   ],
+   "motion": {
+    "kind": "tentacle",
+    "layer": 0,
+    "n": 12,
+    "seg": 0.27,
+    "fluidity": 0.9,
+    "straighten": 0.5,
+    "spring": 1.5,
+    "wobble": 0.1745,
+    "speed": 3.0,
+    "stretch": [
+     0.5,
+     12.0
+    ]
+   }
   },
   "cryopulse": {
    "layers": [
@@ -755,9 +1310,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "cryosome": {
    "layers": [
@@ -774,9 +1347,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     0
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "cryptobiotic-core": {
    "layers": [
@@ -809,9 +1400,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "cyst-depositor": {
    "layers": [
@@ -820,9 +1429,29 @@
      "x": -0.27,
      "y": -0.41,
      "w": 1.4,
-     "h": 0.8
+     "h": 0.8,
+     "chain": {
+      "x": 0.13,
+      "y": -0.01,
+      "n": 7,
+      "seg": 0.1,
+      "width": 0.8,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 7,
+    "seg": 0.1,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "dehiscence-lobber": {
    "layers": [
@@ -831,9 +1460,29 @@
      "x": -0.21,
      "y": -0.35,
      "w": 1.9,
-     "h": 0.7
+     "h": 0.7,
+     "chain": {
+      "x": 0.14,
+      "y": 0.0,
+      "n": 13,
+      "seg": 0.1,
+      "width": 0.7,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 13,
+    "seg": 0.1,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "dorsal-lysosome": {
    "layers": [
@@ -866,9 +1515,27 @@
       0.31,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.75
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "echosome": {
    "layers": [
@@ -885,9 +1552,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     0
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "elastosome": {
    "layers": [
@@ -920,9 +1605,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "elusive-mitochondrion": {
    "layers": [
@@ -955,9 +1658,27 @@
       0.325,
       0.0,
       0.03
-     ]
+     ],
+     "outline": 3.9
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "endospore": {
    "layers": [
@@ -990,9 +1711,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "entrant-mitochondrion": {
    "layers": [
@@ -1009,9 +1748,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     0
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "exocytotic-chamber": {
    "layers": [
@@ -1044,9 +1801,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "explosive-charge": {
    "layers": [
@@ -1079,9 +1854,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "extensor": {
    "layers": [
@@ -1114,9 +1907,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "flagellum": {
    "layers": [
@@ -1379,7 +2190,25 @@
        -0.1159
       ]
      ],
-     "fill": "parasite"
+     "fill": "parasite",
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 5,
+      "seg": 0.125,
+      "width": 0.3,
+      "caps": [
+       2,
+       2
+      ],
+      "widths": [
+       0.836,
+       0.978,
+       0.943,
+       0.84,
+       0.781
+      ]
+     }
     },
     {
      "points": [
@@ -1484,12 +2313,32 @@
        -0.0455
       ],
       [
-       3.3955,
-       -0.0455
+       3.3674,
+       -0.042
+      ],
+      [
+       3.3822,
+       -0.0322
+      ],
+      [
+       3.392,
+       -0.0174
       ],
       [
        3.3955,
-       0.0455
+       0.0
+      ],
+      [
+       3.392,
+       0.0174
+      ],
+      [
+       3.3822,
+       0.0322
+      ],
+      [
+       3.3674,
+       0.042
       ],
       [
        3.35,
@@ -1592,17 +2441,84 @@
        0.1162
       ],
       [
-       0.3838,
-       0.1162
+       0.4555,
+       0.1073
+      ],
+      [
+       0.4178,
+       0.0822
+      ],
+      [
+       0.3927,
+       0.0445
       ],
       [
        0.3838,
-       -0.1162
+       0.0
+      ],
+      [
+       0.3927,
+       -0.0445
+      ],
+      [
+       0.4178,
+       -0.0822
+      ],
+      [
+       0.4555,
+       -0.1073
       ]
      ],
-     "fill": "parasite"
+     "fill": "parasite",
+     "chain": {
+      "x": 0.5,
+      "y": 0.0,
+      "n": 20,
+      "seg": 0.15,
+      "width": 0.3,
+      "caps": [
+       2,
+       2
+      ],
+      "widths": [
+       0.775,
+       0.716,
+       0.632,
+       0.547,
+       0.488,
+       0.469,
+       0.447,
+       0.42,
+       0.392,
+       0.37,
+       0.359,
+       0.356,
+       0.358,
+       0.362,
+       0.367,
+       0.369,
+       0.366,
+       0.356,
+       0.336,
+       0.303
+      ]
+     }
     }
    ],
+   "motion": {
+    "kind": "lash",
+    "hair": 0,
+    "body": 1,
+    "origin": [
+     0.5,
+     0.0
+    ],
+    "n": 20,
+    "seg": 0.15,
+    "stiffness": 0.5,
+    "fluidity": 0.97,
+    "sway": 0.0
+   },
    "colors": [
     [
      0.0,
@@ -1628,9 +2544,29 @@
      "x": -0.25,
      "y": -0.3,
      "w": 3.0,
-     "h": 0.6
+     "h": 0.6,
+     "chain": {
+      "x": 0.05,
+      "y": 0.0,
+      "n": 16,
+      "seg": 0.16,
+      "width": 0.6,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 16,
+    "seg": 0.16,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "galvanic-conduit": {
    "layers": [
@@ -1639,9 +2575,29 @@
      "x": -0.28,
      "y": -0.35,
      "w": 2.38,
-     "h": 0.7
+     "h": 0.7,
+     "chain": {
+      "x": 0.07,
+      "y": 0.0,
+      "n": 13,
+      "seg": 0.14,
+      "width": 0.7,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 13,
+    "seg": 0.14,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "galvanic-flagellum": {
    "layers": [
@@ -1650,16 +2606,53 @@
      "x": 0.235,
      "y": -0.175,
      "w": 2.45,
-     "h": 0.35
+     "h": 0.35,
+     "chain": {
+      "x": 0.41,
+      "y": 0.0,
+      "n": 15,
+      "seg": 0.15,
+      "width": 0.35,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     },
     {
      "src": "art/body-parts/galvanic-lash-connection.webp",
      "x": -0.225,
      "y": -0.225,
      "w": 0.725,
-     "h": 0.45
+     "h": 0.45,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 5,
+      "seg": 0.125,
+      "width": 0.45,
+      "caps": [
+       1,
+       0
+      ]
+     }
     }
-   ]
+   ],
+   "motion": {
+    "kind": "lash",
+    "hair": 1,
+    "body": 0,
+    "origin": [
+     0.41,
+     0.0
+    ],
+    "n": 15,
+    "seg": 0.15,
+    "stiffness": 0.6,
+    "fluidity": 0.95,
+    "sway": 0.0
+   }
   },
   "galvanic-infuser": {
    "layers": [
@@ -1692,9 +2685,27 @@
       0.425,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 5.14
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "galvanic-node": {
    "layers": [
@@ -1727,9 +2738,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "galvanic-sac": {
    "layers": [
@@ -1762,9 +2791,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "galvanic-weave": {
    "layers": [
@@ -1797,9 +2844,27 @@
       0.2875,
       0.0,
       0.02
-     ]
+     ],
+     "outline": 3.49
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "glycocalyx": {
    "layers": [
@@ -1816,7 +2881,8 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     },
     {
      "src": "art/body-parts/orbital-connection-line2.webp",
@@ -1833,7 +2899,24 @@
       0.0
      ]
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     0
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "glycogen-synthesizer": {
    "layers": [
@@ -1866,9 +2949,27 @@
       0.5606,
       -0.0015,
       0.024
-     ]
+     ],
+     "outline": 6.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "golgi-apparatus": {
    "layers": [
@@ -1901,9 +3002,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "gyrase-wheel": {
    "layers": [
@@ -1912,9 +3031,29 @@
      "x": -0.25,
      "y": -0.6,
      "w": 4.6,
-     "h": 1.2
+     "h": 1.2,
+     "chain": {
+      "x": 0.35,
+      "y": 0.0,
+      "n": 21,
+      "seg": 0.17,
+      "width": 1.2,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 21,
+    "seg": 0.17,
+    "stiffness": 0.65,
+    "amp": 0.2
+   }
   },
   "gyrosome": {
    "layers": [
@@ -1947,9 +3086,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "helical-proboscis": {
    "layers": [
@@ -1958,9 +3115,29 @@
      "x": -0.26,
      "y": -0.4,
      "w": 2.75,
-     "h": 0.8
+     "h": 0.8,
+     "chain": {
+      "x": 0.14,
+      "y": 0.0,
+      "n": 14,
+      "seg": 0.15,
+      "width": 0.8,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 14,
+    "seg": 0.15,
+    "stiffness": 0.6,
+    "amp": 0.2
+   }
   },
   "iridophore-membrane": {
    "layers": [
@@ -1993,9 +3170,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "katanosome": {
    "layers": [
@@ -2028,9 +3223,27 @@
       0.3,
       -0.02,
       -0.04
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "kinetic-pseudopod": {
    "layers": [
@@ -2039,9 +3252,35 @@
      "x": -0.3,
      "y": -0.3,
      "w": 3.35,
-     "h": 0.6
+     "h": 0.6,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 12,
+      "seg": 0.25,
+      "width": 0.6,
+      "caps": [
+       1,
+       1
+      ]
+     }
     }
-   ]
+   ],
+   "motion": {
+    "kind": "tentacle",
+    "layer": 0,
+    "n": 12,
+    "seg": 0.25,
+    "fluidity": 0.9,
+    "straighten": 0.5,
+    "spring": 1.5,
+    "wobble": 0.1745,
+    "speed": 3.0,
+    "stretch": [
+     0.5,
+     12.0
+    ]
+   }
   },
   "kinetosome": {
    "layers": [
@@ -2074,9 +3313,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "lacerator-tendril": {
    "layers": [
@@ -2085,9 +3342,29 @@
      "x": -0.3,
      "y": -0.3,
      "w": 3.15,
-     "h": 0.6
+     "h": 0.6,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 18,
+      "seg": 0.15,
+      "width": 0.6,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 18,
+    "seg": 0.15,
+    "stiffness": 0.6,
+    "amp": 0.2
+   }
   },
   "lateral-emitter": {
    "layers": [
@@ -2120,9 +3397,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "lateral-vent": {
    "layers": [
@@ -2131,9 +3426,29 @@
      "x": -0.21,
      "y": -0.46,
      "w": 1.1,
-     "h": 0.9
+     "h": 0.9,
+     "chain": {
+      "x": 0.24,
+      "y": -0.01,
+      "n": 3,
+      "seg": 0.1,
+      "width": 0.9,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 3,
+    "seg": 0.1,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "luciferase-pump": {
    "layers": [
@@ -2142,9 +3457,29 @@
      "x": -0.27,
      "y": -0.35,
      "w": 2.1,
-     "h": 0.7
+     "h": 0.7,
+     "chain": {
+      "x": 0.08,
+      "y": 0.0,
+      "n": 15,
+      "seg": 0.1,
+      "width": 0.7,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 15,
+    "seg": 0.1,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "magnetosome": {
    "layers": [
@@ -2177,9 +3512,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "metabolic-mitochondrion": {
    "layers": [
@@ -2212,9 +3565,27 @@
       0.3625,
       0.0,
       0.06
-     ]
+     ],
+     "outline": 4.35
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "mitotic-nidus": {
    "layers": [
@@ -2247,9 +3618,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "mucus-emitter": {
    "layers": [
@@ -2258,9 +3647,29 @@
      "x": -0.25,
      "y": -0.45,
      "w": 1.7,
-     "h": 0.9
+     "h": 0.9,
+     "chain": {
+      "x": 0.2,
+      "y": 0.0,
+      "n": 9,
+      "seg": 0.1,
+      "width": 0.9,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 9,
+    "seg": 0.1,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "mutagen": {
    "layers": [
@@ -2293,9 +3702,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "necrolytic-igniter": {
    "layers": [
@@ -2328,9 +3755,27 @@
       0.3375,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 4.05
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "nidublast": {
    "layers": [
@@ -2339,9 +3784,29 @@
      "x": -0.25,
      "y": -0.45,
      "w": 1.55,
-     "h": 0.9
+     "h": 0.9,
+     "chain": {
+      "x": 0.2,
+      "y": 0.0,
+      "n": 6,
+      "seg": 0.13,
+      "width": 0.9,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 6,
+    "seg": 0.13,
+    "stiffness": 0.6,
+    "amp": 0.2
+   }
   },
   "operculum": {
    "layers": [
@@ -2350,7 +3815,19 @@
      "x": -0.215,
      "y": -0.475,
      "w": 1.07,
-     "h": 0.95
+     "h": 0.95,
+     "chain": {
+      "x": 0.26,
+      "y": 0.0,
+      "n": 2,
+      "seg": 0.12,
+      "width": 0.95,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 2.96
     }
    ]
   },
@@ -2385,9 +3862,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "opsonin-arc": {
    "layers": [
@@ -2420,9 +3915,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "opulentor": {
    "layers": [
@@ -2455,9 +3968,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "ossificator": {
    "layers": [
@@ -2490,9 +4021,27 @@
       0.3,
       -0.0015,
       0.024
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "oxidator": {
    "layers": [
@@ -2501,9 +4050,29 @@
      "x": -0.27,
      "y": -0.25,
      "w": 1.6,
-     "h": 0.5
+     "h": 0.5,
+     "chain": {
+      "x": -0.02,
+      "y": 0.0,
+      "n": 12,
+      "seg": 0.1,
+      "width": 0.5,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 12,
+    "seg": 0.1,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "oxysome": {
    "layers": [
@@ -2536,9 +4105,27 @@
       0.3,
       0.0,
       -0.04
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "perforator-tendril": {
    "layers": [
@@ -2547,9 +4134,29 @@
      "x": -0.25,
      "y": -0.25,
      "w": 4.07,
-     "h": 0.5
+     "h": 0.5,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 18,
+      "seg": 0.21,
+      "width": 0.5,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 18,
+    "seg": 0.21,
+    "stiffness": 0.6,
+    "amp": 0.2
+   }
   },
   "perforin-infuser": {
    "layers": [
@@ -2582,9 +4189,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "peroxisome": {
    "layers": [
@@ -2617,9 +4242,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "phagolysosome": {
    "layers": [
@@ -2652,9 +4295,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "phagosome": {
    "layers": [
@@ -2687,9 +4348,27 @@
       0.3,
       0.0,
       -0.0542
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "photoreceptor": {
    "layers": [
@@ -2722,9 +4401,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "pressurized-spicule": {
    "layers": [
@@ -2733,9 +4430,29 @@
      "x": -0.31,
      "y": -0.3,
      "w": 3.0,
-     "h": 0.6
+     "h": 0.6,
+     "chain": {
+      "x": -0.01,
+      "y": 0.0,
+      "n": 16,
+      "seg": 0.16,
+      "width": 0.6,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 16,
+    "seg": 0.16,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "pristine-mitochondrion": {
    "layers": [
@@ -2752,9 +4469,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     0
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "projectile-surge": {
    "layers": [
@@ -2787,9 +4522,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "pulsar-gland": {
    "layers": [
@@ -2798,9 +4551,29 @@
      "x": -0.29,
      "y": -0.34,
      "w": 2.2,
-     "h": 0.7
+     "h": 0.7,
+     "chain": {
+      "x": 0.06,
+      "y": 0.01,
+      "n": 16,
+      "seg": 0.1,
+      "width": 0.7,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 16,
+    "seg": 0.1,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "pyrocyst": {
    "layers": [
@@ -2809,7 +4582,19 @@
      "x": -0.235,
      "y": -0.365,
      "w": 1.63,
-     "h": 0.73
+     "h": 0.73,
+     "chain": {
+      "x": 0.13,
+      "y": 0.0,
+      "n": 10,
+      "seg": 0.1,
+      "width": 0.73,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
    ]
   },
@@ -2820,16 +4605,53 @@
      "x": 0.21,
      "y": -0.2,
      "w": 2.5,
-     "h": 0.4
+     "h": 0.4,
+     "chain": {
+      "x": 0.41,
+      "y": 0.0,
+      "n": 15,
+      "seg": 0.15,
+      "width": 0.4,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     },
     {
      "src": "art/body-parts/fire-lash-connection.webp",
      "x": -0.225,
      "y": -0.225,
      "w": 0.725,
-     "h": 0.45
+     "h": 0.45,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 5,
+      "seg": 0.125,
+      "width": 0.45,
+      "caps": [
+       1,
+       0
+      ]
+     }
     }
-   ]
+   ],
+   "motion": {
+    "kind": "lash",
+    "hair": 1,
+    "body": 0,
+    "origin": [
+     0.41,
+     0.0
+    ],
+    "n": 15,
+    "seg": 0.15,
+    "stiffness": 0.6,
+    "fluidity": 0.95,
+    "sway": 0.0
+   }
   },
   "pyrosome": {
    "layers": [
@@ -2846,9 +4668,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     0
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "recuperative-mitochondrion": {
    "layers": [
@@ -2881,9 +4721,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "refiner": {
    "layers": [
@@ -2916,9 +4774,27 @@
       0.3,
       -0.0015,
       0.024
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "regenerator": {
    "layers": [
@@ -2951,9 +4827,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "resilinoplast": {
    "layers": [
@@ -2986,9 +4880,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "resonant-cavity": {
    "layers": [
@@ -3021,9 +4933,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "rotary-extruder": {
    "layers": [
@@ -3032,9 +4962,29 @@
      "x": -0.24,
      "y": -0.44,
      "w": 2.55,
-     "h": 0.9
+     "h": 0.9,
+     "chain": {
+      "x": 0.21,
+      "y": 0.01,
+      "n": 16,
+      "seg": 0.11,
+      "width": 0.9,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 16,
+    "seg": 0.11,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "ruptusome": {
    "layers": [
@@ -3067,9 +5017,27 @@
       0.3375,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 4.09
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "scatter-ejector": {
    "layers": [
@@ -3078,9 +5046,29 @@
      "x": -0.3,
      "y": -0.3,
      "w": 1.7,
-     "h": 0.6
+     "h": 0.6,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 12,
+      "seg": 0.1,
+      "width": 0.6,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 12,
+    "seg": 0.1,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "sentry-nidus": {
    "layers": [
@@ -3113,9 +5101,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "sequence-scrambler": {
    "layers": [
@@ -3148,9 +5154,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "sinoatrial-node": {
    "layers": [
@@ -3183,9 +5207,27 @@
       0.3,
       -0.02,
       -0.0158
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "spore-cannon": {
    "layers": [
@@ -3194,9 +5236,29 @@
      "x": -0.275,
      "y": -0.275,
      "w": 1.95,
-     "h": 0.55
+     "h": 0.55,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 15,
+      "seg": 0.1,
+      "width": 0.55,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 15,
+    "seg": 0.1,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "starved-oxysome": {
    "layers": [
@@ -3229,9 +5291,27 @@
       0.3,
       0.0,
       -0.0542
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "staurolobber": {
    "layers": [
@@ -3240,9 +5320,29 @@
      "x": -0.22,
      "y": -0.35,
      "w": 1.435,
-     "h": 0.7
+     "h": 0.7,
+     "chain": {
+      "x": 0.13,
+      "y": 0.0,
+      "n": 8,
+      "seg": 0.105,
+      "width": 0.7,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 8,
+    "seg": 0.105,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "stinger-tendril": {
    "layers": [
@@ -3251,9 +5351,29 @@
      "x": -0.25,
      "y": -0.25,
      "w": 1.34,
-     "h": 0.5
+     "h": 0.5,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 5,
+      "seg": 0.21,
+      "width": 0.5,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 5,
+    "seg": 0.21,
+    "stiffness": 0.6,
+    "amp": 0.2
+   }
   },
   "swarm-nidus": {
    "layers": [
@@ -3286,9 +5406,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "symbiotic-pseudopod": {
    "layers": [
@@ -3297,9 +5435,35 @@
      "x": -0.25,
      "y": -0.25,
      "w": 4.34,
-     "h": 0.5
+     "h": 0.5,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 13,
+      "seg": 0.32,
+      "width": 0.5,
+      "caps": [
+       1,
+       1
+      ]
+     }
     }
-   ]
+   ],
+   "motion": {
+    "kind": "tentacle",
+    "layer": 0,
+    "n": 13,
+    "seg": 0.32,
+    "fluidity": 0.9,
+    "straighten": 0.5,
+    "spring": 1.5,
+    "wobble": 0.1745,
+    "speed": 3.0,
+    "stretch": [
+     0.5,
+     30.0
+    ]
+   }
   },
   "sympathetic-detonator": {
    "layers": [
@@ -3332,9 +5496,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "thermal-lance": {
    "layers": [
@@ -3343,9 +5525,29 @@
      "x": -0.21,
      "y": -0.35,
      "w": 1.6,
-     "h": 0.7
+     "h": 0.7,
+     "chain": {
+      "x": 0.14,
+      "y": 0.0,
+      "n": 10,
+      "seg": 0.1,
+      "width": 0.7,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 10,
+    "seg": 0.1,
+    "stiffness": 0.7,
+    "amp": 0.2
+   }
   },
   "toxic-flagellum": {
    "layers": [
@@ -3354,16 +5556,53 @@
      "x": 0.21,
      "y": -0.2,
      "w": 2.5,
-     "h": 0.4
+     "h": 0.4,
+     "chain": {
+      "x": 0.41,
+      "y": 0.0,
+      "n": 15,
+      "seg": 0.15,
+      "width": 0.4,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     },
     {
      "src": "art/body-parts/toxin-lash-connection.webp",
      "x": -0.225,
      "y": -0.225,
      "w": 0.725,
-     "h": 0.45
+     "h": 0.45,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 5,
+      "seg": 0.125,
+      "width": 0.45,
+      "caps": [
+       1,
+       0
+      ]
+     }
     }
-   ]
+   ],
+   "motion": {
+    "kind": "lash",
+    "hair": 1,
+    "body": 0,
+    "origin": [
+     0.41,
+     0.0
+    ],
+    "n": 15,
+    "seg": 0.15,
+    "stiffness": 0.6,
+    "fluidity": 0.95,
+    "sway": 0.0
+   }
   },
   "toxisome": {
    "layers": [
@@ -3396,9 +5635,27 @@
       0.3375,
       -0.04,
       -0.01
-     ]
+     ],
+     "outline": 4.09
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "tri-phase-tendril": {
    "layers": [
@@ -3408,9 +5665,29 @@
      "y": -0.9,
      "w": 2.52,
      "h": 1.8,
-     "tile": 1.4738
+     "tile": 1.4738,
+     "chain": {
+      "x": 0.66,
+      "y": 0.0,
+      "n": 10,
+      "seg": 0.08,
+      "width": 1.8,
+      "caps": [
+       1,
+       1
+      ]
+     },
+     "outline": 3.0
     }
-   ]
+   ],
+   "motion": {
+    "kind": "gun",
+    "layer": 0,
+    "n": 10,
+    "seg": 0.08,
+    "stiffness": 0.6,
+    "amp": 0.2
+   }
   },
   "triosome": {
    "layers": [
@@ -3443,9 +5720,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "trophic-pseudopod": {
    "layers": [
@@ -3454,9 +5749,35 @@
      "x": -0.28,
      "y": -0.28,
      "w": 3.31,
-     "h": 0.56
+     "h": 0.56,
+     "chain": {
+      "x": 0.0,
+      "y": 0.0,
+      "n": 12,
+      "seg": 0.25,
+      "width": 0.56,
+      "caps": [
+       1,
+       1
+      ]
+     }
     }
-   ]
+   ],
+   "motion": {
+    "kind": "tentacle",
+    "layer": 0,
+    "n": 12,
+    "seg": 0.25,
+    "fluidity": 0.9,
+    "straighten": 0.5,
+    "spring": 1.2,
+    "wobble": 0.1745,
+    "speed": 3.0,
+    "stretch": [
+     0.5,
+     40.0
+    ]
+   }
   },
   "turgosome": {
    "layers": [
@@ -3489,9 +5810,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "vacuole": {
    "layers": [
@@ -3524,9 +5863,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "vengeful-mitochondrion": {
    "layers": [
@@ -3559,9 +5916,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "vesicle": {
    "layers": [
@@ -3594,9 +5969,27 @@
       0.37,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 4.46
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   },
   "vortisome": {
    "layers": [
@@ -3629,9 +6022,27 @@
       0.3,
       0.0,
       0.0
-     ]
+     ],
+     "outline": 3.64
     }
-   ]
+   ],
+   "motion": {
+    "kind": "pulse",
+    "layers": [
+     1
+    ],
+    "dur": 0.5,
+    "times": [
+     0.0,
+     0.25,
+     0.5
+    ],
+    "scales": [
+     1.0,
+     1.1,
+     1.0
+    ]
+   }
   }
  }
 }

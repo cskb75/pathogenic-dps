@@ -7,6 +7,8 @@ import type { Vec } from '../engine/geometry';
 import type { SlotKind } from '../engine/types';
 import artData from '../data/organelle_art.json';
 import { art } from './art';
+import type { Motion } from './motion';
+import { useOutline } from './outline';
 
 export interface ArtLayer {
   /** An image over the rect (x, y, w, h)... */
@@ -25,12 +27,18 @@ export interface ArtLayer {
   /** A pattern the game shows only inside the body (internal organelles). */
   masked?: boolean;
   opacity?: number;
+  /** The rarity outline's radius in texels, on the one layer the game outlines (outline.gdshader). */
+  outline?: number;
+  /** A line's points before it bends: where it starts, how many, how far apart, its width and end caps (0 none, 1 box, 2 round). */
+  chain?: { x: number; y: number; n: number; seg: number; width: number; caps: [number, number]; widths?: number[] };
 }
 
-interface OrganelleArtDef {
+export interface OrganelleArtDef {
   layers: ArtLayer[];
   /** Flagellum colours per pathogen (normal_lash.gd parasite_colors). */
   colors?: number[][];
+  /** How it moves at rest in the game's organelle editor. */
+  motion?: Motion;
 }
 
 /** Slot sprites per slot type: 'plain', or a graft id (Volatile, Conductive and Omni slots have their own art). */
@@ -69,42 +77,57 @@ export function layerCorners(l: ArtLayer): Vec[] {
   return [applyMatrix(l.m, x, y), applyMatrix(l.m, x + w, y), applyMatrix(l.m, x, y + h), applyMatrix(l.m, x + w, y + h)];
 }
 
+/** The plain Flagellum's flat shape: the game lights it; a darker rim gives it the edge the textured organelles have. */
+export const flatShape = (color?: string) => ({
+  fill: color,
+  stroke: color && `color-mix(in srgb, ${color} 45%, black)`,
+  strokeWidth: 0.03,
+  strokeLinejoin: 'round' as const,
+});
+
+/**
+ * One art layer, drawn as it is at rest. `outline` is the rarity colour, for
+ * the layer the game outlines (none for Common).
+ */
+export function Layer({ layer: l, color, outline }: { layer: ArtLayer; color?: string; outline?: string }) {
+  const ring = useOutline(l.src && art(l.src), outline, l.outline);
+  if (l.points) return <polygon points={l.points.map((p) => p.join(',')).join(' ')} opacity={l.opacity} {...flatShape(color)} />;
+  const { x = 0, y = 0, w = 0, h = 0 } = l;
+  const transform = l.m ? `matrix(${l.m.join(' ')})` : undefined;
+  if (l.tile) {
+    // LINE_TEXTURE_TILE: copies of the texture side by side, cut off at the line's end.
+    const copies = Math.ceil(w / l.tile);
+    const [px, py] = ring ? [(ring.pad * l.tile) / ring.w, (ring.pad * h) / ring.h] : [0, 0];
+    return (
+      <g transform={transform} opacity={l.opacity}>
+        <svg x={x} y={y} width={w} height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" overflow="hidden">
+          {ring &&
+            Array.from({ length: copies }, (_, k) => (
+              <image key={`o${k}`} href={ring.url} x={k * l.tile! - px} y={-py} width={l.tile! + 2 * px} height={h + 2 * py} preserveAspectRatio="none" />
+            ))}
+          {Array.from({ length: copies }, (_, k) => (
+            <image key={k} href={art(l.src!)} x={k * l.tile!} y={0} width={l.tile} height={h} preserveAspectRatio="none" />
+          ))}
+        </svg>
+      </g>
+    );
+  }
+  const [px, py] = ring ? [(ring.pad * w) / ring.w, (ring.pad * h) / ring.h] : [0, 0];
+  return (
+    <g transform={transform} opacity={l.opacity}>
+      {ring && <image href={ring.url} x={x - px} y={y - py} width={w + 2 * px} height={h + 2 * py} preserveAspectRatio="none" />}
+      <image href={art(l.src!)} x={x} y={y} width={w} height={h} preserveAspectRatio="none" />
+    </g>
+  );
+}
+
 /** Draws art layers in the slot's frame. */
-export function ArtLayers({ layers, color }: { layers: ArtLayer[]; color?: string }) {
+export function ArtLayers({ layers, color, outline }: { layers: ArtLayer[]; color?: string; outline?: string }) {
   return (
     <>
-      {layers.map((l, i) => {
-        if (l.points) {
-          // The game lights this flat shape; a darker rim gives it the edge the textured organelles have.
-          return (
-            <polygon
-              key={i}
-              points={l.points.map((p) => p.join(',')).join(' ')}
-              fill={color}
-              stroke={color && `color-mix(in srgb, ${color} 45%, black)`}
-              strokeWidth={0.03}
-              strokeLinejoin="round"
-              opacity={l.opacity}
-            />
-          );
-        }
-        const { x = 0, y = 0, w = 0, h = 0 } = l;
-        const transform = l.m ? `matrix(${l.m.join(' ')})` : undefined;
-        if (l.tile) {
-          // LINE_TEXTURE_TILE: copies of the texture side by side, cut off at the line's end.
-          const copies = Math.ceil(w / l.tile);
-          return (
-            <g key={i} transform={transform} opacity={l.opacity}>
-              <svg x={x} y={y} width={w} height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" overflow="hidden">
-                {Array.from({ length: copies }, (_, k) => (
-                  <image key={k} href={art(l.src!)} x={k * l.tile!} y={0} width={l.tile} height={h} preserveAspectRatio="none" />
-                ))}
-              </svg>
-            </g>
-          );
-        }
-        return <image key={i} href={art(l.src!)} x={x} y={y} width={w} height={h} transform={transform} opacity={l.opacity} preserveAspectRatio="none" />;
-      })}
+      {layers.map((l, i) => (
+        <Layer key={i} layer={l} color={color} outline={outline} />
+      ))}
     </>
   );
 }

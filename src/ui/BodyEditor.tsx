@@ -1,4 +1,4 @@
-import { useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type KeyboardEvent, type MouseEvent } from 'react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type KeyboardEvent, type MouseEvent } from 'react';
 import { AMOEBA, buildAmoebaBody, nextGrowthId, placeBlob, type AmoebaBody, type Blob } from '../engine/amoeba';
 import { blobOutline, loneBlobEdge } from '../engine/amoebaShape';
 import { placementOptions, removePieceTree, type PlacementOption, type Slot, type SlotKind } from '../engine/body';
@@ -8,7 +8,10 @@ import type { Vec } from '../engine/geometry';
 import type { BodyPlan, Build, EvolvingBody, GameData, ModularBody } from '../engine/types';
 import type { Action } from '../state/build';
 import { art, PlanThumb } from './art';
+import { Clock, ClockContext } from './clock';
+import { connectionCurve, ConnectionLine, FlowArrows, type Curve } from './Connections';
 import { ArtLayers, flagellumColor, layerCorners, organelleArt, slotArt } from './organelleArt';
+import { OrganelleArt } from './OrganelleMotion';
 
 type Tool = { kind: 'select' } | { kind: 'add'; pieceType: string } | { kind: 'grow'; slot: SlotKind } | { kind: 'remove' };
 
@@ -31,14 +34,44 @@ const MIN_SLOT_PX: Record<SlotKind, number> = { internal: 11, external: 9 };
 const REF_UNIT_PX = 150;
 /** Room around organelle art at the edges of the view. */
 const ART_PAD = 0.15;
-/** The game's rarity outline is about 2.5 game pixels (0.025 units) wide; keep it visible when zoomed out. */
-const OUTLINE = { units: 0.025, minPx: 1.3 };
 /** Nanobot edge slots sit slightly outside the module. */
 const EXTERNAL_OFFSET = 0.08;
 
 const pts = (vs: Vec[]) => vs.map((v) => `${v.x * S},${v.y * S}`).join(' ');
 /** An SVG path through closed loops (fill it with the evenodd rule, so holes stay holes). */
 const loopsPath = (loops: Vec[][]) => loops.map((l) => `M${l.map((v) => `${(v.x * S).toFixed(1)},${(v.y * S).toFixed(1)}`).join('L')}Z`).join('');
+
+const ANIMATE_KEY = 'pathogenic-dps.animate';
+/** Flows sharing a connection get their arrows offset from each other. */
+const FLOW_LANE: Record<string, number> = { attack: 0, gun: 1, overcharge: 2 };
+
+/** Whether the body view animates: on unless turned off here, and never when the system asks for reduced motion. */
+function useAnimation() {
+  const [query] = useState(() => (typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null));
+  const [reduced, setReduced] = useState(() => !!query?.matches);
+  useEffect(() => {
+    if (!query) return;
+    const on = () => setReduced(query.matches);
+    query.addEventListener('change', on);
+    return () => query.removeEventListener('change', on);
+  }, [query]);
+  const [wanted, setWanted] = useState(() => {
+    try {
+      return window.localStorage.getItem(ANIMATE_KEY) !== 'off';
+    } catch {
+      return true;
+    }
+  });
+  const set = (on: boolean) => {
+    setWanted(on);
+    try {
+      window.localStorage.setItem(ANIMATE_KEY, on ? 'on' : 'off');
+    } catch {
+      // storage unavailable: the choice lasts until reload
+    }
+  };
+  return { on: wanted && !reduced, reduced, set };
+}
 
 const onActivate = (fn: () => void) => (e: KeyboardEvent) => {
   if (e.key === 'Enter' || e.key === ' ') {
@@ -60,6 +93,16 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
   const blobLoops = useMemo(() => (blobs ? blobOutline(blobs) : []), [blobs]);
   const blobPath = useMemo(() => loopsPath(blobLoops), [blobLoops]);
   const svgRef = useRef<SVGSVGElement>(null);
+  const animation = useAnimation();
+  const clock = useMemo(() => new Clock(), []);
+  // Only animate while the body view is on screen.
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([entry]) => clock.setVisible(entry.isIntersecting));
+    io.observe(svg);
+    return () => io.disconnect();
+  }, [clock]);
   const [cursor, setCursor] = useState<Vec | null>(null);
   const organelles = useMemo(() => new Map(data.organelles.map((o) => [o.id, o])), [data]);
   const rarityIndex = useMemo(() => new Map(data.rarities.map((r, i) => [r.id, i])), [data]);
@@ -93,16 +136,13 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
     [body, build, rarityIndex],
   );
 
-  /** Line between two slots, trimmed so it starts and ends at their edges. */
-  function trimmedLine(a: Slot, b: Slot) {
-    const p = slotCenter(a);
-    const q = slotCenter(b);
-    const d = Math.hypot(q.x - p.x, q.y - p.y) || 1;
-    const ux = (q.x - p.x) / d;
-    const uy = (q.y - p.y) / d;
-    const ra = radius(a) + 0.02;
-    const rb = radius(b) + 0.03;
-    return { x1: (p.x + ux * ra) * S, y1: (p.y + uy * ra) * S, x2: (q.x - ux * rb) * S, y2: (q.y - uy * rb) * S };
+  /** SVG units per game pixel (a Nanobot module is 102.4 game pixels). */
+  const px = (S * artScale) / 100;
+  /** The game's connection curve between two slots: it leaves an external slot heading into the body. */
+  function curveBetween(a: string, b: string): Curve {
+    const [sa, sb] = [body.slotById.get(a)!, body.slotById.get(b)!];
+    const [ca, cb] = [slotCenter(sa), slotCenter(sb)];
+    return connectionCurve({ x: ca.x * S, y: ca.y * S }, { x: cb.x * S, y: cb.y * S }, sa.facing, sb.facing, 30 * px);
   }
 
   const occupied = useMemo(
@@ -188,13 +228,15 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
   const zoom = Math.max(1, REF_UNIT_PX / unitPx);
   const rExternal = plan ? R_EXTERNAL.fixed : R_EXTERNAL.modular;
   const radius = (slot: Slot) => Math.max(slot.kind === 'internal' ? R_INTERNAL : rExternal, MIN_SLOT_PX[slot.kind] / unitPx);
-  const outline = Math.max(OUTLINE.units, OUTLINE.minPx / (unitPx * artScale));
 
   const removal = useMemo(() => {
     if (activeTool.kind !== 'remove' || !hoverPiece || hoverPiece === build.pieces[0]?.id) return new Set<string>();
     const kept = new Set(removePieceTree(build.pieces, hoverPiece).map((p) => p.id));
     return new Set(build.pieces.filter((p) => !kept.has(p.id)).map((p) => p.id));
   }, [activeTool.kind, hoverPiece, build.pieces]);
+
+  /** Connections where organelles at both ends work together: the game draws these bright. */
+  const activeLinks = useMemo(() => new Set(result.links.map((l) => [l.from, l.to].sort().join('|'))), [result.links]);
 
   const selectedLinks = useMemo(() => {
     if (!selected) return new Set<string>();
@@ -267,7 +309,13 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
       ) : (
         <EvolutionPicker data={data} build={build} body={cls.body as EvolvingBody} dispatch={dispatch} />
       )}
-      <p className="hint">{hint}</p>
+      <div className="hint-row">
+        <p className="hint">{hint}</p>
+        <label className="animate-toggle" title={animation.reduced ? 'Your system asks for reduced motion' : 'Organelles move the way the game shows them'}>
+          <input type="checkbox" checked={animation.on} disabled={animation.reduced} onChange={(e) => animation.set(e.target.checked)} />
+          Animate
+        </label>
+      </div>
 
       <svg
         ref={svgRef}
@@ -287,23 +335,6 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
         }}
       >
         <defs>
-          {['attack', 'gun', 'overcharge'].map((k) => (
-            <marker key={k} id={`arrow-${k}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" className={`arrowhead ${k}`} />
-            </marker>
-          ))}
-          {/* Organelles above Common get an outline in their rarity's colour, like the game's outline shaders (scn/shaders/outline_*.tres). */}
-          {data.rarities.slice(1).map((r) => (
-            <filter key={r.id} id={`${ids}-outline-${r.id}`} x="-25%" y="-25%" width="150%" height="150%">
-              <feMorphology in="SourceAlpha" operator="dilate" radius={outline} result="grown" />
-              <feFlood floodColor={r.color} />
-              <feComposite in2="grown" operator="in" result="outline" />
-              <feMerge>
-                <feMergeNode in="outline" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          ))}
           {/* The body's silhouette: internal organelles' patterns only show inside it. */}
           <mask id={`${ids}-body`} style={{ maskType: 'alpha' }}>
             {plan?.sprite && !blobs && <image href={art(plan.sprite.src)} x={plan.sprite.x * S} y={plan.sprite.y * S} width={plan.sprite.w * S} height={plan.sprite.h * S} preserveAspectRatio="none" />}
@@ -382,78 +413,77 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
           </polygon>
         ))}
 
-        {/* Internal organelles tint the body around them (each scene's "Masked" pattern). */}
-        <g mask={`url(#${ids}-body)`} className="organelle-patterns">
-          {body.slots.map((slot) => {
-            const e = equipped.get(slot.id);
-            const layers = e?.look.layers.filter((l) => l.masked);
-            if (!layers?.length) return null;
-            return (
-              <g key={slot.id} transform={placement(slot).transform}>
-                <ArtLayers layers={layers} />
-              </g>
-            );
+        <ClockContext.Provider value={animation.on ? clock : null}>
+          {/* Internal organelles tint the body around them (each scene's "Masked" pattern). */}
+          <g mask={`url(#${ids}-body)`} className="organelle-patterns">
+            {body.slots.map((slot) => {
+              const e = equipped.get(slot.id);
+              const layers = e?.look.layers.filter((l) => l.masked);
+              if (!layers?.length) return null;
+              return (
+                <g key={slot.id} transform={placement(slot).transform}>
+                  <ArtLayers layers={layers} />
+                </g>
+              );
+            })}
+          </g>
+
+          {body.links.map(([a, b], i) => {
+            const key = [a, b].sort().join('|');
+            return <ConnectionLine key={key} id={`${ids}-c${i}`} curve={curveBetween(a, b)} px={px} active={activeLinks.has(key)} near={selectedLinks.has(key)} />;
           })}
-        </g>
 
-        {body.links.map(([a, b]) => {
-          const key = [a, b].sort().join('|');
-          return <line key={key} {...trimmedLine(body.slotById.get(a)!, body.slotById.get(b)!)} className={`connector ${selectedLinks.has(key) ? 'near' : ''}`} />;
-        })}
+          {/* The game's slot sprites: a disc inside, a teardrop pointing out for external slots, with their own
+              art for Volatile, Conductive and Omni slots (built in or grafted). Organelles cover them. */}
+          <g className="slot-sprites">
+            {body.slots.map((slot) => (
+              <g key={slot.id} transform={placement(slot).transform}>
+                <ArtLayers layers={[slotArt(slot.kind, slotState(build, body, slot.id)?.graft ?? slot.special)]} />
+              </g>
+            ))}
+          </g>
 
-        {/* The game's slot sprites: a disc inside, a teardrop pointing out for external slots, with their own
-            art for Volatile, Conductive and Omni slots (built in or grafted). Organelles cover them. */}
-        <g className="slot-sprites">
-          {body.slots.map((slot) => (
-            <g key={slot.id} transform={placement(slot).transform}>
-              <ArtLayers layers={[slotArt(slot.kind, slotState(build, body, slot.id)?.graft ?? slot.special)]} />
+          {/* Organelles as the game draws them: external ones stick straight out of their slot, internal ones sit on it. */}
+          {(['external', 'internal'] as const).map((kind) => (
+            <g key={kind} className={`organelle-art organelle-art-${kind}`}>
+              {body.slots
+                .filter((slot) => slot.kind === kind)
+                .map((slot) => {
+                  const e = equipped.get(slot.id);
+                  if (!e) return null;
+                  const item = result.items.get(slot.id);
+                  const dim = (!!item?.weapon && item.weapon.dps === 0) || e.excluded;
+                  const rarity = data.rarities[Math.min(e.rarity, data.rarities.length - 1)];
+                  return (
+                    <g
+                      key={slot.id}
+                      transform={placement(slot).transform}
+                      className={`organelle ${dim ? 'dim' : ''} ${selected === slot.id ? 'selected' : ''}`}
+                      onClick={(ev) => {
+                        if (activeTool.kind !== 'select') return;
+                        ev.stopPropagation();
+                        onSelect(slot.id);
+                      }}
+                    >
+                      <OrganelleArt look={e.look} color={flagellumColor(e.look, build.classId, e.rarity)} outline={e.rarity > 0 ? rarity.color : undefined} />
+                    </g>
+                  );
+                })}
             </g>
           ))}
-        </g>
 
-        {/* Organelles as the game draws them: external ones stick straight out of their slot, internal ones sit on it. */}
-        {(['external', 'internal'] as const).map((kind) => (
-          <g key={kind} className={`organelle-art organelle-art-${kind}`}>
-            {body.slots
-              .filter((slot) => slot.kind === kind)
-              .map((slot) => {
-                const e = equipped.get(slot.id);
-                if (!e) return null;
-                const item = result.items.get(slot.id);
-                const dim = (!!item?.weapon && item.weapon.dps === 0) || e.excluded;
-                const layers = e.look.layers.filter((l) => !l.masked);
-                const rarity = data.rarities[Math.min(e.rarity, data.rarities.length - 1)];
-                return (
-                  <g
-                    key={slot.id}
-                    transform={placement(slot).transform}
-                    className={`organelle ${dim ? 'dim' : ''} ${selected === slot.id ? 'selected' : ''}`}
-                    onClick={(ev) => {
-                      if (activeTool.kind !== 'select') return;
-                      ev.stopPropagation();
-                      onSelect(slot.id);
-                    }}
-                  >
-                    <g filter={e.rarity > 0 ? `url(#${ids}-outline-${rarity.id})` : undefined}>
-                      <ArtLayers layers={layers} color={flagellumColor(e.look, build.classId, e.rarity)} />
-                    </g>
-                  </g>
-                );
-              })}
-          </g>
-        ))}
-
-        {result.links.map((l) => {
-          const dim = selected && l.from !== selected && l.to !== selected;
-          return (
-            <line
+          {result.links.map((l, i) => (
+            <FlowArrows
               key={`${l.kind}:${l.from}>${l.to}`}
-              {...trimmedLine(body.slotById.get(l.from)!, body.slotById.get(l.to)!)}
-              className={`flow ${l.kind} ${dim ? 'dim' : ''}`}
-              markerEnd={`url(#arrow-${l.kind})`}
+              id={`${ids}-f${i}`}
+              curve={curveBetween(l.from, l.to)}
+              px={px}
+              kind={l.kind}
+              lane={FLOW_LANE[l.kind] ?? 0}
+              dim={!!selected && l.from !== selected && l.to !== selected}
             />
-          );
-        })}
+          ))}
+        </ClockContext.Provider>
 
         {ghosts.map((g) => {
           const covered = g.covers.map(organelleName).join(', ');
