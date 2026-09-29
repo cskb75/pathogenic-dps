@@ -5,10 +5,12 @@ import { placementOptions, removePieceTree, type PlacementOption, type Slot, typ
 import type { CalcResult } from '../engine/calc';
 import { evolutionPath, findClass, slotState } from '../engine/calc';
 import type { Vec } from '../engine/geometry';
-import type { BodyPlan, Build, EvolvingBody, GameData, ModularBody } from '../engine/types';
+import type { Build, EvolvingBody, GameData, ModularBody } from '../engine/types';
 import type { Action } from '../state/build';
 import { drop, fits, lift, type Carry, type Held } from '../state/held';
+import { useAnimation } from './animation';
 import { art, organelleIcon, PlanThumb } from './art';
+import { BlobArt, BodyArt, loopsPath, PieceArt, S } from './bodyArt';
 import { Clock, ClockContext } from './clock';
 import { connectionCurve, ConnectionLine, FlowArrows, type Curve } from './Connections';
 import { arrowPaint, hoverArrows, linkInfo, worksTogether } from './links';
@@ -29,8 +31,6 @@ interface Props {
   setCarry: (carry: Carry | null) => void;
 }
 
-// Drawing scale: one editor unit (a Nanobot module side, or 100 game pixels) = 100 SVG units.
-const S = 100;
 const R_INTERNAL = 0.17;
 const R_EXTERNAL = { modular: 0.12, fixed: 0.145 };
 /** When the view zooms out to fit long organelles, slots stay at least this big on screen (radius in pixels). */
@@ -43,43 +43,20 @@ const ART_PAD = 0.15;
 const EXTERNAL_OFFSET = 0.08;
 
 const pts = (vs: Vec[]) => vs.map((v) => `${v.x * S},${v.y * S}`).join(' ');
-/** An SVG path through closed loops (fill it with the evenodd rule, so holes stay holes). */
-const loopsPath = (loops: Vec[][]) => loops.map((l) => `M${l.map((v) => `${(v.x * S).toFixed(1)},${(v.y * S).toFixed(1)}`).join('L')}Z`).join('');
 
-const ANIMATE_KEY = 'pathogenic-dps.animate';
 /** A held organelle snaps to a slot this close (editor units; the game uses 40 game pixels), or this many screen pixels. */
 const SNAP_REACH = 0.45;
 const SNAP_PX = 36;
 /** How far a pointer moves before a press on an organelle becomes a drag. */
 const DRAG_START_PX = 6;
-
-/** Whether the body view animates: on unless turned off here, and never when the system asks for reduced motion. */
-function useAnimation() {
-  const [query] = useState(() => (typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null));
-  const [reduced, setReduced] = useState(() => !!query?.matches);
-  useEffect(() => {
-    if (!query) return;
-    const on = () => setReduced(query.matches);
-    query.addEventListener('change', on);
-    return () => query.removeEventListener('change', on);
-  }, [query]);
-  const [wanted, setWanted] = useState(() => {
-    try {
-      return window.localStorage.getItem(ANIMATE_KEY) !== 'off';
-    } catch {
-      return true;
-    }
-  });
-  const set = (on: boolean) => {
-    setWanted(on);
-    try {
-      window.localStorage.setItem(ANIMATE_KEY, on ? 'on' : 'off');
-    } catch {
-      // storage unavailable: the choice lasts until reload
-    }
-  };
-  return { on: wanted && !reduced, reduced, set };
-}
+/**
+ * How bright the game's organelle editor draws a body: about 0.115 of its
+ * texture in linear light, so nearly black inside a dim rim. The body's
+ * material is lit (toon_lighting2.gdshader) under the world's Darken
+ * CanvasModulate; organelles aren't. Measured from in-game screenshots of the
+ * Amoeba and the Bacterium, which agree.
+ */
+const BODY_LIGHT = 0.115;
 
 const onActivate = (fn: () => void) => (e: KeyboardEvent) => {
   if (e.key === 'Enter' || e.key === ' ') {
@@ -546,6 +523,14 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch, 
         }}
       >
         <defs>
+          {/* The body as the game's organelle editor lights it (BODY_LIGHT). */}
+          <filter id={`${ids}-lit`} colorInterpolationFilters="linearRGB">
+            <feComponentTransfer>
+              <feFuncR type="linear" slope={BODY_LIGHT} />
+              <feFuncG type="linear" slope={BODY_LIGHT} />
+              <feFuncB type="linear" slope={BODY_LIGHT} />
+            </feComponentTransfer>
+          </filter>
           {/* The body's silhouette: internal organelles' patterns only show inside it. */}
           <mask id={`${ids}-body`} style={{ maskType: 'alpha' }}>
             {plan?.sprite && !blobs && <image href={art(plan.sprite.src)} x={plan.sprite.x * S} y={plan.sprite.y * S} width={plan.sprite.w * S} height={plan.sprite.h * S} preserveAspectRatio="none" />}
@@ -557,22 +542,11 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch, 
           </mask>
         </defs>
 
-        {plan && !blobs && <BodyArt plan={plan} />}
+        {plan && !blobs && <BodyArt plan={plan} filter={`url(#${ids}-lit)`} />}
 
         {blobs && (
           <g className="blobs">
-            <defs>
-              {/* threshold_outline.gdshader: the pattern tiles 4 times across the 700x1000 px composer,
-                  whose centre is the first blob, and is tinted by the fill colour (0.7 grey). */}
-              <pattern id="amoeba-texture" patternUnits="userSpaceOnUse" x={-350} y={-500} width={175} height={250}>
-                <image href={art('art/classes/amoeba-pattern.webp')} width={175} height={250} preserveAspectRatio="none" />
-                <rect width={175} height={250} fill="#000" opacity={0.3} />
-              </pattern>
-            </defs>
-            {/* The game's two outline rings sit outside the body: 5 px bright, then 7 px dark. */}
-            <path d={blobPath} className="blob-outline outer" />
-            <path d={blobPath} className="blob-outline inner" />
-            <path d={blobPath} className="blob" fillRule="evenodd" />
+            <BlobArt path={blobPath} filter={`url(#${ids}-lit)`} />
             {activeTool.kind === 'remove' &&
               blobs
                 .filter((b) => b.growthId !== undefined)
@@ -860,56 +834,6 @@ function HeldArt({
       </g>
     </g>
   );
-}
-
-/**
- * A Nanobot module's texture. In the game a square's sprite is 1.03 modules
- * wide; a triangle's is 1.06 x 0.94, drawn apex up, 0.15 modules above its centre.
- */
-function PieceArt({ vertices, center }: { vertices: Vec[]; center: Vec }) {
-  if (vertices.length === 4) {
-    const a = (Math.atan2(vertices[1].y - vertices[0].y, vertices[1].x - vertices[0].x) * 180) / Math.PI;
-    const w = 1.029;
-    return (
-      <image
-        href={art('art/classes/nanobot-square.webp')}
-        x={(center.x - w / 2) * S}
-        y={(center.y - w / 2) * S}
-        width={w * S}
-        height={w * S}
-        transform={`rotate(${a} ${center.x * S} ${center.y * S})`}
-        className="piece-art"
-        preserveAspectRatio="none"
-      />
-    );
-  }
-  if (vertices.length !== 3) return null;
-  // Turn the texture's apex toward one of the triangle's corners (all three look alike).
-  const apex = vertices[0];
-  const a = (Math.atan2(apex.y - center.y, apex.x - center.x) * 180) / Math.PI + 90;
-  const w = 1.0615;
-  const h = 0.944;
-  return (
-    <image
-      href={art('art/classes/nanobot-triangle.webp')}
-      x={(center.x - w / 2 + 0.008) * S}
-      y={(center.y - h / 2 - 0.146) * S}
-      width={w * S}
-      height={h * S}
-      transform={`rotate(${a} ${center.x * S} ${center.y * S})`}
-      className="piece-art"
-      preserveAspectRatio="none"
-    />
-  );
-}
-
-function BodyArt({ plan }: { plan: BodyPlan }) {
-  if (plan.sprite) {
-    const s = plan.sprite;
-    return <image href={art(s.src)} x={s.x * S} y={s.y * S} width={s.w * S} height={s.h * S} className="body-art" preserveAspectRatio="none" />;
-  }
-  if (plan.outline.length > 2) return <polygon className="piece" points={plan.outline.map(([x, y]) => `${x * S},${y * S}`).join(' ')} />;
-  return null;
 }
 
 function ModularToolbar({ body, tool, setTool }: { body: ModularBody; tool: Tool; setTool: (t: Tool) => void }) {

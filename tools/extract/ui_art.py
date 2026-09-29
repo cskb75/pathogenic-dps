@@ -55,11 +55,30 @@ FILES = {
     'dna-blue': 'gfx/ui/plasmid_menu/blue_dna_pattern.png',
     'dna-yellow': 'gfx/ui/plasmid_menu/yellow_dna_pattern.png',
     'plasmid-backdrop': 'gfx/ui/plasmid_menu/plasmids_menu_2_base.png',
+    # Character select (scn/ui/start_menus/tube.tscn): each pathogen floats in a
+    # glass tube, the parasite clipped to the mask, with a cap above and a bulb
+    # below; arrows either side and the lab behind. The pathogen carousel uses them.
+    'tube-glass': 'gfx/ui/selection_screen/1_tube_middle_2.png',
+    'tube-glow': 'gfx/ui/selection_screen/1_tube_middle_back.png',
+    'tube-mask': 'gfx/ui/selection_screen/1_tube_middle_mask.png',
+    'tube-hole-top': 'gfx/ui/selection_screen/1_tube_middle_hole_top.png',
+    'tube-hole-below': 'gfx/ui/selection_screen/1_tube_middle_hole_below.png',
+    'tube-cap': 'gfx/ui/selection_screen/4_tube_top_2.png',
+    'tube-bulb': 'gfx/ui/selection_screen/5_tube_below_2.png',
+    'select-arrow': 'gfx/ui/selection_screen/selection_screen_arrow.png',
+    'lab-backdrop': 'gfx/ui/selection_screen/selection_screen_background.png',
 }
 
-# Files to scale down to this width: the backdrop is 1354px wide (660 KB as stored)
-# and the type icons, shown at about 24px, are 175px wide.
-MAX_WIDTH = {'plasmid-backdrop': 900, **{name: 70 for name in FILES if name.startswith('type-')}}
+# Files to scale down to this width: the backdrops are 1354px and 1920px wide (660 KB and
+# 2 MB as stored), the type icons, shown at about 24px, are 175px wide, and the tube
+# parts are drawn about 110px wide.
+MAX_WIDTH = {
+    'plasmid-backdrop': 900,
+    'lab-backdrop': 1280,
+    **{name: 70 for name in FILES if name.startswith('type-')},
+    **{name: round(w * 0.9) for name, w in {'tube-glass': 237, 'tube-glow': 235, 'tube-mask': 185, 'tube-cap': 270, 'tube-bulb': 197}.items()},
+    'select-arrow': 140,
+}
 
 
 def main(pck_path):
