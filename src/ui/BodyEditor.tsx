@@ -1,4 +1,4 @@
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type KeyboardEvent, type MouseEvent } from 'react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type Dispatch, type KeyboardEvent, type MouseEvent, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import { AMOEBA, buildAmoebaBody, nextGrowthId, placeBlob, type AmoebaBody, type Blob } from '../engine/amoeba';
 import { blobOutline, loneBlobEdge } from '../engine/amoebaShape';
 import { placementOptions, removePieceTree, type PlacementOption, type Slot, type SlotKind } from '../engine/body';
@@ -7,9 +7,11 @@ import { evolutionPath, findClass, slotState } from '../engine/calc';
 import type { Vec } from '../engine/geometry';
 import type { BodyPlan, Build, EvolvingBody, GameData, ModularBody } from '../engine/types';
 import type { Action } from '../state/build';
-import { art, PlanThumb } from './art';
+import { drop, fits, lift, type Carry, type Held } from '../state/held';
+import { art, organelleIcon, PlanThumb } from './art';
 import { Clock, ClockContext } from './clock';
 import { connectionCurve, ConnectionLine, FlowArrows, type Curve } from './Connections';
+import { arrowPaint, hoverArrows, linkInfo, worksTogether } from './links';
 import { ArtLayers, flagellumColor, layerCorners, organelleArt, slotArt } from './organelleArt';
 import { OrganelleArt } from './OrganelleMotion';
 
@@ -22,6 +24,9 @@ interface Props {
   selected: string | null;
   onSelect: (slotId: string | null) => void;
   dispatch: Dispatch<Action>;
+  /** The organelle in your hand, if any (src/state/held.ts). */
+  carry: Carry | null;
+  setCarry: (carry: Carry | null) => void;
 }
 
 // Drawing scale: one editor unit (a Nanobot module side, or 100 game pixels) = 100 SVG units.
@@ -42,8 +47,11 @@ const pts = (vs: Vec[]) => vs.map((v) => `${v.x * S},${v.y * S}`).join(' ');
 const loopsPath = (loops: Vec[][]) => loops.map((l) => `M${l.map((v) => `${(v.x * S).toFixed(1)},${(v.y * S).toFixed(1)}`).join('L')}Z`).join('');
 
 const ANIMATE_KEY = 'pathogenic-dps.animate';
-/** Flows sharing a connection get their arrows offset from each other. */
-const FLOW_LANE: Record<string, number> = { attack: 0, gun: 1, fires: 1.5, overcharge: 2 };
+/** A held organelle snaps to a slot this close (editor units; the game uses 40 game pixels), or this many screen pixels. */
+const SNAP_REACH = 0.45;
+const SNAP_PX = 36;
+/** How far a pointer moves before a press on an organelle becomes a drag. */
+const DRAG_START_PX = 6;
 
 /** Whether the body view animates: on unless turned off here, and never when the system asks for reduced motion. */
 function useAnimation() {
@@ -80,7 +88,7 @@ const onActivate = (fn: () => void) => (e: KeyboardEvent) => {
   }
 };
 
-export function BodyEditor({ data, build, result, selected, onSelect, dispatch }: Props) {
+export function BodyEditor({ data, build, result, selected, onSelect, dispatch, carry, setCarry }: Props) {
   const [tool, setTool] = useState<Tool>({ kind: 'select' });
   const [hoverPiece, setHoverPiece] = useState<string | null>(null);
   const cls = findClass(data, build.classId);
@@ -169,7 +177,7 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
     return { at, next, fresh, links, outline: loopsPath(blobOutline(next.blobs)) };
   }, [activeTool, cursor, blobs, plan, build.growth, body]);
 
-  const viewBox = useMemo(() => {
+  const fitted = useMemo(() => {
     let all: Vec[];
     let pad: number;
     if (blobs) {
@@ -213,6 +221,15 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
     const h = Math.max(...ys) - minY;
     return { box: `${minX * S} ${minY * S} ${w * S} ${h * S}`, aspect: w / h, w, h };
   }, [body, plan, blobs, blobLoops, equipped]);
+  // While you hold an organelle the view stays as it was when you picked it up,
+  // so slots don't move under the pointer.
+  const lastFit = useRef(fitted);
+  const heldFit = useRef<typeof fitted | null>(null);
+  if (!carry) {
+    heldFit.current = null;
+    lastFit.current = fitted;
+  } else if (!heldFit.current) heldFit.current = lastFit.current;
+  const viewBox = heldFit.current ?? fitted;
 
   // Screen pixels per editor unit, so slots and outlines stay readable when zoomed out.
   const [screen, setScreen] = useState({ w: 600, h: 500 });
@@ -235,8 +252,184 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
     return new Set(build.pieces.filter((p) => !kept.has(p.id)).map((p) => p.id));
   }, [activeTool.kind, hoverPiece, build.pieces]);
 
-  /** Connections where organelles at both ends work together: the game draws these bright. */
-  const activeLinks = useMemo(() => new Set(result.links.map((l) => [l.from, l.to].sort().join('|'))), [result.links]);
+  // --- Carrying organelles, as in the game's organelle editor (src/state/held.ts) ---
+  const held = carry?.held ?? null;
+  const removeRef = useRef<HTMLDivElement>(null);
+  const handRef = useRef<SVGGElement>(null);
+  const chipRef = useRef<HTMLDivElement>(null);
+  /** The slot a held organelle would drop into, and a slot under the pointer it doesn't fit. */
+  const [snap, setSnap] = useState<{ target: string | null; blocked: string | null; remove: boolean }>({ target: null, blocked: null, remove: false });
+  const snapRef = useRef(snap);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [flash, setFlash] = useState<{ slot: string; n: number } | null>(null);
+  const twinOf = (id: string) => body.slotById.get(id)?.mirrorOf ?? body.slots.find((s) => s.mirrorOf === id)?.id;
+
+  /** The latest render's values, for window listeners. */
+  const live = useRef({ build, body, carry, unitPx });
+  live.current = { build, body, carry, unitPx };
+
+  /** A screen point in editor units. */
+  function clientToBody(x: number, y: number): Vec | null {
+    const m = svgRef.current?.getScreenCTM();
+    if (!m) return null;
+    const p = new DOMPoint(x, y).matrixTransform(m.inverse());
+    return { x: p.x / S, y: p.y / S };
+  }
+  const inside = (el: Element | null | undefined, x: number, y: number) => {
+    const r = el?.getBoundingClientRect();
+    return !!r && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+  };
+
+  /** Where the pointer is while carrying: which slot it snaps to, over the Remove zone or not. Moves the hand and the label. */
+  function track(x: number, y: number) {
+    const { build: b, body: bd, carry: c, unitPx: upx } = live.current;
+    if (!c) return;
+    const remove = inside(removeRef.current, x, y);
+    const onBody = inside(svgRef.current, x, y);
+    const p = onBody && !remove ? clientToBody(x, y) : null;
+    let target: string | null = null;
+    let blocked: string | null = null;
+    if (p) {
+      const reach = Math.max(SNAP_REACH, SNAP_PX / upx);
+      let best = reach;
+      let nearest = reach;
+      for (const slot of bd.slots) {
+        const at = slotCenter(slot);
+        const d = Math.hypot(at.x - p.x, at.y - p.y);
+        if (d > reach) continue;
+        if (fits(b, bd, data, c.held, slot.id)) {
+          if (d < best) [best, target] = [d, slot.id];
+        } else if (d < nearest) [nearest, blocked] = [d, slot.id];
+      }
+      if (target) blocked = null;
+    }
+    const next = { target, blocked, remove };
+    const prev = snapRef.current;
+    if (prev.target !== target || prev.blocked !== blocked || prev.remove !== remove) {
+      snapRef.current = next;
+      setSnap(next);
+    }
+    // The held organelle follows the pointer over the body, turned away from its middle like the game does.
+    const hand = handRef.current;
+    if (hand) {
+      if (p && !target) {
+        const external = organelles.get(c.held.organelle.id)?.slot === 'external';
+        const center = bd.frame.center;
+        const angle = external ? (Math.atan2(p.y - center.y, p.x - center.x) * 180) / Math.PI : 0;
+        hand.setAttribute('transform', `translate(${p.x * S} ${p.y * S}) rotate(${angle}) scale(${S / bd.frame.scale})`);
+        hand.setAttribute('visibility', 'visible');
+      } else hand.setAttribute('visibility', 'hidden');
+    }
+    const chip = chipRef.current;
+    if (chip) {
+      chip.style.transform = `translate(${x + 16}px, ${y + 18}px)`;
+      chip.classList.toggle('off-body', !onBody || remove);
+      chip.hidden = false;
+    }
+  }
+
+  /** Drops what you hold in a slot; a swap may leave the other organelle in your hand. */
+  function dropAt(slotId: string): boolean {
+    const { build: b, body: bd, carry: c } = live.current;
+    if (!c) return false;
+    const done = drop(b, bd, data, c.held, slotId);
+    if (!done) return false;
+    dispatch({ type: 'setSlots', slots: done.slots });
+    setCarry(done.held ? { held: done.held, mode: 'carry' } : null);
+    onSelect(slotId);
+    setFlash((f) => ({ slot: slotId, n: (f?.n ?? 0) + 1 }));
+    return true;
+  }
+  /** Puts it back: the build returns to how it was before you picked it up. */
+  function putBack() {
+    const c = live.current.carry;
+    if (c?.held.undo) dispatch({ type: 'setSlots', slots: c.held.undo });
+    setCarry(null);
+  }
+  /** The Remove zone: what you hold is gone (it already left its slot). */
+  const discard = () => setCarry(null);
+  /** Finishes a drag or a click while carrying: drop, remove or put back. */
+  function release() {
+    const s = snapRef.current;
+    if (s.remove) discard();
+    else if (!s.target || !dropAt(s.target)) putBack();
+  }
+  /** Swallows the click that follows letting go of a drag. */
+  function eatNextClick() {
+    const eat = (e: Event) => {
+      e.stopPropagation();
+      e.preventDefault();
+    };
+    window.addEventListener('click', eat, { capture: true, once: true });
+    window.setTimeout(() => window.removeEventListener('click', eat, { capture: true }), 0);
+  }
+
+  useEffect(() => {
+    if (!carry) {
+      snapRef.current = { target: null, blocked: null, remove: false };
+      setSnap(snapRef.current);
+      return;
+    }
+    const move = (e: PointerEvent) => track(e.clientX, e.clientY);
+    const up = (e: PointerEvent) => {
+      track(e.clientX, e.clientY);
+      if (live.current.carry?.mode !== 'drag') return;
+      release();
+      eatNextClick();
+    };
+    const key = (e: globalThis.KeyboardEvent) => e.key === 'Escape' && putBack();
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerdown', move, true);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('keydown', key);
+    return () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerdown', move, true);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('keydown', key);
+    };
+    // The handlers read the latest values through `live`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!carry]);
+
+  /** Pressing on a placed organelle and moving picks it up (a click still selects it). */
+  function pressOrganelle(e: ReactPointerEvent, slotId: string) {
+    if (activeTool.kind !== 'select' || carry || e.button !== 0) return;
+    const start = { x: e.clientX, y: e.clientY };
+    const move = (ev: PointerEvent) => {
+      if (Math.hypot(ev.clientX - start.x, ev.clientY - start.y) < DRAG_START_PX) return;
+      stop();
+      const { build: b, body: bd } = live.current;
+      const up = lift(b, bd, slotId);
+      if (!up) return;
+      dispatch({ type: 'setSlots', slots: up.slots });
+      live.current.carry = { held: up.held, mode: 'drag' };
+      setCarry(live.current.carry);
+      onSelect(null);
+      setHovered(null);
+      track(ev.clientX, ev.clientY);
+    };
+    const stop = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', stop);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', stop);
+  }
+
+  /** What an organelle connects to, and in which colour (the held one previews in its target slot). */
+  const infoAt = (id: string, preview: boolean) => {
+    if (preview && held && snap.target && (id === snap.target || id === twinOf(snap.target))) return linkInfo(held.organelle.id);
+    const o = slotState(build, body, id)?.organelle;
+    return o ? linkInfo(o.id) : undefined;
+  };
+  /** Arrows for the organelle you hold, hover or have selected, like the game. */
+  const focus = held ? snap.target : (hovered ?? selected);
+  const arrows = useMemo(
+    () => (focus && body.slotById.has(focus) ? hoverArrows(body, focus, (id) => infoAt(id, true)) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [focus, body, build, held, snap.target],
+  );
 
   const selectedLinks = useMemo(() => {
     if (!selected) return new Set<string>();
@@ -288,10 +481,21 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
     return { x: p.x / S, y: p.y / S };
   }
 
-  const hasMirrors = body.slots.some((s) => s.mirrorOf);
-  const hint =
-    activeTool.kind === 'select'
-      ? `Click a slot or an organelle to equip it. Round slots are internal. External slots point the way their organelle will stick out.${hasMirrors ? ' Dashed slots copy the organelle from the matching slot on the other side.' : ''}`
+  const heldName = held ? (organelles.get(held.organelle.id)?.name ?? held.organelle.id) : '';
+  /** What letting go would do, for the label by the pointer. */
+  function chipAction() {
+    if (snap.remove) return 'Remove';
+    if (snap.target) {
+      const there = slotState(build, body, snap.target)?.organelle;
+      return there ? `Swap with ${organelles.get(there.id)?.name ?? there.id}` : 'Place here';
+    }
+    if (snap.blocked && held) return `Goes in ${organelles.get(held.organelle.id)?.slot ?? 'other'} slots`;
+    return 'Drop on a slot';
+  }
+  const hint = held
+    ? `Holding ${heldName}: drop it on a slot (onto another organelle to swap them), or on Remove. Esc puts it back.`
+    : activeTool.kind === 'select'
+      ? 'Drag organelles onto slots from the list, or from slot to slot; drop one on another to swap them. Click a slot to set rarity and traits. Hover an organelle to see what it works with.'
       : activeTool.kind === 'add'
         ? `Click a dashed outline to attach a ${addType?.name.toLowerCase() ?? 'module'}. Orange outlines cover an equipped organelle, which gets removed.`
         : activeTool.kind === 'grow'
@@ -317,14 +521,21 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
         </label>
       </div>
 
+      <div className="body-stage">
       <svg
         ref={svgRef}
-        className={`body-svg tool-${activeTool.kind} ${plan ? 'fixed' : 'modular'} ${freeform ? 'freeform' : ''}`}
+        className={`body-svg tool-${activeTool.kind} ${plan ? 'fixed' : 'modular'} ${freeform ? 'freeform' : ''} ${held ? 'holding' : ''}`}
         viewBox={viewBox.box}
         style={{ ...(plan ? { aspectRatio: String(viewBox.aspect) } : {}), '--k': zoom } as CSSProperties}
         onMouseMove={(e) => activeTool.kind === 'grow' && setCursor(toBody(e))}
         onMouseLeave={() => setCursor(null)}
         onClick={(e) => {
+          // Carrying between clicks: this click drops it (or puts it back).
+          if (held) {
+            track(e.clientX, e.clientY);
+            release();
+            return;
+          }
           if (activeTool.kind === 'select') onSelect(null);
           if (activeTool.kind === 'grow') {
             const p = toBody(e);
@@ -430,17 +641,26 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
 
           {body.links.map(([a, b], i) => {
             const key = [a, b].sort().join('|');
-            return <ConnectionLine key={key} id={`${ids}-c${i}`} curve={curveBetween(a, b)} px={px} active={activeLinks.has(key)} near={selectedLinks.has(key)} />;
+            return (
+              <ConnectionLine key={key} id={`${ids}-c${i}`} curve={curveBetween(a, b)} px={px} active={worksTogether(infoAt(a, false), infoAt(b, false))} near={selectedLinks.has(key)} />
+            );
           })}
 
           {/* The game's slot sprites: a disc inside, a teardrop pointing out for external slots, with their own
               art for Volatile, Conductive and Omni slots (built in or grafted). Organelles cover them. */}
           <g className="slot-sprites">
-            {body.slots.map((slot) => (
-              <g key={slot.id} transform={placement(slot).transform}>
-                <ArtLayers layers={[slotArt(slot.kind, slotState(build, body, slot.id)?.graft ?? slot.special)]} />
-              </g>
-            ))}
+            {body.slots.map((slot) => {
+              // While you hold an organelle, like the game: slots it can't go in dim, its target grows and brightens.
+              const target = !!snap.target && (slot.id === snap.target || slot.id === twinOf(snap.target));
+              const off = !!held && !fits(build, body, data, held, slot.id);
+              return (
+                <g key={slot.id} transform={placement(slot).transform} className={`slot-sprite ${target ? 'target' : ''} ${off ? 'off' : ''}`}>
+                  <g transform={target ? 'scale(1.15)' : undefined}>
+                    <ArtLayers layers={[slotArt(slot.kind, slotState(build, body, slot.id)?.graft ?? slot.special)]} />
+                  </g>
+                </g>
+              );
+            })}
           </g>
 
           {/* Organelles as the game draws them: external ones stick straight out of their slot, internal ones sit on it. */}
@@ -454,13 +674,17 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
                   const item = result.items.get(slot.id);
                   const dim = (!!item?.weapon && item.weapon.dps === 0) || e.excluded;
                   const rarity = data.rarities[Math.min(e.rarity, data.rarities.length - 1)];
+                  const covered = !!snap.target && (slot.id === snap.target || slot.id === twinOf(snap.target));
                   return (
                     <g
                       key={slot.id}
                       transform={placement(slot).transform}
-                      className={`organelle ${dim ? 'dim' : ''} ${selected === slot.id ? 'selected' : ''}`}
+                      className={`organelle ${dim ? 'dim' : ''} ${selected === slot.id ? 'selected' : ''} ${covered ? 'covered' : ''}`}
+                      onPointerDown={(ev) => pressOrganelle(ev, slot.id)}
+                      onPointerEnter={() => !held && setHovered(slot.id)}
+                      onPointerLeave={() => setHovered((h) => (h === slot.id ? null : h))}
                       onClick={(ev) => {
-                        if (activeTool.kind !== 'select') return;
+                        if (activeTool.kind !== 'select' || held) return;
                         ev.stopPropagation();
                         onSelect(slot.id);
                       }}
@@ -472,17 +696,23 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
             </g>
           ))}
 
-          {result.links.map((l, i) => (
-            <FlowArrows
-              key={`${l.kind}:${l.from}>${l.to}`}
-              id={`${ids}-f${i}`}
-              curve={curveBetween(l.from, l.to)}
-              px={px}
-              kind={l.kind}
-              lane={FLOW_LANE[l.kind] ?? 0}
-              dim={!!selected && l.from !== selected && l.to !== selected}
+          {held && (
+            <HeldArt
+              held={held}
+              slots={snap.target ? [snap.target, twinOf(snap.target)].filter((id): id is string => !!id) : []}
+              placeAt={(id) => placement(body.slotById.get(id)!).transform}
+              handRef={handRef}
+              classId={build.classId}
+              data={data}
             />
-          ))}
+          )}
+
+          {/* The game's arrows: only for the organelle you hold, hover or have selected, coloured by where they come from. */}
+          {arrows.map((a, i) => {
+            const from = a.toward === a.b ? a.a : a.b;
+            const paint = arrowPaint(a.color);
+            return <FlowArrows key={`${from}>${a.toward}`} id={`${ids}-f${i}`} curve={curveBetween(from, a.toward)} px={px} core={paint.core} glow={paint.glow} alpha={a.alpha} />;
+          })}
         </ClockContext.Provider>
 
         {ghosts.map((g) => {
@@ -520,8 +750,9 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
           const inactive = !!item?.weapon && item.weapon.dps === 0;
           const unmodeled = item && !item.modeled;
           const kind = slot.kind === 'internal' ? 'Internal' : 'External';
+          const twin = twinOf(slot.id);
           const label = `${kind} slot${graft ? ` (${graft.name}${slot.special && !state?.graft ? ', built in' : ''})` : ''}${
-            slot.mirrorOf ? `, copy of ${slot.mirrorOf}` : ''
+            twin ? `, mirrored with the other side` : ''
           }: ${def ? `${def.name}, ${inst!.rarity}${unmodeled ? ' (not modeled yet)' : ''}` : 'empty'}`;
           const select = () => activeTool.kind === 'select' && onSelect(slot.id);
           return (
@@ -529,26 +760,105 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch }
               key={slot.id}
               className={`slot slot-${slot.kind} ${def ? `filled cat-${def.category}` : 'empty'} ${selected === slot.id ? 'selected' : ''} ${
                 invalid ? 'invalid' : ''
-              } ${inactive ? 'inactive' : ''} ${unmodeled ? 'unmodeled' : ''} ${state?.excluded ? 'excluded' : ''} ${slot.mirrorOf ? 'mirror' : ''}`}
+              } ${inactive ? 'inactive' : ''} ${unmodeled ? 'unmodeled' : ''} ${state?.excluded ? 'excluded' : ''}`}
               role="button"
               tabIndex={activeTool.kind === 'select' ? 0 : -1}
               aria-label={label}
               aria-pressed={selected === slot.id}
+              onPointerDown={(e) => def && pressOrganelle(e, slot.id)}
+              onPointerEnter={() => !held && def && setHovered(slot.id)}
+              onPointerLeave={() => setHovered((h) => (h === slot.id ? null : h))}
               onClick={(e) => {
+                // While carrying, the body view's click handler drops it.
+                if (held) return;
                 e.stopPropagation();
                 select();
               }}
-              onKeyDown={onActivate(select)}
+              onKeyDown={onActivate(() => (held ? dropAt(slot.id) : select()))}
             >
               <title>{label}</title>
               <circle className="slot-body" cx={c.x * S} cy={c.y * S} r={r * S} />
             </g>
           );
         })}
+        {flash && body.slotById.has(flash.slot) && (
+          <circle
+            key={flash.n}
+            className="drop-flash"
+            cx={slotCenter(body.slotById.get(flash.slot)!).x * S}
+            cy={slotCenter(body.slotById.get(flash.slot)!).y * S}
+            r={radius(body.slotById.get(flash.slot)!) * 1.6 * S}
+            onAnimationEnd={() => setFlash(null)}
+          />
+        )}
       </svg>
+      {held && (
+        <div
+          ref={removeRef}
+          className={`remove-zone ${snap.remove ? 'over' : ''}`}
+          role="button"
+          tabIndex={0}
+          aria-label={`Remove ${heldName}`}
+          onClick={discard}
+          onKeyDown={onActivate(discard)}
+        >
+          <span className="remove-zone-icon" aria-hidden="true">
+            ✕
+          </span>
+          Remove
+        </div>
+      )}
+      </div>
+      {held && (
+        <div ref={chipRef} className={`held-chip ${snap.remove ? 'remove' : ''} ${snap.blocked && !snap.target ? 'blocked' : ''}`} hidden>
+          <img className="held-chip-icon" src={organelleIcon(held.organelle.id)} alt="" width={36} height={36} />
+          <span className="held-chip-text">
+            <strong>{heldName}</strong>
+            <span>{chipAction()}</span>
+          </span>
+        </div>
+      )}
 
-      <Legend data={data} mirrors={hasMirrors} />
+      <Legend data={data} />
     </section>
+  );
+}
+
+/**
+ * The organelle in your hand: previewed in the slot it would drop into (and a
+ * fainter copy on its mirrored twin), or following the pointer over the body.
+ * The hand's position is set straight on the element as the pointer moves.
+ */
+function HeldArt({
+  held,
+  slots,
+  placeAt,
+  handRef,
+  classId,
+  data,
+}: {
+  held: Held;
+  slots: string[];
+  placeAt: (slotId: string) => string;
+  handRef: RefObject<SVGGElement | null>;
+  classId: string;
+  data: GameData;
+}) {
+  const look = organelleArt(held.organelle.id);
+  if (!look) return null;
+  const rarity = Math.max(0, data.rarities.findIndex((r) => r.id === held.organelle.rarity));
+  const paint = { color: flagellumColor(look, classId, rarity), outline: rarity > 0 ? data.rarities[rarity].color : undefined };
+  return (
+    <g className="held">
+      {slots.map((id, i) => (
+        <g key={id} transform={placeAt(id)} className={`held-preview ${i > 0 ? 'ghost' : ''}`}>
+          <OrganelleArt look={look} {...paint} />
+        </g>
+      ))}
+      <g ref={handRef} className="held-hand" visibility="hidden">
+        <OrganelleArt look={look} {...paint} />
+      </g>
+    </g>
   );
 }
 
@@ -698,7 +1008,7 @@ function EvolutionPicker({ data, build, body, dispatch }: { data: GameData; buil
   );
 }
 
-function Legend({ data, mirrors }: { data: GameData; mirrors: boolean }) {
+function Legend({ data }: { data: GameData }) {
   return (
     <ul className="legend" aria-label="Legend">
       {data.rarities.map((r) => (
@@ -708,20 +1018,8 @@ function Legend({ data, mirrors }: { data: GameData; mirrors: boolean }) {
         </li>
       ))}
       <li>
-        <span className="swatch line attack" />
-        Attack passes through
-      </li>
-      <li>
-        <span className="swatch line gun" />
-        Attack speed
-      </li>
-      <li>
-        <span className="swatch line fires" />
-        Fires a weapon
-      </li>
-      <li>
-        <span className="swatch line overcharge" />
-        Overcharge
+        <span className="swatch line arrows" />
+        Arrows: what the organelle you point at works with, in the colour of the one giving the effect
       </li>
       {data.grafts.map((g) => (
         <li key={g.id}>
@@ -729,12 +1027,6 @@ function Legend({ data, mirrors }: { data: GameData; mirrors: boolean }) {
           {g.name} slot
         </li>
       ))}
-      {mirrors && (
-        <li>
-          <span className="swatch ring mirror" />
-          Mirrored copy
-        </li>
-      )}
     </ul>
   );
 }

@@ -17,7 +17,7 @@ A build planner and DPS calculator for [Pathogenic](https://store.steampowered.c
 All body plans, evolutions, plasmid trees and numbers come from the full game's files (September 2026 build). The game also has an unfinished Protozoan (no evolutions, placeholder plasmid tree), which isn't included.
 
 Things that work the way the game does:
-- **Mirrored slots.** In a bilateral body, an organelle in a side slot is copied to the matching slot on the other side.
+- **Mirrored slots.** In a bilateral body, an organelle in a side slot is copied to the matching slot on the other side. Either side can be edited, dragged from or dropped on; each keeps its own slot type.
 - **Evolutions.** Organelles keep their slot when you evolve, as long as the new body has a slot with the same name. An evolution's damage, HP and stamina bonuses stay with you after you evolve again.
 - **Built-in special slots** act like grafts.
 - **"Left half" and "bottom half".** Effects such as Chirality or Dorsal Dominance are measured from the body's centre, as the game does.
@@ -159,7 +159,16 @@ The body editor draws organelles the way the game does, from `src/data/organelle
 - **Empty slots** are the game's slot sprites: a disc inside the body, a teardrop pointing out for external slots.
 - **Framing:** the view zooms out to fit every organelle, like the game's camera. Slot rings keep a readable size on screen.
 
-- **Connections** are the game's editor connections: curves that leave external slots heading into the body. Each is a pinched gold line with a bright band sliding along it, bright where the organelles at both ends work together. Flows (attacks passing through, attack speed, an organelle firing a weapon, Overcharge) are the game's scrolling arrows, coloured by what flows.
+- **Connections** are the game's editor connections: curves that leave external slots heading into the body. Each is a pinched gold line with a bright band sliding along it, bright where the organelles at both ends work together (`Bodypart.can_connect_to`, from each organelle's tags).
+- **Arrows** show only for the organelle you point at, hold or have selected, like the game's editor (`update_arrow_lines` in `editor.gd`, ported in `src/ui/links.ts`): what reaches it along chains (fainter past the first step) and what it reaches directly, turned to point at weapons. Each arrow is in the colour of the organelle it comes from (`get_connection_color`, an HDR colour: a bright core and a glow of its hue).
+
+**Editing works like the game's organelle editor** (`editor.gd`, with the logic in `src/state/held.ts`):
+
+- **Drag** an organelle from the list onto a slot, or from one slot to another. On a touch screen, or with a click, pick it up and then tap or click a slot.
+- While you hold one, it follows the pointer and snaps to the nearest slot it fits, previewed there (and on the mirrored twin). Slots it doesn't fit dim, and the label by the pointer says what letting go will do. The view stays still until you let go.
+- **Swap:** dropping on another organelle swaps them. The other one goes where yours came from if it fits there; otherwise it's now in your hand, as in the game.
+- **Remove** by dropping on the Remove zone. Letting go anywhere else, or pressing Esc, puts it back.
+- Clicking a slot still selects it, to set its organelle's rarity and traits or graft the slot.
 
 **Animation** follows what the game's organelle editor shows at rest, ported from the scripts that do it (`src/ui/motion.ts`, with each organelle's values extracted into `organelle_art.json`):
 

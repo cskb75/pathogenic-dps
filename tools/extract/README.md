@@ -18,7 +18,7 @@ python3 tools/extract/extract.py path/to/pathogenic.pck /tmp/pathogenic-out
 | `bodies.py` | Extracts each pathogen's body plans: starting body and evolutions (slots, connections, mirroring, special slots, outline, centre bone) and their sprites. |
 | `app_data.py` | Turns `bodies.py`'s output into `src/data/bodies.json` and `public/art/bodies`. |
 | `plasmids.py` | Writes every pathogen's plasmid tree (positions, links, text, icons, damage effects) to `src/data/plasmids.json` and `public/art/plasmids`. |
-| `organelle_art.py` | Reads how each organelle is drawn on the body (the textured lines and sprites in its scene, at rest), how it moves in the game's organelle editor (the values its scripts use), its rarity outline, and the slot sprites. Writes `src/data/organelle_art.json` and the textures to `public/art/body-parts`. |
+| `organelle_art.py` | Reads how each organelle is drawn on the body (the textured lines and sprites in its scene, at rest), how it moves in the game's organelle editor (the values its scripts use), its rarity outline, its tags and connection-arrow colour, and the slot sprites. Writes `src/data/organelle_art.json` and the textures to `public/art/body-parts`. |
 | `ui_art.py` | Copies the game's UI art the app's theme uses (menu frames, organelle type frames and icons, plasmid node frames, DNA links, the plasmid menu backdrop) into `public/art/ui`. |
 | `wiki_icons.py` | Downloads organelle, mutation and plasmid icons from pathogenic.wiki into `public/art`. |
 

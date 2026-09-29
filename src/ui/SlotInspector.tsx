@@ -16,6 +16,8 @@ interface Props {
   slotId: string | null;
   onSelect: (slotId: string | null) => void;
   dispatch: Dispatch<Action>;
+  /** Picks an organelle up from the list: dragged, or carried to a slot you click. */
+  onGrab: (organelleId: string, mode: 'drag' | 'carry') => void;
 }
 
 const LINK_TEXT: Record<Link['kind'], { in: string; out: string }> = {
@@ -25,7 +27,7 @@ const LINK_TEXT: Record<Link['kind'], { in: string; out: string }> = {
   fires: { in: 'Fired by', out: 'Fires' },
 };
 
-export function SlotInspector({ data, build, result, slotId, onSelect, dispatch }: Props) {
+export function SlotInspector({ data, build, result, slotId, onSelect, dispatch, onGrab }: Props) {
   const infos = useMemo(() => new Map(data.organelles.map((o) => [o.id, o])), [data]);
   const [picking, setPicking] = useState(false);
   useEffect(() => setPicking(false), [slotId]);
@@ -33,9 +35,12 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
 
   if (!slot) {
     return (
-      <section id="inspector" className="panel inspector" aria-label="Slot">
-        <h2>Slot</h2>
-        <p className="muted">Select a slot on the body to equip an organelle, pick its rarity and traits, or graft the slot.</p>
+      <section id="inspector" className="panel inspector" aria-label="Organelles">
+        <h2>Organelles</h2>
+        <p className="muted small">
+          Drag one onto a slot on the body, or click it and then click a slot. Select a slot to set its organelle's rarity and traits, or graft the slot.
+        </p>
+        <OrganellePicker data={data} accepts={['internal', 'external']} onPick={(id) => onGrab(id, 'carry')} onGrab={(id) => onGrab(id, 'drag')} />
       </section>
     );
   }
@@ -45,6 +50,7 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
   const own = build.slots[slot.id] ?? {};
   const state = slotState(build, body, slot.id) ?? {};
   const source = slot.mirrorOf;
+  const twin = source ?? body.slots.find((s) => s.mirrorOf === slot.id)?.id;
   const inst = state.organelle;
   const info = inst ? infos.get(inst.id) : undefined;
   const effectiveGraft = own.graft ?? slot.special;
@@ -89,14 +95,7 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
         </button>
       </div>
 
-      {source && (
-        <p className="note">
-          Mirrored slot: it always holds a copy of the organelle in the matching slot on the other side.{' '}
-          <button className="link" onClick={() => onSelect(source)}>
-            Edit that slot
-          </button>
-        </p>
-      )}
+      {twin && <p className="note">Mirrored: this slot and the one on the other side always hold the same organelle. Changes here apply to both; the slot type is each slot's own.</p>}
 
       <fieldset className="graft-picker">
         <legend>Slot type</legend>
@@ -138,17 +137,13 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
               {item && !item.modeled && <span className="badge warn">not counted in DPS</span>}
             </span>
           </div>
-          {!source && (
-            <div className="organelle-card-actions">
-              <button onClick={() => setPicking(true)}>Change</button>
-              <button className="danger" onClick={() => setOrganelle('')}>
-                Remove
-              </button>
-            </div>
-          )}
+          <div className="organelle-card-actions">
+            <button onClick={() => setPicking(true)}>Change</button>
+            <button className="danger" onClick={() => setOrganelle('')}>
+              Remove
+            </button>
+          </div>
         </div>
-      ) : source ? (
-        <p className="muted">The other side is empty.</p>
       ) : (
         <>
           {picking && (
@@ -156,7 +151,7 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
               Keep {info?.name ?? 'the current organelle'}
             </button>
           )}
-          <OrganellePicker data={data} accepts={accepts} current={inst?.id} onPick={setOrganelle} />
+          <OrganellePicker data={data} accepts={accepts} current={inst?.id} onPick={setOrganelle} onGrab={(id) => onGrab(id, 'drag')} />
         </>
       )}
 
@@ -169,7 +164,7 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
           ))}
           {!item && <p className="note warn">{info.name} goes in {info.slot} slots. Graft this slot as Omni or move it.</p>}
 
-          <fieldset className="rarity-picker" disabled={!!source}>
+          <fieldset className="rarity-picker">
             <legend>Rarity</legend>
             {data.rarities.map((r) => (
               <button
@@ -184,7 +179,7 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
             ))}
           </fieldset>
 
-          <fieldset className="traits" disabled={!!source}>
+          <fieldset className="traits">
             <legend>Traits</legend>
             {data.traits.map((t) => (
               <label key={t.id} title={t.description}>
@@ -239,7 +234,6 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch 
                 <input
                   type="checkbox"
                   checked={!state.excluded}
-                  disabled={!!source}
                   onChange={(e) => dispatch({ type: 'setSlot', slotId: target, patch: { excluded: !e.target.checked || undefined } })}
                 />
                 Count toward total DPS <span className="muted">(untick if it can't aim at the target)</span>

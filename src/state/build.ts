@@ -65,6 +65,8 @@ export type Action =
   | { type: 'removeGrowth'; id: number }
   | { type: 'setOrganelle'; slotId: string; organelle: OrganelleInstance | undefined }
   | { type: 'setSlot'; slotId: string; patch: Partial<Omit<SlotState, 'organelle'>> }
+  /** Every slot at once: picking organelles up, dropping and swapping them (src/state/held.ts). */
+  | { type: 'setSlots'; slots: Build['slots'] }
   | { type: 'setClass'; classId: string }
   | { type: 'setEvolution'; tier: number; id: string }
   | { type: 'setMutation'; id: string; count: number }
@@ -148,6 +150,8 @@ export function makeReducer(data: GameData) {
         const current = build.slots[action.slotId] ?? {};
         return { ...build, slots: { ...build.slots, [action.slotId]: { ...current, ...action.patch } } };
       }
+      case 'setSlots':
+        return { ...build, slots: action.slots };
       case 'setMutation':
         return { ...build, mutations: withCount(build.mutations, action.id, action.count) };
       case 'setPlasmid':

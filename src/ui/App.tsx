@@ -2,6 +2,7 @@ import { useEffect, useMemo, useReducer, useState } from 'react';
 import { gameData } from '../data';
 import { calculate } from '../engine/calc';
 import { emptyBuild, exampleBuild, loadInitialBuild, makeReducer, saveBuild, shareUrl } from '../state/build';
+import { fresh, type Carry } from '../state/held';
 import { BodyEditor } from './BodyEditor';
 import { BuildSettings } from './BuildSettings';
 import { ClassPicker } from './ClassPicker';
@@ -16,6 +17,8 @@ export function App() {
   const [build, dispatch] = useReducer(reducer, gameData, loadInitialBuild);
   const [selected, setSelected] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  /** An organelle in your hand in the body editor (src/state/held.ts). */
+  const [carry, setCarry] = useState<Carry | null>(null);
   const result = useMemo(() => calculate(build, gameData), [build]);
 
   useEffect(() => saveBuild(build), [build]);
@@ -52,6 +55,7 @@ export function App() {
     if (!window.confirm(example ? 'Replace this build with the example build?' : 'Start a new empty build?')) return;
     dispatch({ type: 'load', build: example ? exampleBuild(gameData) : emptyBuild(gameData, build.classId) });
     setSelected(null);
+    setCarry(null);
     window.history.replaceState(null, '', window.location.pathname);
   }
 
@@ -81,7 +85,15 @@ export function App() {
         </div>
       </header>
 
-      <ClassPicker data={gameData} build={build} dispatch={dispatch} onSwitched={() => setSelected(null)} />
+      <ClassPicker
+        data={gameData}
+        build={build}
+        dispatch={dispatch}
+        onSwitched={() => {
+          setSelected(null);
+          setCarry(null);
+        }}
+      />
 
       <p className="banner" role="note">
         <img className="banner-icon" src={uiArt('type-dna')} alt="" width={22} height={32} />
@@ -93,13 +105,34 @@ export function App() {
 
       <main className="layout">
         <div className="col-main">
-          <BodyEditor data={gameData} build={build} result={result} selected={selectedSlot} onSelect={selectFromEditor} dispatch={dispatch} />
+          <BodyEditor
+            data={gameData}
+            build={build}
+            result={result}
+            selected={selectedSlot}
+            onSelect={selectFromEditor}
+            dispatch={dispatch}
+            carry={carry}
+            setCarry={setCarry}
+          />
           <RunPanel data={gameData} build={build} result={result} dispatch={dispatch} />
           <BuildSettings data={gameData} build={build} dispatch={dispatch} />
         </div>
         <div className="col-side">
           <Results data={gameData} build={build} result={result} selected={selectedSlot} onSelect={setSelected} />
-          <SlotInspector data={gameData} build={build} result={result} slotId={selectedSlot} onSelect={setSelected} dispatch={dispatch} />
+          <SlotInspector
+            data={gameData}
+            build={build}
+            result={result}
+            slotId={selectedSlot}
+            onSelect={setSelected}
+            dispatch={dispatch}
+            onGrab={(id, mode) => {
+              // Picking up another puts back what you held first (as Esc would), so nothing is lost.
+              if (carry?.held.undo) dispatch({ type: 'setSlots', slots: carry.held.undo });
+              setCarry({ held: fresh(id), mode });
+            }}
+          />
         </div>
       </main>
 

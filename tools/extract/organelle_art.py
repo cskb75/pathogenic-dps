@@ -40,6 +40,9 @@ Slot.attach_bodypart places a bodypart (at the slot, unrotated).
               Visual node (the sprite, not the masked pattern).
   Animated Line2D layers carry `chain` (their points, spacing, caps, width) so
   the app can bend them.
+- `link` is what the editor's connection arrows need: the organelle's tags
+  (from its .tres), which decide what it connects to (Bodypart.can_connect_to),
+  and the HDR colour of the arrows it sends (Bodypart.get_connection_color).
 """
 import io
 import json
@@ -52,7 +55,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 from ctex import export  # noqa: E402
-from extract import Pack, clean  # noqa: E402
+from extract import TAGS, Pack, clean  # noqa: E402
 from gdres import scene_nodes  # noqa: E402
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -355,6 +358,43 @@ def pulse_of(scene):
     return None
 
 
+# bodypart.gd: the connection colour when a scene doesn't set one.
+UNSET_CONNECTION_COLOR = (3.5, 1.5, 0.8)
+
+
+def tooltip_type_color(tags, ui_name):
+    """Bodypart.get_tooltip_type_color."""
+    has = set(tags)
+    if 'MeleeWeapon' in has or 'ShootsBullets' in has or ('Weapon' in has and ui_name != 'o_conduit_name'):
+        return (0.131, 0.287, 0.183)
+    if 'Active' in has:
+        return (0.345, 0.156, 0.386)
+    if has & {'AttackModifier', 'BulletModifier'}:
+        return (0.063, 0.271, 0.361)
+    if 'EnergyGenerator' in has:
+        return (0.432, 0.221, 0.0)
+    if 'WeaponModifier' in has:
+        return (0.063, 0.271, 0.361)
+    return (0.115, 0.279, 0.275)
+
+
+def connection_link(pack, scene_path, root):
+    """The organelle's tags and its arrows' colour (Bodypart.get_connection_color)."""
+    res = pack.resource(scene_path[:-len('.tscn')] + '.tres')['resources'][-1]['props']
+    tags = [TAGS.get(t, t) for t in res.get('tags', [])]
+    color = tuple(root.get('connection_color') or UNSET_CONNECTION_COLOR)[:3]
+    if all(abs(a - b) < 1e-4 for a, b in zip(color, UNSET_CONNECTION_COLOR)):
+        if 'EnergyGenerator' in tags:
+            color = UNSET_CONNECTION_COLOR
+        elif {'MeleeWeapon', 'ShootsBullets', 'Weapon'} & set(tags):
+            color = (1.0, 3.0, 0.8)
+        else:
+            # The tooltip's type colour, scaled up to the unset colour's peak.
+            base = tooltip_type_color(tags, res.get('ui_name'))
+            color = tuple(c * max(UNSET_CONNECTION_COLOR) / max(base) for c in base)
+    return {'color': [round(c, 4) for c in color], 'tags': sorted(t for t in tags if isinstance(t, str))}
+
+
 def organelle_layers(pack, scene_path, textures, warn, classes):
     scene = Scene(pack, scene_path)
     root = scene.nodes[0]['props']
@@ -399,6 +439,7 @@ def organelle_layers(pack, scene_path, textures, warn, classes):
     colors = root.get('parasite_colors')
     if colors:
         out['colors'] = [[round(c, 4) for c in col[:3]] for col in colors]
+    out['link'] = connection_link(pack, scene_path, root)
     return out
 
 
