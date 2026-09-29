@@ -7,11 +7,12 @@
 //   around a core whose bright band slides along the line on a 4 s sine
 //   (editor_line_gradient.gdshader). Connections between organelles that work
 //   together are bright; the rest are dimmed grey (update_visibility).
-// - ArrowLine, for flows: small_arrow.png (a thin line with a chevron every
-//   101 px), 25 px wide, fading in toward 70% of the line and out at its end,
-//   scrolled by arrow_scroll.gdshader. Coloured here by what flows.
+// - ArrowLine: small_arrow.png (a thin line with a chevron every 101 px), 25
+//   px wide, fading in toward 70% of the line and out at its end, scrolled by
+//   arrow_scroll.gdshader. The editor shows arrows only for the organelle you
+//   hover or hold (links.ts), in the colour of the organelle they come from.
 
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, type CSSProperties } from 'react';
 import type { Vec } from '../engine/geometry';
 import { useClock, useTick } from './clock';
 
@@ -116,11 +117,12 @@ const CHEVRON = 'M0,0L-20,-9.8L-13,0L-20,9.8Z';
 const fade = (x: number) => (x < 0 ? 0 : x < 0.7047 ? x / 0.7047 : x < 1 ? (1 - x) / (1 - 0.7047) : 0);
 
 /**
- * A flow along a connection: chevrons scrolling from `curve.p0` to `curve.p3`
+ * Arrows along a connection: chevrons scrolling from `curve.p0` to `curve.p3`
  * the way arrow_scroll.gdshader moves the texture (speed 2.5, one copy per
- * 101 px). `lane` offsets flows sharing a connection so their arrows interleave.
+ * 101 px). `core` and `glow` are the HDR colour on screen (links.ts,
+ * arrowPaint); `alpha` fades arrows further back along a chain.
  */
-export function FlowArrows({ id, curve, px, kind, lane, dim }: { id: string; curve: Curve; px: number; kind: string; lane: number; dim: boolean }) {
+export function FlowArrows({ id, curve, px, core, glow, alpha }: { id: string; curve: Curve; px: number; core: string; glow: string; alpha: number }) {
   const shape = useMemo(() => samples(curve), [curve]);
   const length = shape.length / px; // game pixels
   const count = Math.ceil(length / ARROW_EVERY) + 2;
@@ -129,9 +131,9 @@ export function FlowArrows({ id, curve, px, kind, lane, dim }: { id: string; cur
   const place = (t: number) => {
     const scroll = (((2.5 * t + length / ARROW_EVERY / 4) % 2) + 2) % 2 - 1.25;
     const spacing = ARROW_EVERY / length;
-    const first = Math.ceil((0 - scroll) / spacing - ARROW_TIP - lane / 3);
+    const first = Math.ceil((0 - scroll) / spacing - ARROW_TIP);
     return Array.from({ length: count }, (_, i) => {
-      const x = scroll + (first + i + ARROW_TIP + lane / 3) * spacing;
+      const x = scroll + (first + i + ARROW_TIP) * spacing;
       if (x < 0 || x > 1) return null;
       const { p, dir } = shape.pointAt(x);
       const deg = (Math.atan2(dir.y, dir.x) * 180) / Math.PI;
@@ -152,12 +154,19 @@ export function FlowArrows({ id, curve, px, kind, lane, dim }: { id: string; cur
   });
   const d = `M${curve.p0.x},${curve.p0.y}C${curve.c1.x},${curve.c1.y} ${curve.c2.x},${curve.c2.y} ${curve.p3.x},${curve.p3.y}`;
   return (
-    <g className={`flow ${kind} ${dim ? 'dim' : ''}`}>
+    <g className="flow" opacity={alpha} style={{ '--flow': core, '--flow-glow': glow } as CSSProperties}>
       <linearGradient id={id} gradientUnits="userSpaceOnUse" x1={curve.p0.x} y1={curve.p0.y} x2={curve.p3.x} y2={curve.p3.y}>
         <stop offset={0} className="flow-stop" stopOpacity={0} />
         <stop offset={0.7047} className="flow-stop" stopOpacity={1} />
         <stop offset={1} className="flow-stop" stopOpacity={0} />
       </linearGradient>
+      <linearGradient id={`${id}-glow`} gradientUnits="userSpaceOnUse" x1={curve.p0.x} y1={curve.p0.y} x2={curve.p3.x} y2={curve.p3.y}>
+        <stop offset={0} className="flow-glow-stop" stopOpacity={0} />
+        <stop offset={0.7047} className="flow-glow-stop" stopOpacity={0.45} />
+        <stop offset={1} className="flow-glow-stop" stopOpacity={0} />
+      </linearGradient>
+      {/* The game's glow: the colour's hue spread around the bright line. */}
+      <path d={d} className="flow-line" stroke={`url(#${id}-glow)`} strokeWidth={9 * px} strokeLinecap="round" fill="none" />
       <path d={d} className="flow-line" stroke={`url(#${id})`} strokeWidth={2.7 * px} fill="none" />
       {place(time.current).map((c, i) => (
         <path

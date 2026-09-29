@@ -189,6 +189,17 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.5,
+     0.8
+    ],
+    "tags": [
+     "EnergyGenerator",
+     "Internal"
+    ]
    }
   },
   "actin-whip": {
@@ -220,6 +231,21 @@
     "seg": 0.11,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     0.6,
+     1.6,
+     1.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "apex-nidus": {
@@ -272,6 +298,19 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal",
+     "SpawnsMinions"
     ]
    }
   },
@@ -326,6 +365,20 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     4.4159,
+     1.0641,
+     1.2066
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "attractor": {
@@ -362,6 +415,18 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     2.2014,
+     0.8173,
+     5.1105
+    ],
+    "tags": [
+     "BulletModifier",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -416,6 +481,18 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.0,
+     1.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "autophagic-mitochondrion": {
@@ -469,6 +546,18 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.5,
+     0.8
+    ],
+    "tags": [
+     "Active",
+     "EnergyGenerator",
+     "Internal"
+    ]
    }
   },
   "axopodium": {
@@ -506,6 +595,19 @@
      0.5,
      18.0
     ]
+   },
+   "link": {
+    "color": [
+     3.1282,
+     1.4145,
+     3.5
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External"
+    ]
    }
   },
   "bacteriophage-launcher": {
@@ -537,6 +639,20 @@
     "seg": 0.11,
     "stiffness": 0.6,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     2.9375,
+     2.2728,
+     3.0
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "SpawnsMinions",
+     "Weapon"
+    ]
    }
   },
   "ballistic-flagellum": {
@@ -592,6 +708,20 @@
     "stiffness": 0.6,
     "fluidity": 0.95,
     "sway": 0.0
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "Lash"
+    ]
    }
   },
   "berserk-mitochondrion": {
@@ -645,6 +775,17 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.5,
+     0.8
+    ],
+    "tags": [
+     "EnergyGenerator",
+     "Internal"
+    ]
    }
   },
   "bifurcator": {
@@ -682,6 +823,21 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     1.0,
+     1.0,
+     4.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "blastocyst-mortar": {
@@ -713,6 +869,21 @@
     "seg": 0.1,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     4.0,
+     0.8,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "capsid-flail": {
@@ -744,6 +915,20 @@
     "seg": 0.21,
     "stiffness": 0.5,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "MeleeWeapon",
+     "Weapon"
+    ]
    }
   },
   "caustic-secretor": {
@@ -775,6 +960,21 @@
     "seg": 0.1,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "chemoreceptor-antenna": {
@@ -806,6 +1006,17 @@
     "seg": 0.08,
     "stiffness": 0.8,
     "amp": 0.18
+   },
+   "link": {
+    "color": [
+     1.5,
+     0.6,
+     1.8
+    ],
+    "tags": [
+     "EnergyConsumer",
+     "External"
+    ]
    }
   },
   "chitin-shield": {
@@ -826,7 +1037,18 @@
      ],
      "outline": 3.0
     }
-   ]
+   ],
+   "link": {
+    "color": [
+     3.5,
+     1.5,
+     0.8
+    ],
+    "tags": [
+     "EnergyGenerator",
+     "External"
+    ]
+   }
   },
   "chromatophore-gland": {
    "layers": [
@@ -849,7 +1071,21 @@
      },
      "outline": 3.0
     }
-   ]
+   ],
+   "link": {
+    "color": [
+     3.1282,
+     1.4145,
+     3.5
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External"
+    ]
+   }
   },
   "chromatophore-lens": {
    "layers": [
@@ -901,6 +1137,20 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     3.1282,
+     1.4145,
+     3.5
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -955,6 +1205,21 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     1.0,
+     1.0,
+     4.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "ciliate-strike": {
@@ -1008,6 +1273,19 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.1282,
+     1.4145,
+     3.5
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "cluster-ejector": {
@@ -1039,6 +1317,21 @@
     "seg": 0.1,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "cnidocyst": {
@@ -1070,6 +1363,21 @@
     "seg": 0.16,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     4.0,
+     0.8,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "conal-burst": {
@@ -1123,6 +1431,21 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     0.8,
+     3.5,
+     1.5
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal",
+     "UsesWeapons"
+    ]
    }
   },
   "concussive-tendril": {
@@ -1154,6 +1477,20 @@
     "seg": 0.17,
     "stiffness": 0.6,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.7052,
+     0.653,
+     2.4542
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "MeleeWeapon",
+     "Weapon"
+    ]
    }
   },
   "cryoflagellum": {
@@ -1209,6 +1546,19 @@
     "stiffness": 0.6,
     "fluidity": 0.95,
     "sway": 0.0
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "Lash"
+    ]
    }
   },
   "cryophore": {
@@ -1240,6 +1590,21 @@
     "seg": 0.1,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "cryopseudopod": {
@@ -1276,6 +1641,19 @@
     "stretch": [
      0.5,
      12.0
+    ]
+   },
+   "link": {
+    "color": [
+     1.0,
+     1.0,
+     4.0
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "Pseudopod"
     ]
    }
   },
@@ -1330,6 +1708,19 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.1282,
+     1.4145,
+     3.5
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "cryosome": {
@@ -1366,6 +1757,21 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     1.0,
+     1.0,
+     4.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -1420,6 +1826,18 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "cyst-depositor": {
@@ -1451,6 +1869,21 @@
     "seg": 0.1,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "dehiscence-lobber": {
@@ -1482,6 +1915,21 @@
     "seg": 0.1,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     4.0,
+     0.8,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "dorsal-lysosome": {
@@ -1535,6 +1983,20 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.0,
+     1.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "echosome": {
@@ -1571,6 +2033,20 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     0.0,
+     1.912,
+     1.8098
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -1625,6 +2101,20 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     1.0,
+     1.0,
+     4.0
+    ],
+    "tags": [
+     "BulletModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "elusive-mitochondrion": {
@@ -1677,6 +2167,17 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.5,
+     0.8
+    ],
+    "tags": [
+     "EnergyGenerator",
+     "Internal"
     ]
    }
   },
@@ -1731,6 +2232,17 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "entrant-mitochondrion": {
@@ -1767,6 +2279,17 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.5,
+     0.8
+    ],
+    "tags": [
+     "EnergyGenerator",
+     "Internal"
     ]
    }
   },
@@ -1821,6 +2344,20 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     0.5,
+     1.0,
+     3.0
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal",
+     "WeaponModifier"
+    ]
    }
   },
   "explosive-charge": {
@@ -1874,6 +2411,19 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.1282,
+     1.4145,
+     3.5
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "extensor": {
@@ -1926,6 +2476,18 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     0.0,
+     2.1753,
+     3.2416
+    ],
+    "tags": [
+     "AttackModifier",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -2535,7 +3097,19 @@
      0.3467,
      0.0
     ]
-   ]
+   ],
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "EnergyConsumer",
+     "External",
+     "Lash"
+    ]
+   }
   },
   "galvanic-cnidocyst": {
    "layers": [
@@ -2566,6 +3140,22 @@
     "seg": 0.16,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     4.0,
+     0.8,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "CreatesLightning",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "galvanic-conduit": {
@@ -2597,6 +3187,22 @@
     "seg": 0.14,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "CreatesLightning",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "galvanic-flagellum": {
@@ -2652,6 +3258,21 @@
     "stiffness": 0.6,
     "fluidity": 0.95,
     "sway": 0.0
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "CreatesLightning",
+     "EnergyConsumer",
+     "External",
+     "Lash"
+    ]
    }
   },
   "galvanic-infuser": {
@@ -2704,6 +3325,22 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     1.0178,
+     1.6596,
+     2.1168
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "CreatesLightning",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -2758,6 +3395,20 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     0.0,
+     1.5,
+     1.5
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "galvanic-sac": {
@@ -2810,6 +3461,20 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "CreatesLightning",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -2864,6 +3529,22 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     1.0178,
+     1.6596,
+     2.1168
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "CreatesLightning",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "glycocalyx": {
@@ -2915,6 +3596,17 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.5,
+     0.8
+    ],
+    "tags": [
+     "EnergyGenerator",
+     "Internal"
     ]
    }
   },
@@ -2969,6 +3661,18 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     2.2285,
+     2.5005,
+     0.0
+    ],
+    "tags": [
+     "EnergyConsumer",
+     "Internal",
+     "WeaponModifier"
+    ]
    }
   },
   "golgi-apparatus": {
@@ -3022,6 +3726,21 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     0.0,
+     1.8875,
+     2.4542
+    ],
+    "tags": [
+     "BulletModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal",
+     "UsesMeleeWeapons"
+    ]
    }
   },
   "gyrase-wheel": {
@@ -3053,6 +3772,20 @@
     "seg": 0.17,
     "stiffness": 0.65,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "MeleeWeapon",
+     "Weapon"
+    ]
    }
   },
   "gyrosome": {
@@ -3106,6 +3839,20 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     0.6887,
+     1.8248,
+     0.653
+    ],
+    "tags": [
+     "BulletModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "helical-proboscis": {
@@ -3137,6 +3884,20 @@
     "seg": 0.15,
     "stiffness": 0.6,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "MeleeWeapon",
+     "Weapon"
+    ]
    }
   },
   "iridophore-membrane": {
@@ -3189,6 +3950,20 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     3.1282,
+     1.4145,
+     3.5
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -3243,6 +4018,20 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.0,
+     1.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "kinetic-pseudopod": {
@@ -3279,6 +4068,19 @@
     "stretch": [
      0.5,
      12.0
+    ]
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "Pseudopod"
     ]
    }
   },
@@ -3333,6 +4135,18 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     1.5,
+     0.8,
+     0.3
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "lacerator-tendril": {
@@ -3364,6 +4178,20 @@
     "seg": 0.15,
     "stiffness": 0.6,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.7052,
+     0.653,
+     2.4542
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "MeleeWeapon",
+     "Weapon"
+    ]
    }
   },
   "lateral-emitter": {
@@ -3417,6 +4245,20 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     0.3,
+     2.0,
+     0.3
+    ],
+    "tags": [
+     "AttackModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "lateral-vent": {
@@ -3448,6 +4290,21 @@
     "seg": 0.1,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "luciferase-pump": {
@@ -3479,6 +4336,21 @@
     "seg": 0.1,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "magnetosome": {
@@ -3531,6 +4403,20 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     0.0,
+     1.6705,
+     2.1742
+    ],
+    "tags": [
+     "BulletModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -3585,6 +4471,17 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.5,
+     0.8
+    ],
+    "tags": [
+     "EnergyGenerator",
+     "Internal"
+    ]
    }
   },
   "mitotic-nidus": {
@@ -3638,6 +4535,21 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal",
+     "SpawnsMinions",
+     "UsesWeapons"
+    ]
    }
   },
   "mucus-emitter": {
@@ -3669,6 +4581,21 @@
     "seg": 0.1,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "mutagen": {
@@ -3721,6 +4648,17 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -3775,6 +4713,19 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.1282,
+     1.4145,
+     3.5
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "nidublast": {
@@ -3806,6 +4757,20 @@
     "seg": 0.13,
     "stiffness": 0.6,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     2.9375,
+     2.2728,
+     3.0
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "SpawnsMinions",
+     "Weapon"
+    ]
    }
   },
   "operculum": {
@@ -3829,7 +4794,21 @@
      },
      "outline": 2.96
     }
-   ]
+   ],
+   "link": {
+    "color": [
+     3.1282,
+     1.4145,
+     3.5
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External"
+    ]
+   }
   },
   "opisthoblast": {
    "layers": [
@@ -3881,6 +4860,20 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     1.3,
+     1.3,
+     5.1
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -3935,6 +4928,19 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     0.3,
+     0.8,
+     2.0
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "opulentor": {
@@ -3987,6 +4993,17 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -4041,6 +5058,17 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "oxidator": {
@@ -4072,6 +5100,21 @@
     "seg": 0.1,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "oxysome": {
@@ -4125,6 +5168,18 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.0,
+     1.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "perforator-tendril": {
@@ -4156,6 +5211,20 @@
     "seg": 0.21,
     "stiffness": 0.6,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "MeleeWeapon",
+     "Weapon"
+    ]
    }
   },
   "perforin-infuser": {
@@ -4208,6 +5277,21 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     1.0,
+     1.0,
+     4.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -4262,6 +5346,20 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     2.5,
+     1.0,
+     0.3
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "phagolysosome": {
@@ -4314,6 +5412,19 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.0,
+     1.0
+    ],
+    "tags": [
+     "Active",
+     "AttackModifier",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -4368,6 +5479,18 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.0,
+     1.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "photoreceptor": {
@@ -4421,6 +5544,18 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     1.5,
+     0.2,
+     3.5
+    ],
+    "tags": [
+     "EnergyConsumer",
+     "Internal",
+     "WeaponModifier"
+    ]
    }
   },
   "pressurized-spicule": {
@@ -4452,6 +5587,21 @@
     "seg": 0.16,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     4.0,
+     0.8,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "pristine-mitochondrion": {
@@ -4488,6 +5638,17 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.5,
+     0.8
+    ],
+    "tags": [
+     "EnergyGenerator",
+     "Internal"
     ]
    }
   },
@@ -4542,6 +5703,21 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     0.8,
+     3.5,
+     1.5
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal",
+     "UsesWeapons"
+    ]
    }
   },
   "pulsar-gland": {
@@ -4573,6 +5749,21 @@
     "seg": 0.1,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     0.0,
+     1.2007,
+     3.9917
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "pyrocyst": {
@@ -4596,7 +5787,21 @@
      },
      "outline": 3.0
     }
-   ]
+   ],
+   "link": {
+    "color": [
+     2.0,
+     0.85,
+     0.3
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External"
+    ]
+   }
   },
   "pyroflagellum": {
    "layers": [
@@ -4651,6 +5856,19 @@
     "stiffness": 0.6,
     "fluidity": 0.95,
     "sway": 0.0
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "Lash"
+    ]
    }
   },
   "pyrosome": {
@@ -4687,6 +5905,20 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     2.7695,
+     0.9713,
+     0.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -4741,6 +5973,17 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.5,
+     0.8
+    ],
+    "tags": [
+     "EnergyGenerator",
+     "Internal"
+    ]
    }
   },
   "refiner": {
@@ -4793,6 +6036,17 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -4847,6 +6101,17 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "resilinoplast": {
@@ -4899,6 +6164,21 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     1.0,
+     1.0,
+     4.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   },
@@ -4953,6 +6233,19 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     2.4542,
+     2.4194,
+     0.0
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal",
+     "WeaponModifier"
+    ]
    }
   },
   "rotary-extruder": {
@@ -4984,6 +6277,21 @@
     "seg": 0.11,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     4.0,
+     0.8,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "ruptusome": {
@@ -5037,6 +6345,21 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     1.0,
+     1.0,
+     4.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "scatter-ejector": {
@@ -5068,6 +6391,21 @@
     "seg": 0.1,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     4.0,
+     0.8,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "sentry-nidus": {
@@ -5120,6 +6458,21 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     3.1282,
+     1.4145,
+     3.5
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal",
+     "SpawnsMinions"
     ]
    }
   },
@@ -5174,6 +6527,18 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.1282,
+     1.4145,
+     3.5
+    ],
+    "tags": [
+     "Active",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "sinoatrial-node": {
@@ -5227,6 +6592,20 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.0,
+     1.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "spore-cannon": {
@@ -5258,6 +6637,21 @@
     "seg": 0.1,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     4.0,
+     0.8,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "starved-oxysome": {
@@ -5311,6 +6705,18 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.0,
+     1.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "staurolobber": {
@@ -5342,6 +6748,21 @@
     "seg": 0.105,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     4.0,
+     0.4,
+     1.5
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "stinger-tendril": {
@@ -5373,6 +6794,20 @@
     "seg": 0.21,
     "stiffness": 0.6,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "MeleeWeapon",
+     "Weapon"
+    ]
    }
   },
   "swarm-nidus": {
@@ -5426,6 +6861,21 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.1282,
+     1.4145,
+     3.5
+    ],
+    "tags": [
+     "Active",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal",
+     "SpawnsMinions"
+    ]
    }
   },
   "symbiotic-pseudopod": {
@@ -5462,6 +6912,18 @@
     "stretch": [
      0.5,
      30.0
+    ]
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "External",
+     "Pseudopod"
     ]
    }
   },
@@ -5516,6 +6978,20 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     0.0,
+     1.9222,
+     1.734
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "thermal-lance": {
@@ -5547,6 +7023,21 @@
     "seg": 0.1,
     "stiffness": 0.7,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "External",
+     "ShootsBullets",
+     "Weapon"
+    ]
    }
   },
   "toxic-flagellum": {
@@ -5602,6 +7093,19 @@
     "stiffness": 0.6,
     "fluidity": 0.95,
     "sway": 0.0
+   },
+   "link": {
+    "color": [
+     1.4427,
+     3.5,
+     3.4498
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "Lash"
+    ]
    }
   },
   "toxisome": {
@@ -5655,6 +7159,20 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     0.0,
+     1.9986,
+     0.7321
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "tri-phase-tendril": {
@@ -5687,6 +7205,20 @@
     "seg": 0.08,
     "stiffness": 0.6,
     "amp": 0.2
+   },
+   "link": {
+    "color": [
+     1.0,
+     3.0,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "External",
+     "MeleeWeapon",
+     "Weapon"
+    ]
    }
   },
   "triosome": {
@@ -5740,6 +7272,21 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     1.2959,
+     1.2959,
+     5.1105
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "trophic-pseudopod": {
@@ -5776,6 +7323,19 @@
     "stretch": [
      0.5,
      40.0
+    ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.5,
+     0.8
+    ],
+    "tags": [
+     "CanBeAttackModified",
+     "EnergyGenerator",
+     "External",
+     "Pseudopod"
     ]
    }
   },
@@ -5830,6 +7390,20 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.0,
+     1.0
+    ],
+    "tags": [
+     "AttackModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "Internal"
+    ]
    }
   },
   "vacuole": {
@@ -5882,6 +7456,19 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.5,
+     0.8
+    ],
+    "tags": [
+     "Active",
+     "EnergyConsumer",
+     "EnergyGenerator",
+     "Internal"
     ]
    }
   },
@@ -5936,6 +7523,17 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     3.5,
+     1.5,
+     0.8
+    ],
+    "tags": [
+     "EnergyGenerator",
+     "Internal"
+    ]
    }
   },
   "vesicle": {
@@ -5989,6 +7587,24 @@
      1.1,
      1.0
     ]
+   },
+   "link": {
+    "color": [
+     2.219,
+     1.4847,
+     0.7534
+    ],
+    "tags": [
+     "AttackModifier",
+     "BulletModifier",
+     "CanBeAttackModified",
+     "CanBeBulletModified",
+     "EnergyConsumer",
+     "EnergyGenerator",
+     "Internal",
+     "Weapon",
+     "WeaponModifier"
+    ]
    }
   },
   "vortisome": {
@@ -6041,6 +7657,19 @@
      1.0,
      1.1,
      1.0
+    ]
+   },
+   "link": {
+    "color": [
+     1.5,
+     0.7,
+     3.5
+    ],
+    "tags": [
+     "AttackModifier",
+     "CanBeAttackModified",
+     "EnergyConsumer",
+     "Internal"
     ]
    }
   }

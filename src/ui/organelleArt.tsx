@@ -39,6 +39,8 @@ export interface OrganelleArtDef {
   colors?: number[][];
   /** How it moves at rest in the game's organelle editor. */
   motion?: Motion;
+  /** Its tags and its arrows' HDR colour, for the editor's connection arrows (links.ts). */
+  link?: { color: [number, number, number]; tags: string[] };
 }
 
 /** Slot sprites per slot type: 'plain', or a graft id (Volatile, Conductive and Omni slots have their own art). */

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { isModeled } from '../engine/sim/behaviours';
 import type { GameData, OrganelleInfo, SlotKind } from '../engine/types';
 import { Icon, organelleIcon, TypeIcon } from './art';
@@ -10,11 +10,34 @@ interface Props {
   accepts: SlotKind[];
   current?: string;
   onPick: (id: string) => void;
+  /** Dragging a tile picks the organelle up, to drop on the body (mouse and pen; on touch, tap it instead). */
+  onGrab?: (id: string) => void;
 }
 
+/** How far a pointer moves before a press on a tile becomes a drag. */
+const DRAG_START_PX = 6;
+
 /** A searchable grid of organelle icons, grouped by category. */
-export function OrganellePicker({ data, accepts, current, onPick }: Props) {
+export function OrganellePicker({ data, accepts, current, onPick, onGrab }: Props) {
   const [query, setQuery] = useState('');
+  const dragged = useRef(false);
+  function press(e: ReactPointerEvent, id: string) {
+    dragged.current = false;
+    if (!onGrab || e.pointerType === 'touch' || e.button !== 0) return;
+    const start = { x: e.clientX, y: e.clientY };
+    const move = (ev: PointerEvent) => {
+      if (Math.hypot(ev.clientX - start.x, ev.clientY - start.y) < DRAG_START_PX) return;
+      stop();
+      dragged.current = true;
+      onGrab(id);
+    };
+    const stop = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', stop);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', stop);
+  }
   const [category, setCategory] = useState<string>('all');
   const choices = useMemo(() => data.organelles.filter((o) => accepts.includes(o.slot)), [data, accepts]);
   const categories = CATEGORY_ORDER.filter((c) => choices.some((o) => o.category === c));
@@ -47,7 +70,9 @@ export function OrganellePicker({ data, accepts, current, onPick }: Props) {
               aria-selected={o.id === current}
               className={`organelle-tile type-${CATEGORY_TYPE[o.category]} ${o.id === current ? 'active' : ''} ${modeled ? '' : 'unmodeled'}`}
               title={`${o.name}: ${o.description}${modeled ? '' : ' (not counted in DPS yet)'}`}
-              onClick={() => onPick(o.id)}
+              onPointerDown={(e) => press(e, o.id)}
+              onClick={() => !dragged.current && onPick(o.id)}
+              draggable={false}
             >
               <Icon src={organelleIcon(o.id)} size={40} />
               <span className="tile-name">{o.name}</span>
