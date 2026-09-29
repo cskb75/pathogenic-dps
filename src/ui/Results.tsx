@@ -1,6 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, type Dispatch } from 'react';
 import type { CalcResult } from '../engine/calc';
+import { modeOf } from '../engine/simple';
 import type { Build, GameData } from '../engine/types';
+import type { Action } from '../state/build';
 import { Icon, organelleIcon } from './art';
 import { fmtNum, fmtPct } from './format';
 
@@ -8,28 +10,46 @@ interface Props {
   data: GameData;
   build: Build;
   result: CalcResult;
+  /** Simple mode's worst case; `result` is then the best case. */
+  floor: CalcResult | null;
   selected: string | null;
   onSelect: (slotId: string) => void;
+  dispatch: Dispatch<Action>;
 }
 
-export function Results({ data, build, result, selected, onSelect }: Props) {
+/** "1,200" or, when the two ends differ, "900 – 1,200". */
+const range = (lo: number | undefined, hi: number) => (lo === undefined || Math.round(lo) === Math.round(hi) ? fmtNum(hi) : `${fmtNum(lo)} – ${fmtNum(hi)}`);
+
+export function Results({ data, build, result, floor, selected, onSelect, dispatch }: Props) {
   const rarityColor = useMemo(() => new Map(data.rarities.map((r) => [r.id, r.color])), [data]);
   const best = Math.max(...result.weapons.map((w) => w.dps), 0);
   const unmodeled = [...result.items.values()].filter((i) => !i.modeled);
+  const mode = modeOf(build);
+  const floorDps = useMemo(() => new Map(floor?.weapons.map((w) => [w.slotId, w.dps]) ?? []), [floor]);
 
   return (
     <section className="panel results" aria-label="DPS results">
+      <div className="mode-switch" role="group" aria-label="Mode">
+        {(['simple', 'detailed'] as const).map((m) => (
+          <button key={m} className={mode === m ? 'active' : ''} aria-pressed={mode === m} onClick={() => dispatch({ type: 'setMode', mode: m })}>
+            {m === 'simple' ? 'Simple' : 'Detailed'}
+          </button>
+        ))}
+        <span className="muted small">
+          {mode === 'simple' ? 'Worst to best case: nothing to fill in.' : 'Your own fight assumptions, set below.'}
+        </span>
+      </div>
       <div className="totals">
         <div>
-          <div className="total-label">Single-target DPS</div>
-          <div className="total-value" aria-live="polite">
-            {fmtNum(result.totalDps)}
+          <div className="total-label">Single-target DPS{floor && <span className="total-sub"> · worst to best case</span>}</div>
+          <div className={`total-value ${floor ? 'range' : ''}`} aria-live="polite">
+            {range(floor?.totalDps, result.totalDps)}
           </div>
         </div>
         {build.targets > 1 && (
           <div>
             <div className="total-label">DPS vs {build.targets} enemies</div>
-            <div className="total-value secondary">{fmtNum(result.totalMultiDps)}</div>
+            <div className={`total-value secondary ${floor ? 'range' : ''}`}>{range(floor?.totalMultiDps, result.totalMultiDps)}</div>
           </div>
         )}
       </div>
@@ -74,10 +94,12 @@ export function Results({ data, build, result, selected, onSelect }: Props) {
                       {w.excluded && <span className="badge">not counted</span>}
                     </span>
                   </th>
-                  <td className="num">{fmtNum(w.dps)}</td>
+                  <td className="num">{range(floor ? (floorDps.get(w.slotId) ?? 0) : undefined, w.dps)}</td>
                   <td className="share-col">
                     <div className="bar" aria-hidden="true">
                       <div style={{ width: `${best > 0 ? (w.dps / best) * 100 : 0}%` }} />
+                      {/* The worst case, over the best case's lighter bar. */}
+                      {floor && <div className="bar-floor" style={{ width: `${best > 0 ? ((floorDps.get(w.slotId) ?? 0) / best) * 100 : 0}%` }} />}
                     </div>
                     <span className="sr-only">{fmtPct(share)} of total</span>
                   </td>

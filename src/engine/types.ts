@@ -305,4 +305,10 @@ export interface Build {
   /** Number of enemies in range, for multi-target DPS. */
   targets: number;
   custom: CustomModifier[];
+  /**
+   * Simple: DPS as a range between fixed worst- and best-case fight assumptions
+   * (src/engine/simple.ts). Detailed: your own `params`. Missing in builds from
+   * before there were modes, which were detailed.
+   */
+  mode?: 'simple' | 'detailed';
 }

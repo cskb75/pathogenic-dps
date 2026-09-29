@@ -809,6 +809,33 @@ input[type='range'] {
 .total-value.secondary {
   color: var(--text);
 }
+/* Simple mode's worst-to-best range: two numbers need a little less size. */
+.total-value.range {
+  font-size: 52px;
+}
+.total-sub {
+  font-family: var(--font);
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+/* Simple / Detailed: a segmented switch at the top of the results. */
+.mode-switch {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 0;
+  margin-bottom: 12px;
+}
+.mode-switch button {
+  padding: 4px 14px;
+}
+.mode-switch button + button {
+  margin-left: -1px;
+}
+.mode-switch .muted {
+  margin-left: 10px;
+}
 
 table {
   width: 100%;
@@ -880,6 +907,7 @@ thead th {
 }
 /* Share bars glow like the game's charged plasmid links. */
 .bar {
+  position: relative;
   height: 8px;
   background: color-mix(in srgb, var(--panel-3) 80%, transparent);
   border-radius: 4px;
@@ -890,6 +918,16 @@ thead th {
   background: linear-gradient(90deg, var(--accent-deep), var(--accent) 70%, var(--accent-soft));
   border-radius: 4px;
   box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+/* Simple mode: the worst case in full, the rest of the way to the best case faint. */
+.bar:has(.bar-floor) > div:first-child {
+  opacity: 0.35;
+  box-shadow: none;
+}
+.bar > .bar-floor {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .badge {
@@ -1553,7 +1591,7 @@ summary:hover {
   gap: 8px;
   margin-top: 10px;
 }
-.picker-filters input {
+.picker-filters input[type='search'] {
   width: 100%;
 }
 .chips {
@@ -1666,6 +1704,44 @@ summary:hover {
   line-height: 1.2;
   text-align: center;
   overflow-wrap: anywhere;
+}
+/* What the organelle would do to your DPS in the selected slot. */
+.tile-delta {
+  font-family: var(--font-readout);
+  font-size: 15px;
+  line-height: 1;
+  text-align: center;
+  color: var(--muted);
+}
+.tile-delta.up {
+  color: #6fe08a;
+}
+.tile-delta.down {
+  color: var(--danger);
+}
+.tile-delta.mixed {
+  color: var(--warn);
+}
+.tile-delta.current {
+  font-family: var(--font);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.delta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.delta-bar .check {
+  margin: 6px 0 0;
+  align-items: center;
+  white-space: nowrap;
+}
+.delta-bar > .muted {
+  margin-top: 6px;
 }
 
 /* The equipped organelle, in its type's tooltip frame from the game. */
@@ -1886,4 +1962,22 @@ summary:hover {
   border-radius: 50%;
   background: var(--stamina);
   box-shadow: 0 0 6px var(--stamina);
+}
+
+/* ---- Simple mode --------------------------------------------------------------- */
+
+.simple-note {
+  margin-bottom: 12px;
+}
+.simple-ends {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px 20px;
+  margin-bottom: 10px;
+}
+.simple-ends h3 {
+  margin: 0 0 2px;
+}
+.simple-ends p {
+  margin: 0;
 }
