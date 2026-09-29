@@ -44,6 +44,10 @@ export interface RunState {
   pseudopods: number;
   /** Thrust from flagella. */
   thrust: number;
+  /** Share of the fight the target is frozen. */
+  frozenTime: number;
+  /** Hits each minion takes per second. */
+  minionHitRate: number;
 }
 
 export interface RunModel {
@@ -72,6 +76,10 @@ export interface RunModel {
   /** Stamina added to the pool. */
   extraStamina: number;
   noStamina: boolean;
+  /** Multiplies the chance lightning splits. */
+  lightningSplit: number;
+  /** Splashes released by each minion when it's hit, per stack. */
+  minionHitSplash: { source: string; damage: number }[];
   summary: RunLine[];
   warnings: string[];
 }
@@ -105,6 +113,8 @@ export function runModel(build: Build, data: GameData, cls: ClassDef, state: Run
     damageMultiplier: 1,
     extraStamina: 0,
     noStamina: false,
+    lightningSplit: 1,
+    minionHitSplash: [],
     summary: [],
     warnings: [],
   };
@@ -226,6 +236,19 @@ export function runModel(build: Build, data: GameData, cls: ClassDef, state: Run
     if (e.noStamina) {
       model.noStamina = true;
       lines.push('weapons cost no stamina');
+    }
+    if (e.vsFrozen) {
+      if (state.frozenTime > 0) damage(e.vsFrozen * n * state.frozenTime, `on hits while frozen, ${pct(state.frozenTime).replace('+', '')} of the time`);
+      else idle.push('set "Target frozen" to count it');
+    }
+    if (e.lightningSplit) {
+      model.lightningSplit *= e.lightningSplit ** n;
+      lines.push(`x${(e.lightningSplit ** n).toFixed(2)} lightning split chance (more hits on other enemies)`);
+    }
+    if (e.minionHitSplash) {
+      model.minionHitSplash.push({ source: s.name, damage: e.minionHitSplash * n });
+      if (state.minionHitRate > 0) lines.push(`a ${e.minionHitSplash * n} damage splash each time a minion is hit`);
+      else idle.push('set "Hits taken per minion" to count it');
     }
     const text = [...lines, ...idle].join(', ') || s.notes || 'no effect on DPS';
     model.summary.push({ source: name, text, inactive: lines.length === 0 });

@@ -18,10 +18,11 @@ const KINDS: Record<CustomKind, { label: string; unit: 'percent' | 'mult'; initi
 const GROUPS: { title: string; ids: string[] }[] = [
   {
     title: 'Aim and positioning',
-    ids: ['angledHit', 'pelletHit', 'sideHit', 'mineHit', 'orbContact', 'stauroLasers', 'fireballContact', 'targetDistance', 'backstabChance', 'beatSync', 'nearbyTime'],
+    ids: ['angledHit', 'pelletHit', 'sideHit', 'mineHit', 'orbContact', 'stauroLasers', 'fireballContact', 'targetDistance', 'backstabChance', 'beatSync', 'nearbyTime', 'frozenTime'],
   },
+  { title: 'Actives and flagella', ids: ['surgeHit', 'coneHit', 'arcHit', 'puddleContact', 'sprintTime', 'backHit'] },
   { title: 'Overcharge triggers', ids: ['roomLength', 'killRate', 'hitsTakenRate', 'dodgeRate', 'dodgeRateAll', 'blockRate', 'slashRate', 'pickupRate', 'perfectRooms'] },
-  { title: 'Minions', ids: ['minionEngagement', 'minionLifetime'] },
+  { title: 'Minions', ids: ['minionEngagement', 'minionLifetime', 'minionHitRate'] },
   { title: 'Stamina and stacking organelles', ids: ['staminaLimits', 'maxStamina', 'resonantStacks'] },
 ];
 

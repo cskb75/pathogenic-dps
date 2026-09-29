@@ -22,6 +22,7 @@ const LINK_TEXT: Record<Link['kind'], { in: string; out: string }> = {
   attack: { in: 'Receives attacks from', out: 'Passes attacks to' },
   gun: { in: 'Attack speed from', out: 'Speeds up' },
   overcharge: { in: 'Overcharged by', out: 'Overcharges' },
+  fires: { in: 'Fired by', out: 'Fires' },
 };
 
 export function SlotInspector({ data, build, result, slotId, onSelect, dispatch }: Props) {

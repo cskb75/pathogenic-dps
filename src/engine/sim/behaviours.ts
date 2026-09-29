@@ -31,6 +31,54 @@ function weapon(p: WeaponProfile, notes?: string): Behaviour {
   return { weapon: p, notes };
 }
 
+/** An attack and every copy split off it (splitters make copies before the weapon's own last touches). */
+function eachCopy(a: Attack, fn: (x: Attack) => void) {
+  fn(a);
+  for (const s of a.siblings) eachCopy(s, fn);
+}
+
+/** Like shrapnel: a split arc or a bounce is assumed to find another enemy half the time. */
+const STRAY_HITS = 0.5;
+const splitMemo = new Map<string, number>();
+
+/**
+ * Expected bolts split off one lightning bolt `length` px long
+ * (lightning_beam.gd): at every 200 px but the last, it has `chance` to split
+ * off a new bolt as long as its range left from there. Each split cuts the
+ * chance x0.7, and the new bolt carries on with that chance and splits too.
+ */
+export function expectedSplits(length: number, chance: number): number {
+  const n = Math.floor(length / 200);
+  if (n < 2 || chance < 1e-4) return 0;
+  const key = `${Math.round(length)}|${chance.toPrecision(6)}`;
+  const known = splitMemo.get(key);
+  if (known !== undefined) return known;
+  const step = length / n;
+  // Probability of having split k times so far.
+  let splits = [1];
+  let total = 0;
+  for (let i = 0; i < n - 1; i++) {
+    const next: number[] = new Array(splits.length + 1).fill(0);
+    splits.forEach((p, k) => {
+      const q = Math.min(1, chance * 0.7 ** k);
+      total += p * q * (1 + expectedSplits(length - i * step, chance * 0.7 ** (k + 1)));
+      next[k + 1] += p * q;
+      next[k] += p * (1 - q);
+    });
+    splits = next;
+  }
+  splitMemo.set(key, total);
+  return total;
+}
+
+/** Extra hits on other enemies from splits, for bolts between `min` and `max` px long. */
+function strayArcs(min: number, max: number, chance: number): number {
+  const samples = 8;
+  let sum = 0;
+  for (let i = 0; i < samples; i++) sum += expectedSplits(min + ((max - min) * (i + 0.5)) / samples, chance);
+  return (STRAY_HITS * sum) / samples;
+}
+
 // ---------------------------------------------------------------------------
 // Weapons
 
@@ -226,14 +274,20 @@ const weapons: Record<string, Behaviour> = {
       stamina: 0.8,
       reach: 'line',
       randomAdvance: 0.25,
-      onFire(_ctx, self, a) {
-        // Each bolt deals 40% to 120% of its damage at random, after bonuses.
-        a.damage *= 0.8;
-        a.onHitDamage *= 0.8;
+      onFire(ctx, self, a) {
+        // Each bolt deals 40% to 120% of its damage at random, after bonuses, and
+        // reaches 30% to 110% of 2000 px, splitting as it goes (13% chance per 200 px).
+        const stray = strayArcs(600, 2200, 0.13 * ctx.lightningSplit);
+        eachCopy(a, (x) => {
+          x.damage *= 0.8;
+          x.onHitDamage *= 0.8;
+          x.extraOthers += stray;
+        });
         a.trace.push({ source: self.info.name, text: 'x0.8 on average (random 0.4 to 1.2)' });
+        if (stray) a.trace.push({ source: self.info.name, text: `split arcs: +${fmt(stray)} hits on other enemies per bolt` });
       },
     },
-    'Each bolt comes up to 0.25s early at random. Arcs that split off to other enemies are not counted.',
+    'Each bolt comes up to 0.25s early at random. Bolts split as they fly (13% chance per 200 px); split arcs are assumed to find another enemy half the time, so they only add multi-target damage.',
   ),
   'luciferase-pump': weapon(
     {
@@ -493,7 +547,8 @@ const infusers: Record<string, Behaviour> = {
     },
   },
   'galvanic-infuser': {
-    notes: 'Arcs go to a different enemy, so this is multi-target only.',
+    notes:
+      'Arcs go to a different enemy, so this is multi-target only. Arcs split as they fly; their length comes from "Distance to target" (the gap to the next enemy).',
     modifyAttack(ctx, self, a, chain, times) {
       const c = ctx.charge(self);
       const chance = Math.min(1, 0.2 + 0.05 * self.r + 0.3 * c);
@@ -505,6 +560,9 @@ const infusers: Record<string, Behaviour> = {
         derive: (p) => {
           const l = newAttack({ kind: 'lightning', label: 'Arc', base: p.base * m });
           l.damage = (p.damage + p.onHitDamage) * m;
+          // Aimed at the next enemy (up to 1500 px), reaching 1 to 2 times as far.
+          const gap = Math.min(1500, Math.max(0, ctx.param('targetDistance')));
+          l.extraOthers = strayArcs(gap, 2 * gap, 0.13 * ctx.lightningSplit);
           forward(ctx, l, chain, self, 1);
           announce(ctx, l, self);
           return l;
@@ -586,15 +644,63 @@ const infusers: Record<string, Behaviour> = {
       }
     },
   },
+  elastosome: {
+    notes:
+      'Bullets and beams bounce 1 more time (+1 per rarity and per full point of Overcharge). Each bounce is assumed to find another enemy half the time, so it only adds multi-target damage; the infusers it passes bounces on to are not counted again.',
+    modifyAttack(ctx, self, a) {
+      // Only projectiles with bounces (bullets and beams); once per attack.
+      if (!a.bullet && a.kind !== 'beam' && a.kind !== 'lightning') return;
+      const bounces = 1 + self.r + Math.floor(ctx.charge(self) + 1e-9);
+      a.extraOthers += bounces * STRAY_HITS;
+      a.trace.push({ source: self.info.name, text: `${bounces} bounce${bounces === 1 ? '' : 's'}: +${fmt(bounces * STRAY_HITS)} hits on other enemies` });
+    },
+  },
+  'golgi-apparatus': {
+    weaponModifier: true,
+    golgi: { damage: (r) => -0.1 + 0.2 * r },
+    notes:
+      "Connected melee weapons stop attacking on their own: each attack that reaches it (from anything else) makes one strike where it hits or misses, as often as the melee weapon's cooldown allows, for -10% (+20% per rarity) of base damage more. Its Overcharge speeds that weapon up by 30% (+10% per rarity) per point. Strikes from attacks that miss your target are not counted.",
+    modifyGun(ctx, self, gun, times) {
+      if (gun.weapon?.info.subtype !== 'melee') return;
+      const bonus = (0.3 + 0.1 * self.r) * ctx.charge(self) * times;
+      if (!bonus) return;
+      gun.bonus += bonus;
+      gun.trace.push({ source: self.info.name, text: `+${pct(bonus)} attack speed (Overcharge)` });
+    },
+    modifyAttack(ctx, self, a, chain, times) {
+      const from = chain[chain.length - 1];
+      if (!ctx.gun || !(ctx.gun.interval > 0) || (from?.info.category === 'weapon' && from.info.subtype === 'melee')) return;
+      ctx.trigger(self, (times * a.copies) / ctx.gun.interval, a.aim);
+    },
+  },
+  resilinoplast: {
+    weapon: {
+      kind: 'bullet',
+      base: 50,
+      damageMult: (r) => 1 + r,
+      interval: fixed(1),
+      // Melee strikes through it send the enemy shots they cut back where they came from.
+      rate: (ctx, _r, _c, self) => (ctx.neighbours(self).some((n) => n.info.category === 'weapon' && n.info.subtype === 'melee') ? ctx.param('slashRate') : 0),
+      stamina: 0,
+      reach: 'single',
+      passive: true,
+    },
+    notes:
+      'Connected melee weapons send the enemy shots they cut back at the shooter as 50 damage (x rarity +1) shots, at "Shots slashed per second". Its chance to give your own bullets a reflecting field depends on enemy fire and is not counted.',
+  },
   // Effects with nothing to model for damage (or that depend on where things are).
-  elastosome: { notes: 'Bounces only add hits on other enemies; not modeled.' },
   extensor: { notes: 'Range only; not modeled.' },
   magnetosome: { notes: 'Pulls projectiles; not modeled.' },
-  resilinoplast: { notes: 'Reflected enemy shots depend on enemy fire; not modeled.' },
-  toxisome: { notes: 'Toxic trails depend on positioning; not modeled.' },
-  'galvanic-weave': { notes: 'Arcs between attacks depend on positioning; not modeled.' },
-  'sympathetic-detonator': { notes: 'Explodes attacks when you dash; not modeled.' },
-  'golgi-apparatus': { notes: 'Delivering melee strikes through projectiles is not modeled yet.' },
+  toxisome: {
+    notes:
+      'Attacks drop toxic puddles (3 +1 per rarity) along their path every 0.2-0.6s, and slashes on each hit: how many your target walks through depends on where it goes; not modeled.',
+  },
+  'galvanic-weave': {
+    notes: 'Every 0.1-3s each woven attack arcs to three other woven attacks: whether an arc crosses an enemy depends on where your attacks are; not modeled.',
+  },
+  'sympathetic-detonator': {
+    notes: 'When you dash, attacks still flying explode (80% +30% per rarity of their damage) instead of hitting: depends on what they are near; not modeled.',
+  },
   'opsonin-arc': { notes: 'Boosts attacks that pass through its rotating arc: depends on positioning; not modeled.' },
   gyrosome: { notes: 'Makes projectiles orbit you and pierce: extra hits depend on positioning; not modeled.' },
   apoptosome: { notes: 'Enemies it kills explode for 800 (+400 per rarity): depends on kills; not modeled.' },
@@ -865,18 +971,119 @@ const others: Record<string, Behaviour> = {
   'iridophore-membrane': none('Invulnerability.'),
   'sequence-scrambler': none('Rerolls rewards.'),
   'chemoreceptor-antenna': none('Finds secrets.'),
-  pyroflagellum: later('Leaves burning puddles (7, +3 per rarity) where you dodge: depends on where enemies walk.'),
-  'toxic-flagellum': later('Leaves toxic puddles (5, +2 per rarity) as you move: depends on where enemies walk.'),
-  cryoflagellum: later('Freezes enemies near your tail when you dodge (20, +10 per rarity damage): depends on positioning.'),
-  'ballistic-flagellum': later('Fires bursts backwards while sprinting: depends on where enemies are.'),
   operculum: later('Active: a shield that reflects enemy shots for 80 (x rarity) damage: depends on enemy fire.'),
-  'galvanic-node': later('Active: drops beacons that arc to each other and to you: depends on enemies crossing the arcs.'),
-  'projectile-surge': later('Active: fires a ring of 30 (+8 per rarity) shots from each connected weapon: how many hit depends on positioning.'),
-  'conal-burst': later('Active: fires 10 (+4 per rarity) shots from each connected weapon in a cone; not modeled yet.'),
   'necrolytic-igniter': later('Active: explodes nearby corpses for 200 (+100 per rarity): depends on kills.'),
 };
 
-export const behaviours: Record<string, Behaviour> = { ...weapons, ...infusers, ...weaponInfusers, ...mitochondria, ...minions, ...others };
+// ---------------------------------------------------------------------------
+// Flagella that attack, and actives that fire your weapons for you
+//
+// These depend on where enemies are, so each has a fight assumption.
+
+/** player.gd: dodges make you invulnerable for 0.3s; the Pyroflagellum drops a puddle every 0.05s for twice that. */
+const PYRO_PUDDLES = Math.round((0.3 * 2) / 0.05);
+
+const positional: Record<string, Behaviour> = {
+  pyroflagellum: weapon(
+    {
+      kind: 'burn',
+      base: 7,
+      damageMult: (r, c) => (7 + 3 * r + 7 * c) / 7,
+      interval: fixed(1),
+      // Each puddle lasts 2.5s and burns whoever stands in it once a second.
+      rate: (ctx) => ctx.param('dodgeRateAll') * PYRO_PUDDLES * 2.5 * ctx.param('puddleContact'),
+      stamina: 0,
+      reach: 'area',
+      passive: true,
+      onFire(_ctx, _self, a) {
+        // Burn pools and halves every second, dealing about twice what is added.
+        a.dotFactor = 2;
+      },
+    },
+    'Each dodge leaves 12 burning puddles behind you. Each lasts 2.5s and adds 7 burn (+3 per rarity, +7 per Overcharge) to enemies in it once a second; burn deals about twice what is added. Uses "Dodges per second" and "Puddle contact".',
+  ),
+  'toxic-flagellum': weapon(
+    {
+      kind: 'splash',
+      base: 5,
+      damageMult: (r) => (5 + 2 * r) / 5,
+      interval: fixed(1),
+      // A puddle every 0.3s lasting 3s (+50% per Overcharge), hitting whoever stands in it every 0.5s.
+      rate: (ctx, _r, c) => (1 / 0.3) * 3 * (1 + 0.5 * c) * 2 * ctx.param('puddleContact'),
+      stamina: 0,
+      reach: 'area',
+      passive: true,
+    },
+    'Leaves a toxic puddle every 0.3s. Each lasts 3s (+50% per Overcharge) and hits enemies in it for 5 (+2 per rarity) every 0.5s. Uses "Puddle contact"; puddles grow 50% per rarity, which makes contact easier.',
+  ),
+  cryoflagellum: weapon(
+    {
+      kind: 'slash',
+      base: 20,
+      damageMult: (r) => (20 + 10 * r) / 20,
+      interval: fixed(1),
+      rate: (ctx) => ctx.param('dodgeRateAll') * ctx.param('nearbyTime'),
+      stamina: 0,
+      reach: 'area',
+      passive: true,
+    },
+    'Each dodge blasts enemies around your tail for 20 (+10 per rarity) and freezes them (the freeze is not counted). Uses "Dodges per second", and "Enemies next to you" for how often one is caught.',
+  ),
+  'ballistic-flagellum': weapon(
+    {
+      kind: 'bullet',
+      base: 19,
+      damageMult: (r) => (1 + 0.4 * r) * 1.625,
+      interval: fixed(1),
+      rate: (ctx, r, c) => {
+        const every = Math.max(0.02, ((0.1 / 1.5) * Math.max(0.1, 1 - 0.1 * r)) / (1 + 0.3 * c));
+        const dodges = ctx.param('dodgeRateAll');
+        // A burst of 10 on every dodge, then a stream for at least 0.3s and as long as you sprint.
+        const stream = Math.ceil(0.3 / every - 1e-9);
+        const sprinting = Math.max(0, ctx.param('sprintTime') - dodges * 0.3);
+        return dodges * (10 + stream) + sprinting / every;
+      },
+      aimParam: 'backHit',
+      stamina: 0,
+      reach: 'single',
+      speed: 7500,
+      passive: true,
+    },
+    'Fires 10 shots behind you on every dodge, then one every 0.067s (10% faster per rarity, 30% per Overcharge) for at least 0.3s and for as long as you sprint. Uses "Dodges per second", "Time sprinting" and "Backward shots on target".',
+  ),
+  'galvanic-node': weapon(
+    {
+      kind: 'lightning',
+      base: 40,
+      damageMult: (r) => (40 + 20 * r) / 40,
+      interval: fixed(1),
+      energyCost: () => 5,
+      // Each beacon arcs to you and to every other beacon 5 times a second while it lives.
+      hits: (ctx, r, rate) => {
+        const life = 15 + 5 * r;
+        return life * 5 * (1 + rate * life) * ctx.param('arcHit');
+      },
+      stamina: 0,
+      reach: 'line',
+      passive: true,
+    },
+    'Active: plants a beacon for every 5 Overcharge-seconds. Each lives 15s (+5s per rarity) and arcs to you and to every other beacon 5 times a second, for 40 (+20 per rarity). "Beacon arcs through target" sets how many arcs cross your target.',
+  ),
+  'projectile-surge': {
+    weapon: { kind: 'bullet', base: 0, interval: fixed(1), energyCost: () => 20, stamina: 0, reach: 'single' },
+    volley: { shots: (r) => 30 + 8 * r, aimParam: 'surgeHit' },
+    notes:
+      'Active: for every 20 Overcharge-seconds, fires each connected weapon 30 times (+8 per rarity) in a ring around you, through its infusers and this organelle\'s. "Surge shots on target" sets how many can reach your target (homing ones always can).',
+  },
+  'conal-burst': {
+    weapon: { kind: 'bullet', base: 0, interval: fixed(1), energyCost: () => 12, stamina: 0, reach: 'single' },
+    volley: { shots: (r) => 10 + 4 * r, aimParam: 'coneHit' },
+    notes:
+      'Active: for every 12 Overcharge-seconds, fires each connected weapon 10 times (+4 per rarity) in a 45° cone toward your aim, through its infusers and this organelle\'s. "Cone shots on target" sets how many can reach your target (homing ones always can).',
+  },
+};
+
+export const behaviours: Record<string, Behaviour> = { ...weapons, ...infusers, ...weaponInfusers, ...mitochondria, ...minions, ...positional, ...others };
 
 export const EMPTY_BEHAVIOUR: Behaviour = {};
 
@@ -887,7 +1094,7 @@ export function behaviourFor(id: string): Behaviour {
 /** True when the calculator knows what the organelle does to damage. */
 export function isModeled(id: string): boolean {
   const b = behaviours[id];
-  return !!b && !!(b.weapon || b.mito || b.modifyAttack || b.modifyGun || b.staminaRefund || b.chargeCluster || b.minionGunner || b.minionSupport || b.conduit || b.noDps);
+  return !!b && !!(b.weapon || b.mito || b.modifyAttack || b.modifyGun || b.staminaRefund || b.chargeCluster || b.minionGunner || b.minionSupport || b.volley || b.golgi || b.conduit || b.noDps);
 }
 
 export type { Attack, Ctx, Item };

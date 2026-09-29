@@ -12,6 +12,7 @@ import { buildAmoebaBody } from './amoeba';
 import { buildBody, buildPlanBody, type Body, type PieceShape } from './body';
 import { behaviourFor, isModeled } from './sim/behaviours';
 import {
+  addDamage,
   announce,
   applyModifiers,
   fmt,
@@ -23,6 +24,7 @@ import {
   type GunState,
   type Item,
   type TraceLine,
+  type WeaponProfile,
 } from './sim/model';
 import { runModel, type RunLine, type Share } from './run';
 import type { BodyPlan, Build, ClassDef, GameData, OrganelleInfo, OrganelleInstance, SlotState, ZoneEffect } from './types';
@@ -107,7 +109,8 @@ export interface ItemResult {
 export interface Link {
   from: string;
   to: string;
-  kind: 'attack' | 'gun' | 'overcharge';
+  /** `fires`: an organelle that fires the weapon itself (Projectile Surge, Golgi Apparatus). */
+  kind: 'attack' | 'gun' | 'overcharge' | 'fires';
 }
 
 export interface CalcResult {
@@ -234,6 +237,8 @@ export function calculate(build: Build, data: GameData): CalcResult {
       (i) => i.info.category === 'pseudopod' && (i.info.id !== 'symbiotic-pseudopod' || [...items.values()].some((m) => m.info.category === 'minion')),
     ).length,
     thrust: [...items.values()].reduce((s, i) => s + thrustOf(i), 0),
+    frozenTime: Math.min(1, Math.max(0, param('frozenTime'))),
+    minionHitRate: Math.max(0, param('minionHitRate')),
   });
   warnings.push(...run.warnings);
   const evolutionStamina = 100 * evolutionPath(build, data).reduce((s, p) => s + (p.bonusStamina ?? 0), 0);
@@ -333,6 +338,17 @@ export function calculate(build: Build, data: GameData): CalcResult {
   );
   const weaponItems = [...items.values()].filter((i) => i.behaviour.weapon);
 
+  /** The attack as it lands: an explosive shell hands its damage to an explosion, which re-runs on-hit effects. */
+  function landed(prof: WeaponProfile, root: Attack): Attack {
+    if (!prof.explodes) return root;
+    const level = Math.max(1, param('level'));
+    const scale = 1 + (level - 1) * EXPLOSION_LEVEL_SCALING;
+    const attack: Attack = { ...root, kind: 'explosion', label: `${root.label} explosion`, reach: 'area', damage: root.damage * scale, onHitDamage: 0 };
+    attack.onHit = root.onHit.map((d) => ({ ...d, perHit: d.perHit * 2 }));
+    attack.trace = [...root.trace, ...(scale !== 1 ? [{ source: 'Level', text: `x${scale.toFixed(2)} explosion damage` }] : [])];
+    return attack;
+  }
+
   interface WeaponEval {
     single: number;
     multi: number;
@@ -371,12 +387,15 @@ export function calculate(build: Build, data: GameData): CalcResult {
   /** Fires every weapon once in an Overcharge state. `starving`: hundreds of stamina missing. */
   function fire(charges: Map<Item, number>, activeMitos: number, starving: number, recordLinks: boolean) {
     const refunded = new Set<Item>();
-    const bonuses = (a: Attack, emitter: Item): Share[] => {
+    /** Golgi Apparatus: attacks reaching each one per second, and how many of those land on the target. */
+    const triggers = new Map<Item, { rate: number; aimed: number }>();
+    /** Bonuses the game adds to an attack it announces; `emitter` is the organelle it comes from, if any. */
+    const bonuses = (a: Attack, emitter?: Item): Share[] => {
       const out = [...fixedShares];
       if (a.melee) out.push(...run.meleeDamage);
-      for (const z of run.zones) {
+      for (const z of emitter ? run.zones : []) {
         if (z.meleeOnly && !a.melee) continue;
-        const share = inZone(emitter, z.side, z.threshold) ? z.damage : inZone(emitter, OPPOSITE[z.side], z.threshold) ? z.opposite : 0;
+        const share = inZone(emitter!, z.side, z.threshold) ? z.damage : inZone(emitter!, OPPOSITE[z.side], z.threshold) ? z.opposite : 0;
         if (share) out.push({ source: z.source, share });
       }
       if (activeMitos) for (const b of run.perActiveMito) out.push({ source: b.source, share: b.share * activeMitos });
@@ -395,6 +414,13 @@ export function calculate(build: Build, data: GameData): CalcResult {
       bonuses,
       gun: null,
       refund: (w) => refunded.add(w),
+      lightningSplit: run.lightningSplit,
+      trigger: (golgi, perSecond, aim) => {
+        const t = triggers.get(golgi) ?? { rate: 0, aimed: 0 };
+        t.rate += perSecond;
+        t.aimed += perSecond * aim;
+        triggers.set(golgi, t);
+      },
       budget: { left: CHAIN_BUDGET, exhausted: false },
     };
 
@@ -420,7 +446,7 @@ export function calculate(build: Build, data: GameData): CalcResult {
           base: prof.base * mult,
           copies: shots,
           aim: prof.aimParam ? param(prof.aimParam) : 1,
-          hits: prof.hits ? prof.hits(ctx) : 1,
+          hits: prof.hits ? prof.hits(ctx, g.r, r) : 1,
           reach: prof.reach,
           bullet: prof.kind === 'bullet',
           melee: prof.kind === 'slash',
@@ -430,7 +456,7 @@ export function calculate(build: Build, data: GameData): CalcResult {
           a.base = prof.base;
           a.damage = prof.damage(g.r);
         }
-        ctx.gun = { bonus: 0, mult: 1, trace: [], interval: 1 / r };
+        ctx.gun = { bonus: 0, mult: 1, trace: [], interval: 1 / r, weapon: g };
         ctx.budget = { left: CHAIN_BUDGET, exhausted: false };
         announce(ctx, a, g);
         applyModifiers(ctx, a, [g], neighbours(g), 1);
@@ -447,8 +473,84 @@ export function calculate(build: Build, data: GameData): CalcResult {
       return { single, multi, rate, stamina: 0, gated: false, nodes, gunTrace: trace, charge: ctx.charge(nidus) };
     }
 
+    /**
+     * Projectile Surge, Conal Burst: each use fires every connected weapon a
+     * number of times from the organelle, through the weapon's infusers and
+     * then the organelle's, with no stamina or cooldown.
+     */
+    function fireVolley(ctx: Ctx, burst: Item, uses: number, trace: TraceLine[]): WeaponEval {
+      const v = burst.behaviour.volley!;
+      const times = v.shots(burst.r);
+      const share = param(v.aimParam);
+      const guns = neighbours(burst).filter((g) => g.info.category === 'weapon' && g.behaviour.weapon && ctx.works(g));
+      trace.push({
+        source: burst.info.name,
+        text: guns.length ? `fires ${guns.map((g) => g.info.name).join(', ')} ${times} times per use; ${pct(share)} of shots can reach the target` : 'fires nothing: connect weapons to it',
+      });
+      const nodes: AttackNode[] = [];
+      let single = 0;
+      let multi = 0;
+      for (const g of guns) {
+        const prof = g.behaviour.weapon!;
+        const cg = ctx.charge(g);
+        const shots = times * (prof.shots ? prof.shots(g.r, cg) : 1);
+        const mult = prof.damageMult ? prof.damageMult(g.r, cg) : 1 + 0.4 * g.r;
+        const aim = prof.aimParam ? param(prof.aimParam) : 1;
+        ctx.gun = { bonus: 0, mult: 1, trace: [], interval: 1 / uses, weapon: g };
+        ctx.budget = { left: CHAIN_BUDGET, exhausted: false };
+        const a = newAttack({
+          kind: prof.kind,
+          label: `${g.info.name} x${fmt(shots)} (${burst.info.name})`,
+          base: prof.base * mult,
+          copies: shots,
+          aim: aim * share,
+          // Minions it spawns live twice as long.
+          hits: (prof.hits ? prof.hits(ctx, g.r, uses) : 1) * (prof.minions ? 2 : 1),
+          reach: prof.reach,
+          scattered: true,
+          bullet: prof.kind === 'bullet',
+          melee: prof.kind === 'slash',
+          speed: prof.speed ?? 0,
+        });
+        if (prof.damage) {
+          a.base = prof.base;
+          a.damage = prof.damage(g.r);
+        }
+        announce(ctx, a, g);
+        applyModifiers(ctx, a, [g], neighbours(g), 1);
+        applyModifiers(ctx, a, [burst], neighbours(burst), 1);
+        prof.onFire?.(ctx, g, a, cg);
+        // Homing shots find the target wherever they're fired.
+        const home = (x: Attack) => {
+          if (x.homing) x.aim = aim;
+          x.siblings.forEach(home);
+        };
+        home(a);
+        ctx.link(burst, g, 'fires');
+        const n = evaluateRoot(ctx, landed(prof, a), param('angledHit'));
+        nodes.push(...n);
+        single += n.reduce((s, x) => s + x.single, 0) * uses * damageMult;
+        multi += n.reduce((s, x) => s + x.multi, 0) * uses * damageMult;
+        if (ctx.budget.exhausted) chainsCut.add(burst.info.name);
+        ctx.gun = null;
+      }
+      return { single, multi, rate: uses, stamina: 0, gated: false, nodes, gunTrace: trace, charge: ctx.charge(burst) };
+    }
+
+    // Golgi Apparatus: connected melee weapons strike only when other attacks
+    // reach it, so they're worked out after everything else.
+    const controlledBy = new Map<Item, Item[]>();
+    for (const g of items.values()) {
+      if (!g.behaviour.golgi || !ctx.works(g)) continue;
+      for (const n of neighbours(g)) {
+        if (n.info.category === 'weapon' && n.info.subtype === 'melee' && n.behaviour.weapon) controlledBy.set(n, [...(controlledBy.get(n) ?? []), g]);
+      }
+    }
+    /** Triggers per second each Golgi Apparatus has left to hand out. */
+    const golgiLeft = new Map<Item, number>();
+
     const results = new Map<Item, WeaponEval>();
-    for (const w of weaponItems) {
+    for (const w of [...weaponItems.filter((x) => !controlledBy.has(x)), ...weaponItems.filter((x) => controlledBy.has(x))]) {
       const prof = w.behaviour.weapon!;
       const c = ctx.charge(w);
       const zero: WeaponEval = { single: 0, multi: 0, rate: 0, stamina: 0, gated: false, nodes: [], gunTrace: [], charge: c };
@@ -460,7 +562,7 @@ export function calculate(build: Build, data: GameData): CalcResult {
         results.set(w, zero);
         continue;
       }
-      const gun: GunState = { bonus: 0, mult: 1, trace: [], interval: 0 };
+      const gun: GunState = { bonus: 0, mult: 1, trace: [], interval: 0, weapon: w };
       const selfTimed = !!(prof.energyCost || prof.rate);
       let rate = 0;
       let comboMult = 1;
@@ -470,14 +572,19 @@ export function calculate(build: Build, data: GameData): CalcResult {
         rate = c / cost;
         gun.trace.push({ source: w.info.name, text: `uses ${fmt(cost)} Overcharge-seconds per activation` });
       } else if (prof.rate) {
-        rate = prof.rate(ctx, w.r, c);
+        rate = prof.rate(ctx, w.r, c, w);
       }
       if (selfTimed && rate <= 0) {
         results.set(w, zero);
         continue;
       }
+      if (w.behaviour.volley) {
+        results.set(w, fireVolley(ctx, w, rate, gun.trace));
+        continue;
+      }
+      const golgis = controlledBy.get(w);
       // Exocytotic Chamber: charges up instead of firing.
-      const chamber = selfTimed ? undefined : neighbours(w).find((n) => n.behaviour.chargeCluster && ctx.works(n));
+      const chamber = selfTimed || golgis ? undefined : neighbours(w).find((n) => n.behaviour.chargeCluster && ctx.works(n));
       // Attack speed: weapon infusers add up, Overcharge multiplies.
       for (const b of selfTimed || chamber ? [] : speedShares) {
         gun.bonus += b.share;
@@ -513,6 +620,27 @@ export function calculate(build: Build, data: GameData): CalcResult {
         comboMult = 5 / 3;
         gun.trace.push({ source: w.info.name, text: 'every 3rd strike deals 3x damage, 0.4s later' });
       }
+      // Golgi Apparatus: strike only when attacks reach it, as often as the cooldown allows.
+      const strikes: { golgi: Item; rate: number; aim: number }[] = [];
+      if (golgis) {
+        let room = rate;
+        for (const g of golgis) {
+          const t = triggers.get(g) ?? { rate: 0, aimed: 0 };
+          const left = golgiLeft.get(g) ?? t.rate;
+          const take = Math.min(left, room);
+          golgiLeft.set(g, left - take);
+          room -= take;
+          if (take > 0) strikes.push({ golgi: g, rate: take, aim: t.aimed / t.rate });
+          ctx.link(g, w, 'fires');
+        }
+        const total = strikes.reduce((s, x) => s + x.rate, 0);
+        gun.trace.push({ source: golgis[0].info.name, text: `strikes ${fmt(total)}/s, when other attacks reach it (its cooldown allows ${fmt(rate)}/s)` });
+        rate = total;
+        if (rate <= 0) {
+          results.set(w, { ...zero, gunTrace: gun.trace });
+          continue;
+        }
+      }
       gun.interval = 1 / rate;
       ctx.gun = gun;
       ctx.budget = { left: CHAIN_BUDGET, exhausted: false };
@@ -527,7 +655,7 @@ export function calculate(build: Build, data: GameData): CalcResult {
           base,
           copies,
           aim: prof.aimParam ? param(prof.aimParam) : 1,
-          hits: prof.hits ? prof.hits(ctx) : 1,
+          hits: prof.hits ? prof.hits(ctx, w.r, rate) : 1,
           reach: prof.reach,
           bullet: prof.kind === 'bullet',
           melee: prof.kind === 'slash',
@@ -576,6 +704,18 @@ export function calculate(build: Build, data: GameData): CalcResult {
           applyModifiers(ctx, rest, [w], neighbours(w), 1);
           attacks.push(rest);
         }
+      } else if (strikes.length) {
+        // Each strike lands where the attack that set it off hit: on the target as often as that attack.
+        attacks = strikes.map((s) => {
+          const root = makeRoot((shots * s.rate) / rate, `${w.info.name} (${s.golgi.info.name})`);
+          root.aim *= s.aim;
+          announce(ctx, root, w);
+          // Its own strikes don't set the Golgi Apparatus off again.
+          applyModifiers(ctx, root, [w], neighbours(w).filter((n) => !golgis!.includes(n)), 1);
+          addDamage(root, s.golgi.behaviour.golgi!.damage(s.golgi.r), s.golgi.info.name);
+          applyModifiers(ctx, root, [w, s.golgi], neighbours(s.golgi), 1);
+          return root;
+        });
       } else {
         const root = makeRoot(shots, `${w.info.name}${shots !== 1 ? ` x${Number(shots.toFixed(2))}` : ''}`);
         announce(ctx, root, w);
@@ -586,15 +726,7 @@ export function calculate(build: Build, data: GameData): CalcResult {
 
       const nodes: AttackNode[] = [];
       for (const root of attacks) {
-        let attack = root;
-        if (prof.explodes) {
-          // The shell hands its damage to the explosion, which also re-runs on-hit effects.
-          const level = Math.max(1, param('level'));
-          const scale = 1 + (level - 1) * EXPLOSION_LEVEL_SCALING;
-          attack = { ...root, kind: 'explosion', label: `${root.label} explosion`, reach: 'area', damage: root.damage * scale, onHitDamage: 0 };
-          attack.onHit = root.onHit.map((d) => ({ ...d, perHit: d.perHit * 2 }));
-          attack.trace = [...root.trace, ...(scale !== 1 ? [{ source: 'Level', text: `x${scale.toFixed(2)} explosion damage` }] : [])];
-        }
+        const attack = landed(prof, root);
         if (comboMult !== 1) {
           attack.damage *= comboMult;
           attack.onHitDamage *= comboMult;
@@ -626,6 +758,26 @@ export function calculate(build: Build, data: GameData): CalcResult {
       }
     }
 
+    // Nidal Degranulation: every minion releases a splash when it's hit, counted with the organelle that spawns it.
+    const splash = run.minionHitSplash.reduce((s, x) => s + x.damage, 0);
+    const minionHitRate = Math.max(0, param('minionHitRate'));
+    if (splash > 0 && minionHitRate > 0) {
+      for (const w of weaponItems) {
+        const r = results.get(w)!;
+        const minions = w.behaviour.weapon!.minions;
+        if (!minions || r.rate <= 0) continue;
+        const alive = minions(ctx, w.r, r.rate);
+        const perSecond = alive * minionHitRate;
+        const a = newAttack({ kind: 'splash', label: 'Degranulation splash', base: splash, reach: 'area' });
+        for (const b of bonuses(a)) addDamage(a, b.share, b.source);
+        const n = evaluateRoot(ctx, a, param('angledHit'));
+        r.nodes.push(...n);
+        r.single += n.reduce((s, x) => s + x.single, 0) * perSecond * damageMult;
+        r.multi += n.reduce((s, x) => s + x.multi, 0) * perSecond * damageMult;
+        r.gunTrace.push({ source: run.minionHitSplash[0].source, text: `${fmt(perSecond)} splashes a second (${fmt(alive)} minions hit ${fmt(minionHitRate)} times a second each)` });
+      }
+    }
+
     // Stamina: all weapons fire together and share one pool.
     let use = 0;
     for (const w of weaponItems) {
@@ -640,6 +792,8 @@ export function calculate(build: Build, data: GameData): CalcResult {
   }
 
   // --- Averaging over states ----------------------------------------------------
+  // Weapons you fire yourself can't fire while you sprint.
+  const firing = 1 - Math.min(1, Math.max(0, param('sprintTime')));
   const avg = new Map<Item, { single: number; multi: number; rate: number; stamina: number; charge: number }>();
   const chargeAvg = new Map<Item, number>();
   let dutyAvg = 0;
@@ -649,7 +803,7 @@ export function calculate(build: Build, data: GameData): CalcResult {
     for (const [item, c] of charges) chargeAvg.set(item, (chargeAvg.get(item) ?? 0) + p * c);
     for (const [w, r] of results) {
       const a = avg.get(w) ?? { single: 0, multi: 0, rate: 0, stamina: 0, charge: 0 };
-      const d = r.gated ? duty : 1;
+      const d = r.gated ? duty * firing : 1;
       a.single += p * r.single * d;
       a.multi += p * r.multi * d;
       a.rate += p * r.rate * d;
@@ -666,7 +820,7 @@ export function calculate(build: Build, data: GameData): CalcResult {
 
   const view = (label: string, s: ReturnType<typeof evaluateState>, w: Item): StateView => {
     const r = s.results.get(w)!;
-    const d = r.gated ? s.duty : 1;
+    const d = r.gated ? s.duty * firing : 1;
     return { label, dps: r.single * d, multiDps: r.multi * d, attacksPerSecond: r.rate * d, charge: r.charge, gunTrace: r.gunTrace, nodes: r.nodes };
   };
 

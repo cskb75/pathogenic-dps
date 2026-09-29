@@ -425,6 +425,9 @@ input[type='range'] {
 .flow.overcharge {
   --flow: var(--flow-overcharge);
 }
+.flow.fires {
+  --flow: var(--flow-fires);
+}
 .flow {
   transition: opacity 0.15s;
 }
@@ -628,6 +631,10 @@ input[type='range'] {
 .swatch.line.overcharge,
 .dot.overcharge {
   background: var(--flow-overcharge);
+}
+.swatch.line.fires,
+.dot.fires {
+  background: var(--flow-fires);
 }
 
 /* ---- Results ---------------------------------------------------------- */

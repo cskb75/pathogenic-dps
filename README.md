@@ -68,6 +68,8 @@ It follows the game's attack flow:
    - Burn pools on the enemy and halves every second, so each application deals about 2× its amount. Modifiers and mutations only touch the pool when it starts, so they're left out.
    - Peroxisome explosions land on the enemy that was hit too.
    - Splash, shrapnel and arcs only reach *other* enemies, so they count toward multi-target DPS.
+   - Lightning bolts split as they fly (13% chance every 200 px, more with Galvanic Arborization), and Elastosome bullets bounce. Like shrapnel, each split arc or bounce is assumed to find another enemy half the time, so they only add multi-target DPS.
+   - Golgi Apparatus: its connected melee weapons stop attacking on their own. Each other attack that reaches it makes one of them strike where it lands, as often as the melee weapon's cooldown allows.
 5. **Overcharge.**
    - Each mitochondrion gives Overcharge while its trigger is active. Its uptime is estimated from your fight assumptions, or you can set it.
    - The calculator evaluates every on/off combination of your mitochondria and averages them by uptime.
@@ -77,6 +79,18 @@ It follows the game's attack flow:
    - Every weapon attack costs stamina, and stamina does not regenerate while you keep firing.
    - When it runs out you wait about 1.5 s to refill. Sustained DPS includes these pauses.
    - Only attacks you fire yourself (weapons and held beams) stop. Minions, passive attacks such as pseudopods, and actives keep going, as in the game: `gun.gd` checks stamina only when you press attack.
+   - The same weapons can't fire while you sprint (hold dodge), if you set a sprinting time.
+7. **Attacks that depend on where things are** use a fight assumption each:
+   - Projectile Surge and Conal Burst fire every connected weapon 30 or 10 times per use (more with rarity), through the weapon's infusers and then their own. "Surge shots on target" and "Cone shots on target" set how many can reach your target; homing shots always can. A ring or cone reaches the other enemies as often as your target.
+   - Galvanic Node beacons arc to you and to each other 5 times a second; "Beacon arcs through target" sets how many arcs cross it.
+   - Pyroflagellum and Toxic Flagellum puddles use "Puddle contact". The Cryoflagellum's blast uses "Enemies next to you", and the Ballistic Flagellum "Backward shots on target" and "Time sprinting". All use "Dodges per second".
+   - Resilinoplast sends shots your melee weapons cut back at the shooter ("Shots slashed per second").
+
+Left out on purpose, because they depend on the situation too much to guess:
+- Freezes deal no damage themselves. Cryolysis (+50% on frozen enemies) counts only if you set "Target frozen".
+- Nidal Degranulation counts only if you set "Hits taken per minion".
+- Pyrogenesis adds nothing: every burn is already counted in full, as if the enemy lives until it burns out.
+- Toxisome puddles, Galvanic Weave arcs between your attacks, and Sympathetic Detonator explosions depend on where your attacks and enemies are.
 
 **This run** holds what changes during a run:
 - the mutations you've picked (DNA upgrades), with a counter for picking one more than once
@@ -94,9 +108,11 @@ Run effects follow the game's mutation scripts:
 Things that depend on how you play are **fight assumptions** in the settings panel:
 - how often angled shots or backstabs land
 - how far away the target is
-- how often you kill, get hit or pick things up
+- how often you kill, get hit, dodge, sprint or pick things up
+- how many surge, cone, beacon, puddle and backward shots reach the target
+- how long the target stays frozen
 - the level (explosions scale with it)
-- how long minions spend fighting and how long spawned ones survive
+- how long minions spend fighting, how long spawned ones survive and how often they get hit
 
 ## Updating the numbers
 
@@ -143,7 +159,7 @@ The body editor draws organelles the way the game does, from `src/data/organelle
 - **Empty slots** are the game's slot sprites: a disc inside the body, a teardrop pointing out for external slots.
 - **Framing:** the view zooms out to fit every organelle, like the game's camera. Slot rings keep a readable size on screen.
 
-- **Connections** are the game's editor connections: curves that leave external slots heading into the body. Each is a pinched gold line with a bright band sliding along it, bright where the organelles at both ends work together. Flows (attacks passing through, attack speed, Overcharge) are the game's scrolling arrows, coloured by what flows.
+- **Connections** are the game's editor connections: curves that leave external slots heading into the body. Each is a pinched gold line with a bright band sliding along it, bright where the organelles at both ends work together. Flows (attacks passing through, attack speed, an organelle firing a weapon, Overcharge) are the game's scrolling arrows, coloured by what flows.
 
 **Animation** follows what the game's organelle editor shows at rest, ported from the scripts that do it (`src/ui/motion.ts`, with each organelle's values extracted into `organelle_art.json`):
 

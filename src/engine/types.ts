@@ -170,6 +170,12 @@ export interface RunEffects {
   starvation?: number;
   /** Weapons stop costing stamina. */
   noStamina?: boolean;
+  /** Share of base damage added to hits on frozen enemies (Cryolysis). */
+  vsFrozen?: number;
+  /** Multiplies the chance lightning splits (Galvanic Arborization). */
+  lightningSplit?: number;
+  /** Damage of a splash each minion releases when it's hit (Nidal Degranulation). */
+  minionHitSplash?: number;
 }
 
 /**

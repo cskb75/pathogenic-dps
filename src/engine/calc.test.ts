@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { gameData } from '../data';
 import { calculate } from './calc';
+import { expectedSplits } from './sim/behaviours';
 import type { Build, Rarity, SlotState } from './types';
 
 // Every expected value below is worked out by hand from the game's formulas
@@ -541,5 +542,142 @@ describe('evolving classes', () => {
     expect(dps(plain, 'ESlot5')).toBeCloseTo(90 * rate(1 / 1.3));
     const boosted = { ...plain, plasmids: { 'fungal-spore-leftactivesplasmid': 1 } };
     expect(dps(boosted, 'ESlot5')).toBeCloseTo(90 * rate(1 / (1 + 0.3 * 1.4)));
+  });
+});
+
+describe('effects that depend on the fight', () => {
+  const charged = { ...org('entrant-mitochondrion'), uptime: 1 };
+  const withParams = (slots: Record<string, SlotState>, params: Record<string, number>, extra: Partial<Build> = {}) =>
+    build(slots, { params: { staminaLimits: 0, ...params }, ...extra });
+
+  it('Projectile Surge fires each connected weapon 30 times per 20 Overcharge-seconds, in a ring', () => {
+    const b = withParams({ 'core.c': org('projectile-surge'), 'core.e0': org('caustic-secretor'), 's.c': charged }, { surgeHit: 0.5 }, { targets: 3 });
+    const w = calculate(b, gameData).items.get('core.c')!.weapon!;
+    expect(w.dps).toBeCloseTo((30 * 6.5 * 0.5) / 20);
+    // The ring reaches every enemy around you as often as your target.
+    expect(w.multiDps).toBeCloseTo(3 * w.dps);
+    // Rare: 38 shots.
+    b.slots['core.c'] = org('projectile-surge', 'rare');
+    expect(dps(b, 'core.c')).toBeCloseTo((38 * 6.5 * 0.5) / 20);
+  });
+
+  it('surge shots that home in reach the target wherever they are fired', () => {
+    // Basal Metabolism gives the surge 0.3 Overcharge; the Attractor makes the Caustic Secretor's shots home in.
+    const b = withParams({ 'core.c': org('projectile-surge'), 'core.e0': org('caustic-secretor'), 's.c': org('attractor') }, {}, { mutations: { 'basal-metabolism': 1 } });
+    expect(dps(b, 'core.c')).toBeCloseTo((30 * 6.5 * 0.3) / 20);
+    // An Oxysome touching both the weapon and the surge adds its bonus twice, as in the game.
+    b.slots['s.c'] = org('oxysome');
+    expect(dps(b, 'core.c')).toBeCloseTo((30 * 6.5 * 1.5 * 0.1 * 0.3) / 20);
+  });
+
+  it('Conal Burst sprays 10 shots of each connected weapon per 12 Overcharge-seconds', () => {
+    const b = withParams({ 'core.c': org('conal-burst'), 'core.e0': org('caustic-secretor'), 's.c': charged }, {});
+    expect(dps(b, 'core.c')).toBeCloseTo((10 * 6.5 * 0.4) / 12);
+    expect(calculate(b, gameData).links).toContainEqual({ from: 'core.c', to: 'core.e0', kind: 'fires' });
+  });
+
+  it('Galvanic Node: beacons arc to you and to each other 5 times a second', () => {
+    // A beacon every 5s, living 15s: 3 others alive, so 5 x (1 + 3) arcs a second each.
+    const b = withParams({ 'core.c': org('galvanic-node'), 's.c': charged }, { arcHit: 0.1 });
+    expect(dps(b, 'core.c')).toBeCloseTo(0.2 * (15 * 5 * 4 * 0.1) * 40);
+    // Rare: 60 damage, 20s lives, 4 others alive.
+    b.slots['core.c'] = org('galvanic-node', 'rare');
+    expect(dps(b, 'core.c')).toBeCloseTo(0.2 * (20 * 5 * 5 * 0.1) * 60);
+  });
+
+  it('Pyroflagellum: 12 puddles per dodge, each burning whoever stands in it once a second for 2.5s', () => {
+    const b = withParams({ 'core.e0': org('pyroflagellum') }, { dodgeRateAll: 0.5, puddleContact: 0.2 });
+    // 0.5 dodges x 12 puddles x 2.5 burns x 20% contact = 3 burns of 7 a second, each dealing twice that.
+    expect(dps(b, 'core.e0')).toBeCloseTo(3 * 7 * 2);
+    expect(calculate(b, gameData).items.get('core.e0')!.modeled).toBe(true);
+  });
+
+  it('Toxic Flagellum: a puddle every 0.3s, hitting every 0.5s for 3s', () => {
+    const b = withParams({ 'core.e0': org('toxic-flagellum', 'rare') }, { puddleContact: 0.1 });
+    expect(dps(b, 'core.e0')).toBeCloseTo((1 / 0.3) * 3 * 2 * 0.1 * 7);
+  });
+
+  it('Cryoflagellum blasts enemies near you on each dodge', () => {
+    const b = withParams({ 'core.e0': org('cryoflagellum') }, { dodgeRateAll: 0.5, nearbyTime: 0.4 });
+    expect(dps(b, 'core.e0')).toBeCloseTo(0.5 * 0.4 * 20);
+  });
+
+  it('Ballistic Flagellum: 10 shots per dodge, then a stream for 0.3s and while you sprint', () => {
+    const shot = 19 * 1.625;
+    const every = 0.1 / 1.5;
+    const b = withParams({ 'core.e0': org('ballistic-flagellum') }, { dodgeRateAll: 0.5, backHit: 0.3 });
+    // 0.3s at one shot per 0.067s: 5 shots.
+    expect(dps(b, 'core.e0')).toBeCloseTo(0.5 * 15 * shot * 0.3);
+    b.params.sprintTime = 0.35;
+    expect(dps(b, 'core.e0')).toBeCloseTo((0.5 * 15 + (0.35 - 0.15) / every) * shot * 0.3);
+  });
+
+  it("weapons you fire can't fire while you sprint", () => {
+    expect(dps(withParams({ 'core.e0': org('caustic-secretor') }, { sprintTime: 0.25 }), 'core.e0')).toBeCloseTo(0.75 * BASE);
+    // Actives and flagella keep going.
+    expect(dps(withParams({ 'core.e0': org('cryoflagellum') }, { sprintTime: 0.25, dodgeRateAll: 0.5, nearbyTime: 0.4 }), 'core.e0')).toBeCloseTo(4);
+  });
+
+  it('Golgi Apparatus: a connected melee weapon strikes where other attacks land, as its cooldown allows', () => {
+    // Lacerator Tendril: 90 damage, 1s cooldown; the Caustic Secretor reaches the Golgi 8.6 times a second.
+    const b = withParams({ 'core.c': org('golgi-apparatus'), 'core.e0': org('caustic-secretor'), 'core.e2': org('lacerator-tendril') }, {});
+    const r = calculate(b, gameData);
+    expect(r.items.get('core.e2')!.weapon!.dps).toBeCloseTo(90 * 0.9);
+    expect(r.items.get('core.e0')!.weapon!.dps).toBeCloseTo(BASE);
+    expect(r.links).toContainEqual({ from: 'core.c', to: 'core.e2', kind: 'fires' });
+    // Rare: +10% of base damage.
+    b.slots['core.c'] = org('golgi-apparatus', 'rare');
+    expect(dps(b, 'core.e2')).toBeCloseTo(90 * 1.1);
+    // A Pressurized Spicule every 2.5s sets off only 0.4 strikes a second.
+    b.slots['core.e0'] = org('pressurized-spicule');
+    expect(dps(b, 'core.e2')).toBeCloseTo(0.4 * 90 * 1.1);
+    // With nothing else reaching it, the melee weapon never strikes.
+    delete b.slots['core.e0'];
+    expect(dps(b, 'core.e2')).toBe(0);
+  });
+
+  it('Resilinoplast: melee strikes send cut enemy shots back', () => {
+    const b = withParams({ 'core.c': org('resilinoplast'), 'core.e0': org('lacerator-tendril') }, { slashRate: 0.2 });
+    expect(dps(b, 'core.c')).toBeCloseTo(0.2 * 50);
+    b.slots['core.e0'] = org('caustic-secretor');
+    expect(dps(b, 'core.c')).toBe(0);
+  });
+
+  it('Elastosome bounces only add hits on other enemies', () => {
+    const b = withParams({ 'core.e0': org('caustic-secretor'), 'core.c': org('elastosome') }, {}, { targets: 3 });
+    const w = calculate(b, gameData).items.get('core.e0')!.weapon!;
+    expect(w.dps).toBeCloseTo(BASE);
+    // One bounce, finding another enemy half the time.
+    expect(w.multiDps).toBeCloseTo(1.5 * BASE);
+  });
+
+  it('lightning splits add hits on other enemies, more with Galvanic Arborization', () => {
+    expect(expectedSplits(399, 0.13)).toBe(0);
+    // 400 px: one chance to split, and the new bolt can split again at 0.7x the chance.
+    expect(expectedSplits(400, 0.1)).toBeCloseTo(0.1 + 0.1 * (0.07 + 0.07 * (0.049 + 0.049 * 0.0343)), 5);
+    const b = withParams({ 'core.e0': org('galvanic-conduit') }, {}, { targets: 2 });
+    const plain = calculate(b, gameData).items.get('core.e0')!.weapon!;
+    expect(plain.multiDps).toBeGreaterThan(plain.dps * 2);
+    b.mutations = { 'galvanic-arborization': 1 };
+    const more = calculate(b, gameData).items.get('core.e0')!.weapon!;
+    expect(more.dps).toBeCloseTo(plain.dps);
+    expect(more.multiDps).toBeGreaterThan(plain.multiDps);
+  });
+
+  it('Cryolysis: +50% of base damage while the target is frozen', () => {
+    const b = withParams({ 'core.e0': org('caustic-secretor') }, {}, { mutations: { cryolysis: 1 } });
+    expect(dps(b, 'core.e0')).toBeCloseTo(BASE);
+    expect(calculate(b, gameData).run.find((l) => l.source === 'Cryolysis')?.inactive).toBe(true);
+    b.params.frozenTime = 0.4;
+    expect(dps(b, 'core.e0')).toBeCloseTo(1.2 * BASE);
+  });
+
+  it('Nidal Degranulation: each minion releases a 100 damage splash when hit', () => {
+    const slots = { 'core.c': org('apex-nidus') };
+    const plain = dps(withParams(slots, { minionEngagement: 1 }), 'core.c');
+    const b = withParams(slots, { minionEngagement: 1 }, { mutations: { 'nidal-degranulation': 1 } });
+    expect(dps(b, 'core.c')).toBeCloseTo(plain);
+    b.params.minionHitRate = 0.5;
+    expect(dps(b, 'core.c')).toBeCloseTo(plain + 0.5 * 100);
   });
 });
