@@ -55,9 +55,9 @@ export function BuildSettings({ data, build, dispatch }: Props) {
             <div>
               <h3>Best case</h3>
               <p className="small muted">
-                Everything at its best. Every mitochondrion always on, a dodge every time the 1.2s cooldown allows, targets always frozen, and enemies
-                wherever they help most: right next to you, beside and behind you for shots that go that way, and open to every backstab. Minions
-                last until the room ends and always have someone to fight.
+                Everything maxed, even past what the game quite allows. Every mitochondrion always on, every trigger (kills, hits, dodges, blocks,
+                slashes, pickups) at the top of its range, targets always frozen, enemies right next to you, beside and behind you, and every
+                sideways, all-around and arcing shot through your target. Long rooms, minions that last all room and always have someone to fight.
               </p>
             </div>
           </div>

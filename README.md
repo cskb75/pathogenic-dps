@@ -120,7 +120,7 @@ The switch at the top of the results picks how fight assumptions are set. The mo
 
 - **Simple** (the default for new builds) has nothing to fill in. DPS shows as a range between two fixed sets of assumptions (`src/engine/simple.ts`). Both assume you play perfectly: every aimed shot lands and stamina never runs out.
   - **Worst case:** nothing situational helps. Every mitochondrion is off, so there's no Overcharge. Kills, hits, dodges, blocks, slashes and pickups trigger nothing, and targets are never frozen. Shots that go sideways, backwards, all around you or at random hit as often as the Detailed defaults say.
-  - **Best case:** everything at its best, as far as the game allows. Every mitochondrion is always on. You dodge every time the 1.2s cooldown allows. Enemies are right next to you, behind you, and wherever else they help. One target can still only take half of a Lateral Vent's shots (it fires both ways) and a quarter of a Projectile Surge ring or of the Galvanic Node's arcs. Rooms are the usual length, and minions last until the room ends.
+  - **Best case:** everything maxed. Every mitochondrion is always on, and every other assumption sits at the top of its range, even past what the game quite allows. That means 3 dodges a second despite the 1.2s cooldown, and every sideways, all-around and arcing shot through one target. Treat it as a ceiling to compare builds by, not a number to expect.
 - **Detailed** uses your own values in the Fight assumptions panel. Switching to Simple keeps them saved.
 
 Run state (HP, cores, level, bosses, kills, recycled and eaten organelles) is yours in both modes. Builds from before there were modes open in Detailed.

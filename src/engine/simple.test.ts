@@ -38,8 +38,12 @@ describe('simple mode', () => {
     // The build itself is untouched, for switching back to detailed.
     expect(build.params).toEqual({ hp: 2, cores: 40, pelletHit: 0.2 });
     const ceiling = simpleBuild(build, gameData, 'ceiling');
-    expect(ceiling.params.dodgeRateAll).toBeCloseTo(1 / 1.2);
-    expect(ceiling.params.frozenTime).toBe(1);
+    // Everything maxed: every assumption at the top of its range.
+    for (const p of gameData.params) {
+      const setting = SIMPLE_PARAMS[p.id]?.ceiling;
+      if (setting === 'max') expect(ceiling.params[p.id], p.id).toBe(p.max);
+    }
+    expect(ceiling.params).toMatchObject({ dodgeRateAll: 3, arcHit: 1, surgeHit: 1, sideHit: 1, roomLength: 180, minionHitRate: 5, frozenTime: 1 });
   });
 
   it('switches Overcharge off at the worst end and keeps every mitochondrion on at the best', () => {

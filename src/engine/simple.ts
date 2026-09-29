@@ -5,8 +5,10 @@
 // - the floor: nothing situational helps. No Overcharge (every mitochondrion
 //   off), no kills, hits, dodges, blocks, slashes or pickups triggering
 //   anything, and anything that depends on where enemies are at its usual rate;
-// - the ceiling: everything at its best. Every mitochondrion always on,
-//   triggers as often as the game allows, enemies wherever they help most.
+// - the ceiling: everything maxed. Every mitochondrion always on, and every
+//   assumption at the top of its range in the calculator, even where the game
+//   couldn't quite get there (more dodges than the cooldown allows, every arc
+//   of a ring through one target).
 //
 // The engine is unchanged: each end is the build with its fight assumptions
 // replaced (run state such as HP, cores and level is kept).
@@ -22,12 +24,9 @@ export const modeOf = (build: Build): Mode => build.mode ?? 'detailed';
 /** An assumption's value at one end: a number, or the end of its range in the calculator. */
 type Setting = number | 'min' | 'max' | 'default';
 
-/** The game's dodge cooldown (player.gd, dodge_cd): at most one dodge per 1.2s. */
-const DODGE_CD = 1.2;
-
 const both = (s: Setting) => ({ floor: s, ceiling: s });
 const usualToBest = { floor: 'default', ceiling: 'max' } as const;
-const noneToMost = (most: Setting = 'max') => ({ floor: 'min' as Setting, ceiling: most });
+const noneToMost = { floor: 'min', ceiling: 'max' } as const;
 
 /** Where every fight assumption sits at each end. Run state (HP, cores, level...) isn't here: it's kept as you set it. */
 export const SIMPLE_PARAMS: Record<string, { floor: Setting; ceiling: Setting }> = {
@@ -42,16 +41,13 @@ export const SIMPLE_PARAMS: Record<string, { floor: Setting; ceiling: Setting }>
   maxStamina: both('default'),
   sprintTime: both('min'),
 
-  // Where enemies are: as usual, or wherever they help most, as far as one
-  // target can: on one side of the Lateral Vent (it fires both ways), taking a
-  // quarter of a Projectile Surge ring or of the Galvanic Node's arcs (they go
-  // all around you, and between beacons spread about the room).
+  // Where enemies are: as usual, or wherever they help most.
   angledHit: usualToBest,
-  sideHit: { floor: 'default', ceiling: 0.5 },
+  sideHit: usualToBest,
   backHit: usualToBest,
-  surgeHit: { floor: 'default', ceiling: 0.25 },
+  surgeHit: usualToBest,
   coneHit: usualToBest,
-  arcHit: { floor: 'default', ceiling: 0.25 },
+  arcHit: usualToBest,
   stauroLasers: usualToBest,
   mineHit: usualToBest,
   puddleContact: usualToBest,
@@ -59,22 +55,21 @@ export const SIMPLE_PARAMS: Record<string, { floor: Setting; ceiling: Setting }>
   nearbyTime: usualToBest,
   minionEngagement: usualToBest,
   targetDistance: usualToBest,
-  // Rooms as long as usual; at best, minions from actives last until the room ends.
-  roomLength: both('default'),
+  // Long rooms let minions from actives pile up.
+  roomLength: usualToBest,
   minionLifetime: usualToBest,
 
-  // Triggers: none at all, or as often as the game allows.
-  dodgeRateAll: noneToMost(1 / DODGE_CD),
-  dodgeRate: noneToMost(1 / DODGE_CD),
-  slashRate: noneToMost(),
-  killRate: noneToMost(),
-  hitsTakenRate: noneToMost(),
-  blockRate: noneToMost(),
-  pickupRate: noneToMost(),
-  perfectRooms: noneToMost(),
-  frozenTime: noneToMost(),
-  // Each minion hit about once a second: more would kill it.
-  minionHitRate: noneToMost(1),
+  // Triggers: none at all, or as often as the calculator allows.
+  dodgeRateAll: noneToMost,
+  dodgeRate: noneToMost,
+  slashRate: noneToMost,
+  killRate: noneToMost,
+  hitsTakenRate: noneToMost,
+  blockRate: noneToMost,
+  pickupRate: noneToMost,
+  perfectRooms: noneToMost,
+  frozenTime: noneToMost,
+  minionHitRate: noneToMost,
 };
 
 export type End = 'floor' | 'ceiling';
