@@ -20,6 +20,16 @@ describe('build state', () => {
     expect(decodeBuild(encodeBuild(build), gameData)).toEqual(build);
   });
 
+  it('starts new builds in simple mode, keeps the mode with the build, and loads older builds as detailed', () => {
+    const build = exampleBuild(gameData);
+    expect(build.mode).toBe('simple');
+    expect(reducer(build, { type: 'setClass', classId: 'helminth' }).mode).toBe('simple');
+    const detailed = reducer(build, { type: 'setMode', mode: 'detailed' });
+    expect(decodeBuild(encodeBuild(detailed), gameData)?.mode).toBe('detailed');
+    const { mode: _, ...older } = build;
+    expect(decodeBuild(encodeBuild(older as typeof build), gameData)?.mode).toBe('detailed');
+  });
+
   it('rejects garbage links', () => {
     expect(decodeBuild('not-a-build', gameData)).toBeNull();
     expect(decodeBuild(encodeBuild({ nope: true } as never), gameData)).toBeNull();

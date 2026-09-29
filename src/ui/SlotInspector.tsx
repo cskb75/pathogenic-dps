@@ -2,17 +2,21 @@ import { useEffect, useMemo, useState, type CSSProperties, type Dispatch } from 
 import type { CalcResult, Link, MitoResult } from '../engine/calc';
 import { findClass, slotState } from '../engine/calc';
 import type { Build, GameData, Rarity, SlotKind } from '../engine/types';
+import { modeOf } from '../engine/simple';
 import type { Action } from '../state/build';
 import { art, Icon, organelleIcon, TypeIcon } from './art';
 import { WeaponBreakdown } from './Breakdown';
 import { OrganellePicker } from './OrganellePicker';
 import { CATEGORY_LABELS, CATEGORY_TYPE, fmtNum, fmtPct } from './format';
 import { slotArt } from './organelleArt';
+import { useDeltas } from './useDeltas';
 
 interface Props {
   data: GameData;
   build: Build;
   result: CalcResult;
+  /** Simple mode's worst case (result is then the best case). */
+  floor: CalcResult | null;
   slotId: string | null;
   onSelect: (slotId: string | null) => void;
   dispatch: Dispatch<Action>;
@@ -27,11 +31,18 @@ const LINK_TEXT: Record<Link['kind'], { in: string; out: string }> = {
   fires: { in: 'Fired by', out: 'Fires' },
 };
 
-export function SlotInspector({ data, build, result, slotId, onSelect, dispatch, onGrab }: Props) {
+export function SlotInspector({ data, build, result, floor, slotId, onSelect, dispatch, onGrab }: Props) {
   const infos = useMemo(() => new Map(data.organelles.map((o) => [o.id, o])), [data]);
   const [picking, setPicking] = useState(false);
   useEffect(() => setPicking(false), [slotId]);
   const slot = slotId ? result.body.slotById.get(slotId) : undefined;
+  const simple = modeOf(build) === 'simple';
+
+  // While the list is open for a slot, each organelle that fits shows how it would change DPS there.
+  const accepts: SlotKind[] = !slot ? [] : (build.slots[slot.id]?.graft ?? slot.special) === 'omni' ? ['internal', 'external'] : [slot.kind];
+  const listing = !!slot && (picking || !slotState(build, result.body, slot.id)?.organelle);
+  const candidates = useMemo(() => (listing ? data.organelles.filter((o) => accepts.includes(o.slot)).map((o) => o.id) : []), [listing, data, accepts.join()]);
+  const deltas = useDeltas(build, data, listing && slot ? (slot.mirrorOf ?? slot.id) : null, candidates);
 
   if (!slot) {
     return (
@@ -54,7 +65,6 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch,
   const inst = state.organelle;
   const info = inst ? infos.get(inst.id) : undefined;
   const effectiveGraft = own.graft ?? slot.special;
-  const accepts: SlotKind[] = effectiveGraft === 'omni' ? ['internal', 'external'] : [slot.kind];
   const item = result.items.get(slot.id);
   const where =
     cls.body.kind === 'modular'
@@ -151,7 +161,17 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch,
               Keep {info?.name ?? 'the current organelle'}
             </button>
           )}
-          <OrganellePicker data={data} accepts={accepts} current={inst?.id} onPick={setOrganelle} onGrab={(id) => onGrab(id, 'drag')} />
+          <OrganellePicker
+            data={data}
+            accepts={accepts}
+            current={inst?.id}
+            onPick={setOrganelle}
+            onGrab={(id) => onGrab(id, 'drag')}
+            deltas={deltas}
+            deltaNote={`DPS change in this slot${inst ? `, at ${data.rarities.find((r) => r.id === inst.rarity)?.name ?? inst.rarity} like the one here` : ''}${
+              simple ? ': worst to best case' : ''
+            }`}
+          />
         </>
       )}
 
@@ -189,7 +209,7 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch,
             ))}
           </fieldset>
 
-          {item?.mito && <MitoControls mito={item.mito} slotId={target} dispatch={dispatch} />}
+          {item?.mito && <MitoControls mito={item.mito} slotId={target} dispatch={dispatch} simple={simple} />}
           {item && !item.mito && item.charge > 0 && <p className="small">Holds {fmtNum(item.charge)} Overcharge on average.</p>}
 
           {(incoming.length > 0 || outgoing.length > 0 || idle.length > 0) && (
@@ -238,7 +258,7 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch,
                 />
                 Count toward total DPS <span className="muted">(untick if it can't aim at the target)</span>
               </label>
-              <WeaponBreakdown weapon={item.weapon} />
+              <WeaponBreakdown weapon={item.weapon} floor={floor?.items.get(slot.id)?.weapon?.dps} />
             </>
           )}
         </>
@@ -247,7 +267,15 @@ export function SlotInspector({ data, build, result, slotId, onSelect, dispatch,
   );
 }
 
-function MitoControls({ mito, slotId, dispatch }: { mito: MitoResult; slotId: string; dispatch: Dispatch<Action> }) {
+function MitoControls({ mito, slotId, dispatch, simple }: { mito: MitoResult; slotId: string; dispatch: Dispatch<Action>; simple: boolean }) {
+  if (simple) {
+    return (
+      <p className="small">
+        <strong>{mito.trigger}</strong>: {fmtNum(mito.charge)} Overcharge
+        {mito.duration !== undefined && <> for {fmtNum(mito.duration)}s</>}. Off in the worst case, always on in the best.
+      </p>
+    );
+  }
   return (
     <div className="field-stack">
       <p className="small">

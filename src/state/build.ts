@@ -22,6 +22,7 @@ export function emptyBuild(data: GameData, classId = data.classes[0].id): Build 
     params: {},
     targets: 1,
     custom: [],
+    mode: 'simple',
   };
 }
 
@@ -76,7 +77,8 @@ export type Action =
   | { type: 'clearMutations' }
   | { type: 'setParam'; id: string; value: number }
   | { type: 'setTargets'; targets: number }
-  | { type: 'setCustom'; custom: CustomModifier[] };
+  | { type: 'setCustom'; custom: CustomModifier[] }
+  | { type: 'setMode'; mode: 'simple' | 'detailed' };
 
 /** Drops slot settings for slots that no longer exist on the body. */
 function pruneSlots(build: Build, data: GameData): Build {
@@ -126,7 +128,7 @@ export function makeReducer(data: GameData) {
         // A new body; what you've picked up this run stays (plasmids belong to each pathogen).
         if (action.classId === build.classId) return build;
         const next = emptyBuild(data, action.classId);
-        return { ...next, mutations: build.mutations, params: build.params, targets: build.targets, custom: build.custom };
+        return { ...next, mutations: build.mutations, params: build.params, targets: build.targets, custom: build.custom, mode: build.mode };
       }
       case 'setEvolution': {
         // Organelles stay in slots with the same name, as in the game; others wait
@@ -171,6 +173,8 @@ export function makeReducer(data: GameData) {
         return { ...build, targets: Math.max(1, Math.min(50, Math.round(action.targets) || 1)) };
       case 'setCustom':
         return { ...build, custom: action.custom };
+      case 'setMode':
+        return { ...build, mode: action.mode };
     }
   };
 }
@@ -312,6 +316,8 @@ export function parseBuild(raw: unknown, data: GameData): Build | null {
       params: numberMap(raw.params) as Record<string, number>,
       targets: typeof raw.targets === 'number' ? raw.targets : 1,
       custom: Array.isArray(raw.custom) ? raw.custom.filter(isCustomModifier) : [],
+      // Builds saved before there were modes were made with your own fight assumptions.
+      mode: raw.mode === 'simple' ? 'simple' : 'detailed',
     },
     data,
   );

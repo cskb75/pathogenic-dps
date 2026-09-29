@@ -105,7 +105,7 @@ Run effects follow the game's mutation scripts:
 - Respiratory Burst counts mitochondria in each Overcharge state.
 - Starvation Reflex assumes half your stamina is missing on average while firing.
 
-Things that depend on how you play are **fight assumptions** in the settings panel:
+Things that depend on how you play are **fight assumptions**:
 - how often angled shots or backstabs land
 - how far away the target is
 - how often you kill, get hit, dodge, sprint or pick things up
@@ -113,6 +113,19 @@ Things that depend on how you play are **fight assumptions** in the settings pan
 - how long the target stays frozen
 - the level (explosions scale with it)
 - how long minions spend fighting, how long spawned ones survive and how often they get hit
+
+### Simple and Detailed mode
+
+The switch at the top of the results picks how fight assumptions are set. The mode is saved with the build, so a share link opens in the same mode.
+
+- **Simple** (the default for new builds) has nothing to fill in. DPS shows as a range between two fixed sets of assumptions (`src/engine/simple.ts`). Both assume you play perfectly: every aimed shot lands and stamina never runs out.
+  - **Worst case:** nothing situational helps. Every mitochondrion is off, so there's no Overcharge. Kills, hits, dodges, blocks, slashes and pickups trigger nothing, and targets are never frozen. Shots that go sideways, backwards, all around you or at random hit as often as the Detailed defaults say.
+  - **Best case:** everything maxed. Every mitochondrion is always on, and every other assumption sits at the top of its range, even past what the game quite allows. That means 3 dodges a second despite the 1.2s cooldown, and every sideways, all-around and arcing shot through one target. Treat it as a ceiling to compare builds by, not a number to expect.
+- **Detailed** uses your own values in the Fight assumptions panel. Switching to Simple keeps them saved.
+
+Run state (HP, cores, level, bosses, kills, recycled and eaten organelles) is yours in both modes. Builds from before there were modes open in Detailed.
+
+**What each organelle would do.** With a slot selected, the organelle list shows how much each organelle that fits would change single-target DPS there, as the worst- to best-case change in Simple mode. It uses the rarity of the organelle already in the slot, or Common. Tick "Most DPS first" to sort by it. The numbers fill in a few at a time, since each is a full calculation.
 
 ## Updating the numbers
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer, useState } from 'react';
 import { gameData } from '../data';
-import { calculate } from '../engine/calc';
+import { calculateMode } from '../engine/simple';
 import { emptyBuild, exampleBuild, loadInitialBuild, makeReducer, saveBuild, shareUrl } from '../state/build';
 import { fresh, type Carry } from '../state/held';
 import { BodyEditor } from './BodyEditor';
@@ -19,7 +19,8 @@ export function App() {
   const [copied, setCopied] = useState(false);
   /** An organelle in your hand in the body editor (src/state/held.ts). */
   const [carry, setCarry] = useState<Carry | null>(null);
-  const result = useMemo(() => calculate(build, gameData), [build]);
+  // Simple mode: `result` is the best case and `floor` the worst (src/engine/simple.ts).
+  const { main: result, floor } = useMemo(() => calculateMode(build, gameData), [build]);
 
   useEffect(() => saveBuild(build), [build]);
 
@@ -119,11 +120,12 @@ export function App() {
           <BuildSettings data={gameData} build={build} dispatch={dispatch} />
         </div>
         <div className="col-side">
-          <Results data={gameData} build={build} result={result} selected={selectedSlot} onSelect={setSelected} />
+          <Results data={gameData} build={build} result={result} floor={floor} selected={selectedSlot} onSelect={setSelected} dispatch={dispatch} />
           <SlotInspector
             data={gameData}
             build={build}
             result={result}
+            floor={floor}
             slotId={selectedSlot}
             onSelect={setSelected}
             dispatch={dispatch}

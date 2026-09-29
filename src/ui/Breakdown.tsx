@@ -2,14 +2,18 @@ import type { AttackNode, StateView, WeaponResult } from '../engine/calc';
 import { fmtNum } from './format';
 
 /** Where every number in a weapon's DPS comes from. */
-export function WeaponBreakdown({ weapon }: { weapon: WeaponResult }) {
+/** A weapon's DPS and where it comes from. With `floor` (simple mode's worst case), `weapon` is the best case and the DPS shows as a range. */
+export function WeaponBreakdown({ weapon, floor }: { weapon: WeaponResult; floor?: number }) {
   const views = [weapon.idle, ...(weapon.charged ? [weapon.charged] : [])];
+  const range = floor !== undefined && Math.round(floor) !== Math.round(weapon.dps);
   return (
     <div className="breakdown">
       <p className="dps-line">
-        <strong>{fmtNum(weapon.dps)}</strong> DPS
+        <strong>{range ? `${fmtNum(floor!)} – ${fmtNum(weapon.dps)}` : fmtNum(weapon.dps)}</strong> DPS
+        {floor !== undefined && <span className="muted"> worst to best case</span>}
         {weapon.multiDps !== weapon.dps && <span className="muted"> · {fmtNum(weapon.multiDps)} across all enemies</span>}
       </p>
+      {floor !== undefined && <p className="small muted">The breakdown below is the best case.</p>}
       <p className="small muted">
         {fmtNum(weapon.attacksPerSecond)} attacks/s on average
         {weapon.staminaPerSecond > 0 && <>, using {fmtNum(weapon.staminaPerSecond)} stamina/s</>}

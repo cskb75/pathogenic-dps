@@ -1,4 +1,5 @@
 import type { Dispatch } from 'react';
+import { modeOf } from '../engine/simple';
 import type { Build, CustomKind, CustomModifier, GameData, ParamDef } from '../engine/types';
 import type { Action } from '../state/build';
 
@@ -27,6 +28,8 @@ const GROUPS: { title: string; ids: string[] }[] = [
 ];
 
 export function BuildSettings({ data, build, dispatch }: Props) {
+  // Simple mode fixes the fight assumptions (src/engine/simple.ts); your own stay saved for Detailed.
+  const simple = modeOf(build) === 'simple';
   const params = new Map(data.params.map((p) => [p.id, p]));
   const setCustom = (custom: CustomModifier[]) => dispatch({ type: 'setCustom', custom });
   const updateCustom = (id: string, patch: Partial<CustomModifier>) => setCustom(build.custom.map((c) => (c.id === id ? { ...c, ...patch } : c)));
@@ -34,7 +37,35 @@ export function BuildSettings({ data, build, dispatch }: Props) {
   return (
     <section className="panel settings" aria-labelledby="settings-heading">
       <h2 id="settings-heading">Fight assumptions</h2>
-      <p className="muted small">Things that depend on how you play. Hover a name for details.</p>
+      {simple ? (
+        <div className="simple-note">
+          <p className="small">
+            Simple mode shows DPS from the worst case to the best case, so there's nothing to set here. Both assume you play it perfectly: every
+            aimed shot lands and stamina never runs out.
+          </p>
+          <div className="simple-ends">
+            <div>
+              <h3>Worst case</h3>
+              <p className="small muted">
+                Nothing situational helps. No Overcharge: every mitochondrion is off. Kills, hits, dodges, blocks, slashes and pickups trigger nothing,
+                and targets are never frozen. Shots that go sideways, backwards, all around you or at random hit as often as usual, as do mines,
+                backstabs and minions.
+              </p>
+            </div>
+            <div>
+              <h3>Best case</h3>
+              <p className="small muted">
+                Everything maxed, even past what the game quite allows. Every mitochondrion always on, every trigger (kills, hits, dodges, blocks,
+                slashes, pickups) at the top of its range, targets always frozen, enemies right next to you, beside and behind you, and every
+                sideways, all-around and arcing shot through your target. Long rooms, minions that last all room and always have someone to fight.
+              </p>
+            </div>
+          </div>
+          <button onClick={() => dispatch({ type: 'setMode', mode: 'detailed' })}>Set them yourself (Detailed mode)</button>
+        </div>
+      ) : (
+        <p className="muted small">Things that depend on how you play. Hover a name for details.</p>
+      )}
       <div className="settings-grid">
         <fieldset>
           <legend>Targets</legend>
@@ -43,7 +74,7 @@ export function BuildSettings({ data, build, dispatch }: Props) {
             <input type="number" min={1} max={50} value={build.targets} onChange={(e) => dispatch({ type: 'setTargets', targets: Number(e.target.value) })} />
           </label>
         </fieldset>
-        {GROUPS.map((g) => (
+        {!simple && GROUPS.map((g) => (
           <fieldset key={g.title}>
             <legend>{g.title}</legend>
             {g.ids.map((id) => params.get(id)).filter((p): p is ParamDef => !!p).map((p) => (
