@@ -18,7 +18,7 @@ All body plans, evolutions, plasmid trees and numbers come from the full game's 
 
 Things that work the way the game does:
 - **Mirrored slots.** In a bilateral body, an organelle in a side slot is copied to the matching slot on the other side. Either side can be edited, dragged from or dropped on; each keeps its own slot type.
-- **Evolutions.** Organelles keep their slot when you evolve, as long as the new body has a slot with the same name. An evolution's damage, HP and stamina bonuses stay with you after you evolve again.
+- **Evolutions** go step by step, as in a run: the picker opens at levels 2, 6 and 10 (`editor.gd`). Each level you settle, including a Skip, shrinks to one line you can reopen, and the next shows what the game can offer there. The evolution you have lists guaranteed next evolutions, which the game always shows first (marked "Always offered"), even from another tier. The rest of its 3 cards are drawn at random from that level's pool, plus Skip. Organelles keep their slot when you evolve, as long as the new body has a slot with the same name. An evolution's damage, HP and stamina bonuses stay with you after you evolve again.
 - **Built-in special slots** act like grafts.
 - **"Left half" and "bottom half".** Effects such as Chirality or Dorsal Dominance are measured from the body's centre, as the game does.
 - **Nanobot modules** are 102.4 game pixels a side. An edge slot connects to its own module's centre and to each neighbouring module's centre, unless it faces away from it; the body's centre is the average of the module centres.

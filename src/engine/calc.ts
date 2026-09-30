@@ -27,7 +27,7 @@ import {
   type WeaponProfile,
 } from './sim/model';
 import { runModel, type RunLine, type Share } from './run';
-import type { BodyPlan, Build, ClassDef, GameData, OrganelleInfo, OrganelleInstance, SlotState, ZoneEffect } from './types';
+import type { BodyPlan, Build, ClassDef, EvolvingBody, GameData, OrganelleInfo, OrganelleInstance, SlotState, ZoneEffect } from './types';
 import { RARITIES } from './types';
 
 export type { AttackNode, TraceLine } from './sim/model';
@@ -136,15 +136,42 @@ export function findClass(data: GameData, classId: string): ClassDef {
  * Evolving classes: the starting body, then each evolution picked so far.
  * The last one is the current body; bonuses from earlier ones carry over.
  */
+/** The game's "Skip Evolution" card at an evolution level: no new body (skip_evolution.tres). */
+export const SKIP_EVOLUTION = 'skip';
+
+/** The levels the evolution picker opens at (player.gd, get_evolution_levels): tier i is at EVOLUTION_LEVELS[i]. */
+export const EVOLUTION_LEVELS = [2, 6, 10];
+
+/**
+ * What the game's evolution picker can show at a tier, after the picks before
+ * it (editor.gd, generate_mutations): the evolution you have lists guaranteed
+ * ones, shown first (from any tier: the full game doesn't filter them), and
+ * the other cards are drawn at random from the tier's pool, 3 in all, plus Skip.
+ */
+export function evolutionOffer(data: GameData, body: EvolvingBody, picks: string[], tier: number): { current?: BodyPlan; guaranteed: string[]; pool: string[] } {
+  let current: BodyPlan | undefined;
+  const offerAfter = (i: number, now?: BodyPlan) => {
+    const guaranteed = (now?.guaranteed ?? []).filter((id) => data.bodies[id]);
+    return { current: now, guaranteed, pool: (body.tiers[i] ?? []).filter((id) => !guaranteed.includes(id) && data.bodies[id]) };
+  };
+  for (let i = 0; i < tier; i++) {
+    const { guaranteed, pool } = offerAfter(i, current);
+    const pick = picks[i];
+    if (pick && (guaranteed.includes(pick) || pool.includes(pick))) current = data.bodies[pick];
+  }
+  return offerAfter(tier, current);
+}
+
+/** The starting body and each evolution taken, in order. */
 export function evolutionPath(build: Build, data: GameData): BodyPlan[] {
   const cls = findClass(data, build.classId);
   if (cls.body.kind !== 'evolving') return [];
-  const { start, tiers } = cls.body;
-  const path = [data.bodies[start]];
-  tiers.forEach((options, i) => {
-    const pick = build.evolutions[i];
-    if (pick && options.includes(pick) && data.bodies[pick]) path.push(data.bodies[pick]);
-  });
+  const path = [data.bodies[cls.body.start]];
+  for (let tier = 0; tier < cls.body.tiers.length; tier++) {
+    const pick = build.evolutions[tier];
+    const { guaranteed, pool } = evolutionOffer(data, cls.body, build.evolutions, tier);
+    if (pick && (guaranteed.includes(pick) || pool.includes(pick))) path.push(data.bodies[pick]);
+  }
   return path.filter((p) => !!p);
 }
 

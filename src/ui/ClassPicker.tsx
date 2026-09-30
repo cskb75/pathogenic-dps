@@ -9,7 +9,7 @@ import type { Action } from '../state/build';
 import { useAnimation } from './animation';
 import { uiArt } from './art';
 import { Clock, ClockContext } from './clock';
-import { Specimen, specimenBody, specimenOf } from './Specimen';
+import { BOB, Specimen, specimenBody, specimenOf } from './Specimen';
 
 interface Props {
   data: GameData;
@@ -188,21 +188,37 @@ const RIM = 90;
 const VIEW = { x: -135, y: -TUBE_H / 2 - 96, w: 270, h: TUBE_H + 240 };
 /** How much bigger than the game (player_scale) a pathogen may be drawn, room allowing. */
 const ENLARGE = 1.4;
+/** The pathogen's mask fades out over this much at its top and bottom, so hairs reaching past fade rather than end in a straight cut. */
+const FADE = 36;
 
 /** The game's tube with the pathogen floating in it, lit from below in its colour. */
 function Tube({ cls, data }: { cls: ClassDef; data: GameData }) {
   const id = useId().replace(/[^\w-]/g, '');
   const spec = specimenOf(cls.id);
   const { box } = useMemo(() => specimenBody(cls, data), [cls, data]);
-  // Fit the body (not its hairs: the tube cuts those off, as in the game) inside the glass.
-  const room = { w: MASK.w - 30, h: MASK.h - CUT - 70 };
-  const scale = Math.min(spec.scale * ENLARGE, room.w / (box.w * 100), room.h / (box.h * 100));
+  // Fit the body inside the glass clear of the faded ends, however far it bobs
+  // (not its hairs: the tube cuts those off, as in the game).
+  const room = { w: MASK.w - 30, h: MASK.h - CUT - 2 * FADE };
+  const bob = BOB.amp * 100;
+  const scale = Math.min(spec.scale * ENLARGE, room.w / (box.w * 100), room.h / (box.h * 100 + 2 * bob));
+  const inner = MASK.h - CUT;
   const light = spec.light ?? '#3fb7ff';
   return (
     <svg className="tube" viewBox={`${VIEW.x} ${VIEW.y} ${VIEW.w} ${VIEW.h}`} aria-hidden="true">
       <defs>
+        <linearGradient id={`${id}-fade`} x1={0} y1={-inner / 2} x2={0} y2={inner / 2} gradientUnits="userSpaceOnUse">
+          <stop offset={0} stopColor="#fff" stopOpacity={0} />
+          <stop offset={FADE / inner} stopColor="#fff" stopOpacity={1} />
+          <stop offset={1 - FADE / inner} stopColor="#fff" stopOpacity={1} />
+          <stop offset={1} stopColor="#fff" stopOpacity={0} />
+        </linearGradient>
+        <mask id={`${id}-ends`} style={{ maskType: 'alpha' }}>
+          <rect x={-MASK.w / 2} y={-inner / 2} width={MASK.w} height={inner} fill={`url(#${id}-fade)`} />
+        </mask>
         <mask id={`${id}-in`} style={{ maskType: 'alpha' }}>
-          <Sliced href={uiArt('tube-mask')} w={MASK.w} h={MASK.h - CUT} iw={MASK.w} ih={MASK.h} />
+          <g mask={`url(#${id}-ends)`}>
+            <Sliced href={uiArt('tube-mask')} w={MASK.w} h={inner} iw={MASK.w} ih={MASK.h} />
+          </g>
         </mask>
         <radialGradient id={`${id}-light`}>
           <stop offset="0" stopColor={light} stopOpacity={0.75} />
@@ -217,7 +233,7 @@ function Tube({ cls, data }: { cls: ClassDef; data: GameData }) {
       <g mask={`url(#${id}-in)`}>
         {/* The tube's own light sits just under the pathogen (tube.tscn PointLight2D). */}
         <ellipse className="tube-light" cx={0} cy={TUBE_H / 2 - 40} rx={150} ry={210} fill={`url(#${id}-light)`} />
-        <g transform={`translate(0 15) scale(${scale.toFixed(4)})`}>
+        <g transform={`scale(${scale.toFixed(4)})`}>
           <Specimen cls={cls} data={data} />
         </g>
       </g>

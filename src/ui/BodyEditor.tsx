@@ -3,9 +3,9 @@ import { AMOEBA, buildAmoebaBody, nextGrowthId, placeBlob, type AmoebaBody, type
 import { blobOutline, loneBlobEdge } from '../engine/amoebaShape';
 import { placementOptions, removePieceTree, type PlacementOption, type Slot, type SlotKind } from '../engine/body';
 import type { CalcResult } from '../engine/calc';
-import { evolutionPath, findClass, slotState } from '../engine/calc';
+import { EVOLUTION_LEVELS, evolutionOffer, findClass, SKIP_EVOLUTION, slotState } from '../engine/calc';
 import type { Vec } from '../engine/geometry';
-import type { Build, EvolvingBody, GameData, ModularBody } from '../engine/types';
+import type { BodyPlan, Build, EvolvingBody, GameData, ModularBody } from '../engine/types';
 import type { Action } from '../state/build';
 import { drop, fits, lift, type Carry, type Held } from '../state/held';
 import { useAnimation } from './animation';
@@ -488,7 +488,7 @@ export function BodyEditor({ data, build, result, selected, onSelect, dispatch, 
       ) : freeform ? (
         <FreeformToolbar tool={tool} setTool={setTool} blobs={(build.growth ?? []).length} />
       ) : (
-        <EvolutionPicker data={data} build={build} body={cls.body as EvolvingBody} dispatch={dispatch} />
+        <EvolutionFlow data={data} build={build} body={cls.body as EvolvingBody} dispatch={dispatch} />
       )}
       <div className="hint-row">
         <p className="hint">{hint}</p>
@@ -883,51 +883,79 @@ function FreeformToolbar({ tool, setTool, blobs }: { tool: Tool; setTool: (t: To
   );
 }
 
-function EvolutionPicker({ data, build, body, dispatch }: { data: GameData; build: Build; body: EvolvingBody; dispatch: Dispatch<Action> }) {
-  const current = evolutionPath(build, data).at(-1);
+/**
+ * Evolving step by step, as in a run: the evolution picker at levels 2, 6 and
+ * 10. Each step you've settled shrinks to a line you can reopen; the next one
+ * shows what the game can offer there (evolutionOffer: the evolution you have
+ * lists guaranteed ones, shown first; the rest are drawn at random, 3 cards in
+ * all, plus Skip).
+ */
+function EvolutionFlow({ data, build, body, dispatch }: { data: GameData; build: Build; body: EvolvingBody; dispatch: Dispatch<Action> }) {
   if (body.tiers.length === 0) {
     return <p className="note">Only the starting body is known so far: evolutions need the full game's files.</p>;
   }
+  // Settled tiers come first (an empty one before a later pick counts as skipped); the next is open.
+  const open = Math.min(build.evolutions.length, body.tiers.length);
+  const choose = (tier: number, id: string) => dispatch({ type: 'setEvolution', tier, id });
+  const perks = (plan: BodyPlan) =>
+    [
+      plan.bonusDamage ? `+${Math.round(plan.bonusDamage * 100)}% damage` : '',
+      plan.bonusHp ? `+${plan.bonusHp} max HP` : '',
+      plan.bonusStamina ? `+${plan.bonusStamina} stamina` : '',
+    ]
+      .filter(Boolean)
+      .join(', ');
+  const offer = open < body.tiers.length ? evolutionOffer(data, body, build.evolutions, open) : null;
+  const card = (id: string, guaranteed: boolean) => {
+    const plan = data.bodies[id];
+    const perk = perks(plan);
+    return (
+      <button key={id} className={`evolution-card ${guaranteed ? 'guaranteed' : ''}`} onClick={() => choose(open, id)} title={plan.description ?? plan.name}>
+        {guaranteed && <span className="evolution-badge">Always offered</span>}
+        {plan.sprite && <PlanThumb plan={plan} size={40} />}
+        <span className="evolution-name">{plan.name}</span>
+        {perk && <span className="evolution-perk">{perk}</span>}
+      </button>
+    );
+  };
   return (
-    <div className="evolutions">
-      {body.tiers.map((options, tier) => {
-        const picked = build.evolutions[tier] ?? '';
+    <div className="evolution-flow">
+      {build.evolutions.slice(0, open).map((pick, tier) => {
+        const plan = pick && pick !== SKIP_EVOLUTION ? data.bodies[pick] : undefined;
+        const perk = plan ? perks(plan) : '';
         return (
-          <fieldset key={tier} className="evolution-tier">
-            <legend>Evolution {tier + 1}</legend>
-            <div className="evolution-options">
-              <button className={`evolution-card none ${picked ? '' : 'active'}`} aria-pressed={!picked} onClick={() => dispatch({ type: 'setEvolution', tier, id: '' })}>
-                <span className="evolution-name">{tier === 0 ? 'Not yet' : 'Skip'}</span>
-              </button>
-              {options.map((id) => {
-                const plan = data.bodies[id];
-                if (!plan) return null;
-                const active = picked === id;
-                const perks = [
-                  plan.bonusDamage ? `+${Math.round(plan.bonusDamage * 100)}% damage` : '',
-                  plan.bonusHp ? `+${plan.bonusHp} max HP` : '',
-                  plan.bonusStamina ? `+${plan.bonusStamina} stamina` : '',
-                ]
-                  .filter(Boolean)
-                  .join(', ');
-                return (
-                  <button
-                    key={id}
-                    className={`evolution-card ${active ? 'active' : ''} ${current?.id === id ? 'current' : ''}`}
-                    aria-pressed={active}
-                    onClick={() => dispatch({ type: 'setEvolution', tier, id: active ? '' : id })}
-                    title={plan.description ?? plan.name}
-                  >
-                    {plan.sprite && <PlanThumb plan={plan} size={40} />}
-                    <span className="evolution-name">{plan.name}</span>
-                    {perks && <span className="evolution-perk">{perks}</span>}
-                  </button>
-                );
-              })}
-            </div>
-          </fieldset>
+          <div key={tier} className="evolution-step done">
+            <span className="evolution-level">Level {EVOLUTION_LEVELS[tier]}</span>
+            {plan?.sprite && <PlanThumb plan={plan} size={28} />}
+            <span className="evolution-name">{plan ? plan.name : 'Skipped'}</span>
+            {perk && <span className="evolution-perk">{perk}</span>}
+            <button className="link small" onClick={() => choose(tier, '')} aria-label={`Change the level ${EVOLUTION_LEVELS[tier]} evolution`}>
+              Change
+            </button>
+          </div>
         );
       })}
+      {offer && (
+        <fieldset className="evolution-step open">
+          <legend>
+            Level {EVOLUTION_LEVELS[open]} evolution{offer.current ? ` after ${offer.current.name}` : ''}
+          </legend>
+          <p className="muted small">
+            {offer.guaranteed.length > 0
+              ? `The game always offers ${offer.guaranteed.map((id) => data.bodies[id].name).join(' and ')} here${
+                  offer.guaranteed.length < 3 ? `, and ${3 - offer.guaranteed.length === 1 ? 'one' : 'two'} of the others at random` : ''
+                }, plus Skip.`
+              : 'The game offers 3 of these at random, plus Skip.'}
+          </p>
+          <div className="evolution-options">
+            {offer.guaranteed.map((id) => card(id, true))}
+            {offer.pool.map((id) => card(id, false))}
+            <button className="evolution-card none" onClick={() => choose(open, SKIP_EVOLUTION)} title="Skip Evolution: no effect">
+              <span className="evolution-name">Skip</span>
+            </button>
+          </div>
+        </fieldset>
+      )}
     </div>
   );
 }

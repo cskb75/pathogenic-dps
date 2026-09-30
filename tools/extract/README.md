@@ -15,7 +15,8 @@ python3 tools/extract/extract.py path/to/pathogenic.pck /tmp/pathogenic-out
 | `gdtr.py` | Reads the game's translation file (hashed keys, smaz-compressed text). Downloads the smaz codebook from PyPI on first use. |
 | `ctex.py` | Unwraps compressed textures (`.ctex`) into the PNG or WebP stored inside. |
 | `extract.py` | Runs all of the above and writes decompiled scripts plus JSON tables of organelles, weapons, mutations, plasmid maps and English strings. |
-| `bodies.py` | Extracts each pathogen's body plans: starting body and evolutions (slots, connections, mirroring, special slots, outline, centre bone) and their sprites. |
+| `bodies.py` | Extracts each pathogen's body plans: starting body and evolutions (slots, connections, mirroring, special slots, outline, centre bone, the evolutions each one guarantees next) and their sprites. |
+| `uids.py` | Resolves `uid://` references to `res://` paths through the pack's `.godot/uid_cache.bin` (the text is the id in base 34: letters a-y, then digits 0-8). |
 | `app_data.py` | Turns `bodies.py`'s output into `src/data/bodies.json` and `public/art/bodies`. |
 | `plasmids.py` | Writes every pathogen's plasmid tree (positions, links, text, icons, damage effects) to `src/data/plasmids.json` and `public/art/plasmids`. |
 | `organelle_art.py` | Reads how each organelle is drawn on the body (the textured lines and sprites in its scene, at rest), how it moves in the game's organelle editor (the values its scripts use), its rarity outline, its tags and connection-arrow colour, and the slot sprites. Writes `src/data/organelle_art.json` and the textures to `public/art/body-parts`. |

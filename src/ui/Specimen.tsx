@@ -83,7 +83,7 @@ export function specimenBody(cls: ClassDef, data: GameData): { box: Box; art: Re
 }
 
 /** tube.gd: the pathogen bobs 25 game pixels up and down, sin(t / 2) at a random 0.9-1.1 x speed. */
-const BOB = { amp: 0.25, rate: 0.5 };
+export const BOB = { amp: 0.25, rate: 0.5 };
 
 /** A pathogen in its own frame (editor units x S, the body's box centred on the origin), moving while a clock runs. */
 export function Specimen({ cls, data }: { cls: ClassDef; data: GameData }) {

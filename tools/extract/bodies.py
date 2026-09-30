@@ -30,6 +30,7 @@ from extract import Pack, clean  # noqa: E402
 from gdc import decompile  # noqa: E402
 from gdres import parse, scene_nodes  # noqa: E402
 from gdtr import Translation  # noqa: E402
+from uids import resolve  # noqa: E402
 
 # Classes with fixed bodies: id -> (starting body scene, class config). See
 # get_parasite_scene in scn/globals.gd and each player script's get_config().
@@ -153,6 +154,10 @@ def main(pck_path, out_dir):
     tr_name = max(en, key=lambda n: pack.index[n][1])
     t = Translation(parse(pack.raw(tr_name))['resources'][-1]['props'])
     out = {'classes': [], 'bodies': {}}
+    # Evolution resource path -> body key, and each evolution's guaranteed_evolutions
+    # (evolution.gd): the game offers those first at the next evolution level.
+    key_of = {}
+    guaranteed = {}
     for cid, (base, config) in CLASSES.items():
         key = f'{cid}-start'
         out['bodies'][key] = {**read_body(pack, base, key, out_dir), 'name': 'Starting body', 'tier': 0}
@@ -160,8 +165,9 @@ def main(pck_path, out_dir):
         for i, tier in enumerate(evolution_tiers(pack, base, config)):
             keys = []
             for evo in tier:
-                props = pack.resource(evo)['resources'][-1]['props']
-                scene = clean(props.get('player_scene'), pack.resource(evo)['ext'])
+                res = pack.resource(evo)
+                props = res['resources'][-1]['props']
+                scene = clean(props.get('player_scene'), res['ext'])
                 name = t.get(props.get('ui_name', '')) or props.get('ui_name')
                 ekey = f"{cid}-{re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')}"
                 desc = t.get(props['description']) if props.get('description') else None
@@ -174,10 +180,19 @@ def main(pck_path, out_dir):
                     'bonusStamina': props.get('bonus_stamina', 0),
                     **({'description': desc} if desc else {}),
                 }
+                key_of[resolve(pack, evo)] = ekey
+                refs = clean(props.get('guaranteed_evolutions', []), res['ext']) or []
+                if refs:
+                    guaranteed[ekey] = [resolve(pack, r) for r in refs]
                 keys.append(ekey)
             tiers.append(keys)
         out['classes'].append({'id': cid, 'start': key, 'tiers': tiers})
         print(f'{cid}: {sum(len(x) for x in tiers)} evolutions in {len(tiers)} tiers')
+    for ekey, paths in guaranteed.items():
+        missing = [x for x in paths if x not in key_of]
+        if missing:
+            print(f'{ekey}: guaranteed evolutions not in any tier: {missing}')
+        out['bodies'][ekey]['guaranteed'] = [key_of[x] for x in paths if x in key_of]
     with open(os.path.join(out_dir, 'bodies.json'), 'w') as f:
         json.dump(out, f, indent=1)
     print(f'wrote {out_dir}/bodies.json')

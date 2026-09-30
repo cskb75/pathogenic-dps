@@ -1,10 +1,10 @@
 // Build state: creation, edits (as a reducer), and save/load.
 
-import { bodyFor, findClass } from '../engine/calc';
+import { bodyFor, evolutionOffer, findClass, SKIP_EVOLUTION } from '../engine/calc';
 import { nextGrowthId, type Growth } from '../engine/amoeba';
 import { removePieceTree } from '../engine/body';
 import { toggleNode } from './plasmidTree';
-import type { Build, CustomKind, CustomModifier, GameData, OrganelleInstance, Rarity, SlotState } from '../engine/types';
+import type { Build, CustomKind, CustomModifier, EvolvingBody, GameData, OrganelleInstance, Rarity, SlotState } from '../engine/types';
 import { RARITIES } from '../engine/types';
 
 export function emptyBuild(data: GameData, classId = data.classes[0].id): Build {
@@ -133,9 +133,11 @@ export function makeReducer(data: GameData) {
       case 'setEvolution': {
         // Organelles stay in slots with the same name, as in the game; others wait
         // in case you switch back, and are dropped when the build is saved.
-        const evolutions = [...build.evolutions];
-        while (evolutions.length <= action.tier) evolutions.push('');
-        evolutions[action.tier] = action.id;
+        // Clearing a tier reopens it and drops the ones after it (each follows on
+        // from the last); an id or SKIP_EVOLUTION settles it.
+        const evolutions = action.id ? [...build.evolutions] : build.evolutions.slice(0, action.tier);
+        while (evolutions.length <= action.tier && action.id) evolutions.push('');
+        if (action.id) evolutions[action.tier] = action.id;
         while (evolutions.length && !evolutions[evolutions.length - 1]) evolutions.pop();
         return { ...build, evolutions };
       }
@@ -274,13 +276,15 @@ export function parseBuild(raw: unknown, data: GameData): Build | null {
     seen.add(id);
   });
   if (cls.body.kind === 'modular' && pieces.length === 0) return null;
-  const evolutions =
-    cls.body.kind === 'evolving' && Array.isArray(raw.evolutions)
-      ? cls.body.tiers.map((options, i) => {
-          const pick = (raw.evolutions as unknown[])[i];
-          return typeof pick === 'string' && options.includes(pick) ? pick : '';
-        })
-      : [];
+  // Each tier keeps a pick the game could have offered after the ones before it, or a skip.
+  const evolutions: string[] = [];
+  if (cls.body.kind === 'evolving' && Array.isArray(raw.evolutions)) {
+    cls.body.tiers.forEach((_, i) => {
+      const pick = (raw.evolutions as unknown[])[i];
+      const { guaranteed, pool } = evolutionOffer(data, cls.body as EvolvingBody, evolutions, i);
+      evolutions.push(typeof pick === 'string' && (pick === SKIP_EVOLUTION || guaranteed.includes(pick) || pool.includes(pick)) ? pick : '');
+    });
+  }
   while (evolutions.length && !evolutions[evolutions.length - 1]) evolutions.pop();
   const growth: Growth[] = [];
   if (cls.body.kind === 'freeform' && Array.isArray(raw.growth)) {
