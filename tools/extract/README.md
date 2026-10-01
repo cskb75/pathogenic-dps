@@ -1,6 +1,6 @@
 # Game data extraction
 
-Scripts for reading Pathogenic's Godot 4 export (`.pck`) so organelle numbers can be checked against the game files. They handle the demo (compiled `.gdc` scripts) and the full release (plain `.gd` scripts, pck format 4). **Decompiled scripts and the raw JSON dumps must never be committed**: keep that output outside the repo. Only `app_data.py`, `plasmids.py`, `organelle_art.py`, `ui_art.py` and `wiki_icons.py` write into the repo, and only app data: body plan geometry, plasmid trees, how organelles are drawn, and art.
+Scripts for reading Pathogenic's Godot 4 export (`.pck`) so organelle numbers can be checked against the game files. They handle the demo (compiled `.gdc` scripts) and the full release (plain `.gd` scripts, pck format 4). **Decompiled scripts and the raw JSON dumps must never be committed**: keep that output outside the repo. Only `app_data.py`, `plasmids.py`, `organelle_art.py`, `ui_art.py`, `specimens.py`, `seeded.py` and `wiki_icons.py` write into the repo, and only app data: body plan geometry, plasmid trees, how organelles are drawn, and art.
 
 ```sh
 pip install zstandard pillow
@@ -22,6 +22,8 @@ python3 tools/extract/extract.py path/to/pathogenic.pck /tmp/pathogenic-out
 | `organelle_art.py` | Reads how each organelle is drawn on the body (the textured lines and sprites in its scene, at rest), how it moves in the game's organelle editor (the values its scripts use), its rarity outline, its tags and connection-arrow colour, and the slot sprites. Writes `src/data/organelle_art.json` and the textures to `public/art/body-parts`. |
 | `ui_art.py` | Copies the game's UI art the app's theme uses (menu frames, organelle type frames and icons, plasmid node frames, DNA links, the plasmid menu backdrop, the character select's tubes, arrows and lab) into `public/art/ui`. |
 | `specimens.py` | Reads each pathogen as the character select shows it: its tube's size and light colour, and the hairs its scene attaches to the starting body (position, length, width curve, colour or texture, and the values `hair.gd` sways them with). Writes `src/data/specimens.json` and the hair textures to `public/art/specimens`. |
+| `scenes.py` | Builds a scene's full node tree with its instanced scenes expanded, and walks it in the order the game runs `_enter_tree` (top-down) and `_ready` (bottom-up). |
+| `seeded.py` | Collects what a run's seed decides, for seeded runs. That's the mutation and organelle pools in load order (weights, reward rates, tags, unlocks, devil weights, and the script that scales each weight), each floor's room count, every room node that draws from the floor's reward stream (in draw order, with its settings), each pathogen's starting stamina and dodge, and the rarity, prefix and discount numbers. Writes `src/data/seeded.json`. |
 | `wiki_icons.py` | Downloads organelle, mutation and plasmid icons from pathogenic.wiki into `public/art`. |
 
 To refresh the body plans and plasmid trees after a game update:
@@ -33,6 +35,7 @@ python3 tools/extract/plasmids.py path/to/pathogenic.pck
 python3 tools/extract/organelle_art.py path/to/pathogenic.pck
 python3 tools/extract/ui_art.py path/to/pathogenic.pck
 python3 tools/extract/specimens.py path/to/pathogenic.pck
+python3 tools/extract/seeded.py path/to/pathogenic.pck
 ```
 
 The Nanobot and the Amoeba have no fixed body plans: their rules live in `src/engine/body.ts` and `src/engine/amoeba.ts`.

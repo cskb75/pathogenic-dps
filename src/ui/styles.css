@@ -2019,3 +2019,259 @@ summary:hover {
 .simple-ends p {
   margin: 0;
 }
+
+/* ---- Seeded run --------------------------------------------------------------- */
+
+.seeded-run h3 {
+  margin: 18px 0 4px;
+}
+.seeded-run h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-soft);
+}
+.seeded-run .panel-head p {
+  margin: 0;
+  max-width: 62ch;
+}
+.seed-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex: none;
+}
+/* The pause menu prints the seed in a readout face. */
+.seed-code {
+  font-family: var(--font-readout);
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  color: var(--owned);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--owned) 55%, transparent);
+}
+.seed-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 12px;
+  margin-top: 12px;
+}
+.seed-form p,
+.seed-form .check {
+  flex-basis: 100%;
+  margin: 0;
+}
+.seed-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.seed-field input {
+  width: 11ch;
+  font-family: var(--font-readout);
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--owned);
+}
+.seed-error {
+  color: var(--warn);
+}
+.warn-note {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--warn) 12%, var(--panel));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--warn) 45%, transparent);
+}
+.run-step > p,
+.run-floor p,
+.room-block p {
+  margin: 0 0 6px;
+}
+.run-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+.run-cards.evolutions {
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+}
+.run-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 8px;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 500;
+}
+button.run-card,
+.run-card.reward {
+  border-image-source: none;
+  border: 1px solid color-mix(in srgb, var(--line-rounded) 55%, transparent);
+  background: radial-gradient(circle at 50% 25%, color-mix(in srgb, var(--accent) 10%, var(--panel-2)), var(--panel) 80%);
+}
+button.run-card:hover {
+  border-image-source: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.run-card.guaranteed {
+  border-color: var(--accent);
+}
+.run-card.none {
+  justify-content: center;
+  color: var(--muted);
+}
+.run-card-name {
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.run-card-text {
+  font-size: 11.5px;
+  line-height: 1.3;
+  color: var(--muted);
+}
+.run-card-gift {
+  font-size: 11.5px;
+  color: var(--flow-fires);
+}
+.run-card-meta {
+  font-size: 11.5px;
+}
+.run-card-traits {
+  font-size: 11.5px;
+  color: var(--owned);
+}
+.run-card .rarity-label {
+  font-weight: 700;
+  color: var(--rarity, var(--rarity-common));
+}
+.run-card.rarity-rare {
+  --rarity: var(--rarity-rare);
+}
+.run-card.rarity-epic {
+  --rarity: var(--rarity-epic);
+}
+.run-card.rarity-legendary {
+  --rarity: var(--rarity-legendary);
+}
+.run-card.reward:not(.rarity-common) {
+  border-color: color-mix(in srgb, var(--rarity, var(--line-rounded)) 60%, transparent);
+}
+.run-card.reward > button {
+  margin-top: auto;
+}
+.run-card.taken {
+  border-color: var(--owned);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--owned) 45%, transparent);
+}
+.run-tools {
+  margin-top: 8px;
+  align-items: center;
+}
+.run-more {
+  margin-top: 8px;
+}
+.run-history {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: 10px;
+}
+.run-history ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chip.static {
+  cursor: default;
+}
+.floor-tabs .chip.current {
+  border-color: var(--owned);
+}
+.floor-tabs .chip.current.active {
+  box-shadow: 0 0 8px color-mix(in srgb, var(--owned) 45%, transparent);
+}
+.run-floor {
+  margin-top: 10px;
+}
+.run-ahead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-bottom: 10px;
+}
+.run-ahead p {
+  flex: 1 1 260px;
+  margin: 0;
+}
+.offset-buttons {
+  display: inline-flex;
+  gap: 2px;
+  margin: 0 4px;
+  vertical-align: middle;
+}
+.offset-buttons button {
+  padding: 0 8px;
+  line-height: 1.4;
+}
+.room-block {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-soft);
+}
+.room-block select {
+  margin-bottom: 8px;
+}
+.shop-price {
+  font-size: 12px;
+}
+.shop-price strong {
+  font-family: var(--font-readout);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--stamina);
+}
+.shop-price .sale {
+  color: var(--owned);
+  font-weight: 600;
+}
+.shop-extras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+.run-unlocks {
+  margin-top: 16px;
+}
+.run-unlocks summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.unlock-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0 12px;
+}
+.unlock-list .check {
+  margin: 4px 0;
+}
