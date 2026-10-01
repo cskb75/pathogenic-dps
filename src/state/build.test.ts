@@ -116,6 +116,18 @@ describe('build state', () => {
     expect(build.evolutions).toEqual([]);
   });
 
+  it('evolves step by step: skipping settles a level, changing one reopens it and drops the ones after', () => {
+    let build = emptyBuild(gameData, 'bacterium');
+    build = reducer(build, { type: 'setEvolution', tier: 0, id: 'bacterium-coccus' });
+    build = reducer(build, { type: 'setEvolution', tier: 1, id: 'skip' });
+    build = reducer(build, { type: 'setEvolution', tier: 2, id: 'bacterium-diplococcus' });
+    expect(build.evolutions).toEqual(['bacterium-coccus', 'skip', 'bacterium-diplococcus']);
+    // A link keeps the skip and the guaranteed pick from another tier.
+    expect(decodeBuild(encodeBuild(build), gameData)!.evolutions).toEqual(build.evolutions);
+    build = reducer(build, { type: 'setEvolution', tier: 1, id: '' });
+    expect(build.evolutions).toEqual(['bacterium-coccus']);
+  });
+
   it('round-trips an evolving build and drops bad evolutions from links', () => {
     let build = emptyBuild(gameData, 'fungal-spore');
     build = reducer(build, { type: 'setEvolution', tier: 0, id: 'fungal-spore-ascomycota' });

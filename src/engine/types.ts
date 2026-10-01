@@ -100,6 +100,8 @@ export interface BodyPlan {
   /** Stamina containers (100 stamina each) added. */
   bonusStamina?: number;
   description?: string;
+  /** Evolutions the game offers first at the next evolution level after this one (evolution.gd, guaranteed_evolutions). */
+  guaranteed?: string[];
 }
 
 /** Nanobot-style bodies: modules attached edge to edge. */

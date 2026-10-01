@@ -3,11 +3,14 @@ import { gameData } from '../data';
 import { calculateMode } from '../engine/simple';
 import { emptyBuild, exampleBuild, loadInitialBuild, makeReducer, saveBuild, shareUrl } from '../state/build';
 import { fresh, type Carry } from '../state/held';
+import { loadRun, runReducer, saveRun } from '../state/seededRun';
+import type { OrganelleInstance } from '../engine/types';
 import { BodyEditor } from './BodyEditor';
 import { BuildSettings } from './BuildSettings';
 import { ClassPicker } from './ClassPicker';
 import { Results } from './Results';
 import { RunPanel } from './RunPanel';
+import { SeededRunPanel } from './SeededRun';
 import { SlotInspector } from './SlotInspector';
 import { art, uiArt } from './art';
 
@@ -19,10 +22,13 @@ export function App() {
   const [copied, setCopied] = useState(false);
   /** An organelle in your hand in the body editor (src/state/held.ts). */
   const [carry, setCarry] = useState<Carry | null>(null);
+  /** A run followed by its seed (src/state/seededRun.ts), saved apart from the build. */
+  const [run, runDispatch] = useReducer(runReducer, null, loadRun);
   // Simple mode: `result` is the best case and `floor` the worst (src/engine/simple.ts).
   const { main: result, floor } = useMemo(() => calculateMode(build, gameData), [build]);
 
   useEffect(() => saveBuild(build), [build]);
+  useEffect(() => saveRun(run), [run]);
 
   // A shared build has now been loaded (and saved), so drop it from the URL:
   // otherwise reloading would bring back the shared version over later edits.
@@ -39,6 +45,15 @@ export function App() {
     if (!slotId || !window.matchMedia('(max-width: 900px)').matches) return;
     const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     requestAnimationFrame(() => document.getElementById('inspector')?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'nearest' }));
+  }
+
+  /** An organelle you took in the seeded run: in your hand, to drop on a slot. */
+  function takeOrganelle(organelle: OrganelleInstance) {
+    // Taking another puts back what you held first (as Esc would), so nothing is lost.
+    if (carry?.held.undo) dispatch({ type: 'setSlots', slots: carry.held.undo });
+    setCarry({ held: { organelle, settings: {} }, mode: 'carry' });
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelector('.panel.editor')?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'nearest' });
   }
 
   async function copyLink() {
@@ -116,6 +131,7 @@ export function App() {
             carry={carry}
             setCarry={setCarry}
           />
+          <SeededRunPanel data={gameData} build={build} dispatch={dispatch} run={run} runDispatch={runDispatch} onTake={takeOrganelle} />
           <RunPanel data={gameData} build={build} result={result} dispatch={dispatch} />
           <BuildSettings data={gameData} build={build} dispatch={dispatch} />
         </div>

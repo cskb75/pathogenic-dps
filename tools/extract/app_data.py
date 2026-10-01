@@ -57,6 +57,8 @@ def main(out_dir):
             plan['bonusStamina'] = b['bonusStamina']
         if b.get('description'):
             plan['description'] = b['description']
+        if b.get('guaranteed'):
+            plan['guaranteed'] = b['guaranteed']
         if b.get('sprite'):
             sp = b['sprite']
             shutil.copy(os.path.join(out_dir, sp['file']), os.path.join(art, os.path.basename(sp['file'])))

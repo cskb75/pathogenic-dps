@@ -1,0 +1,4548 @@
+{
+ "alphabet": "ABCDEFGHJKMNPQRTUVWXY346789",
+ "mutations": [
+  {
+   "key": "actives_energy_mutation",
+   "name": "Metabolic Refinement",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "actives_energy_mutation"
+  },
+  {
+   "key": "armor_mutation",
+   "name": "Ossification",
+   "weight": 1.0,
+   "reward": 0.5,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "attack_speed_mutation",
+   "name": "Fast Twitch Fibers",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "auto_actives_mutation",
+   "name": "Autonomic Discharge",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "auto_actives_mutation"
+  },
+  {
+   "key": "base_speed_mutation",
+   "name": "Cilium Growth",
+   "weight": 0.8,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "better_drops_mutation",
+   "name": "Scavenger's Gland",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "chemotactic_cascade_mutation",
+   "name": "Chemotactic Cascade",
+   "weight": 2.5,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "chemotactic_cascade_mutation"
+  },
+  {
+   "key": "core_drop_on_hit_mutation",
+   "name": "Algetic Secretion",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "cryolysis_mutation",
+   "name": "Cryolysis",
+   "weight": 3.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "cryolysis_mutation"
+  },
+  {
+   "key": "damage_mutation",
+   "name": "Corrosive Acid",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "damage_slot_mutation",
+   "name": "Volatile Receptor",
+   "weight": 0.7,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "damage_slot_mutation"
+  },
+  {
+   "key": "dna_pickup_mutation",
+   "name": "RNA Retriggering",
+   "weight": 0.0,
+   "reward": 0.2,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "dodge_cd_mutation",
+   "name": "Enhanced Boosters",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "dodge_cd_mutation"
+  },
+  {
+   "key": "dodge_invul_mutation",
+   "name": "Survival Reflex",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "dodge_invul_mutation"
+  },
+  {
+   "key": "dodge_stamina_mutation",
+   "name": "Glycolytic Burst",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "empty_islot_damage_mutation",
+   "name": "Prokaryotic Ancestry",
+   "weight": 0.5,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "energy_generation_mutation",
+   "name": "Mitochondrial Augmentation",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "energy_generation_mutation"
+  },
+  {
+   "key": "energy_slot_mutation",
+   "name": "Conductive Receptor",
+   "weight": 0.7,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "energy_slot_mutation"
+  },
+  {
+   "key": "few_weapons_buff_mutation",
+   "name": "Focused Specialization",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "first_shot_upgrade_mutation",
+   "name": "Attack Preparation",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "full_heal_mutation",
+   "name": "Membrane Restoration",
+   "weight": 1.0,
+   "reward": 0.5,
+   "unlock": false,
+   "rule": "full_heal_mutation"
+  },
+  {
+   "key": "galvanic_arborization_mutation",
+   "name": "Galvanic Arborization",
+   "weight": 2.5,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "galvanic_arborization_mutation"
+  },
+  {
+   "key": "glass_cannon_mutation",
+   "name": "Apoptotic Frenzy",
+   "weight": 0.3,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "health_mutation",
+   "name": "Reinforced Membrane",
+   "weight": 2.0,
+   "reward": 5.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "hormesis_mutation",
+   "name": "Hormesis",
+   "weight": 3.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "hormesis_mutation"
+  },
+  {
+   "key": "hp_drops_mutation",
+   "name": "Catabolic Conversion",
+   "weight": 2.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "hyperreflexia_mutation",
+   "name": "Hyperreflexia",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "left_hand_mutation",
+   "name": "Sinistral Chirality",
+   "weight": 0.2,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "low_health_buff_mutation",
+   "name": "Adrenaline",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "money_damage_mutation",
+   "name": "Argentic Coating",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "money_pickup_mutation",
+   "name": "Lucrumease",
+   "weight": 1.0,
+   "reward": 0.2,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "mutation_reroll_mutation",
+   "name": "Somatic Hypermutation",
+   "weight": 0.7,
+   "reward": 0.1,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "myofibrillar_hypertrophy_mutation",
+   "name": "Myofibrillar Hypertrophy",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "myofibrillar_hypertrophy_mutation"
+  },
+  {
+   "key": "nidal_degranulation_mutation",
+   "name": "Nidal Degranulation",
+   "weight": 2.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "nidal_degranulation_mutation"
+  },
+  {
+   "key": "no_stamina_mutation",
+   "name": "Glycogen Funnel",
+   "weight": 0.3,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "no_stamina_mutation"
+  },
+  {
+   "key": "passive_overcharge_mutation",
+   "name": "Basal Metabolism",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "passive_overcharge_mutation"
+  },
+  {
+   "key": "pickup_range_mutation",
+   "name": "Endocytic Suction",
+   "weight": 0.8,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "polyploidy_mutation",
+   "name": "Polyploidy",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "pyrogenesis_mutation",
+   "name": "Pyrogenesis",
+   "weight": 2.5,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "pyrogenesis_mutation"
+  },
+  {
+   "key": "random_mitochondrion_mutation",
+   "name": "Energy Adaptation",
+   "weight": 1.0,
+   "reward": 0.4,
+   "unlock": false,
+   "rule": "random_mitochondrion_mutation"
+  },
+  {
+   "key": "random_modifier_mutation",
+   "name": "Recombinant Adaptation",
+   "weight": 1.0,
+   "reward": 0.4,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "random_weapon_mutation",
+   "name": "Offensive Adaptation",
+   "weight": 1.0,
+   "reward": 0.4,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "range_mutation",
+   "name": "Kinetic Extension",
+   "weight": 1.5,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "recycle_mutation",
+   "name": "Molecular Deconstruction",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "reroll_mutation",
+   "name": "Genetic Reshuffle",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "respiratory_burst_mutation",
+   "name": "Respiratory Burst",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "respiratory_burst_mutation"
+  },
+  {
+   "key": "right_hand_mutation",
+   "name": "Dextral Chirality",
+   "weight": 0.2,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "shop_discount_mutation",
+   "name": "Osmotic Bargaining",
+   "weight": 0.7,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "slower_bullets_mutation",
+   "name": "Viscous Secretion",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "speed_damage_mutation",
+   "name": "Additive Momentum",
+   "weight": 1.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "speed_damage_mutation"
+  },
+  {
+   "key": "spread_mutation",
+   "name": "Stenosis",
+   "weight": 0.8,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "stamina_damage_mutation",
+   "name": "Starvation Reflex",
+   "weight": 1.5,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "stamina_mutation",
+   "name": "Glycogen Reserve",
+   "weight": 3.5,
+   "reward": 2.5,
+   "unlock": false,
+   "rule": "stamina_mutation"
+  },
+  {
+   "key": "stash_mutation",
+   "name": "Endosomal Cache",
+   "weight": 0.7,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": null
+  },
+  {
+   "key": "turret_eslot_mutation",
+   "name": "External Omnireceptor",
+   "weight": 0.7,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "turret_eslot_mutation"
+  },
+  {
+   "key": "turret_slot_mutation",
+   "name": "Internal Omnireceptor",
+   "weight": 0.7,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "turret_slot_mutation"
+  },
+  {
+   "key": "amoeba_external_slot_blob",
+   "name": "Ectoplasmic Bulge",
+   "weight": 15.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "amoeba_evolution"
+  },
+  {
+   "key": "amoeba_internal_slot_blob",
+   "name": "Endomembrane Folding",
+   "weight": 15.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "amoeba_evolution"
+  },
+  {
+   "key": "nanobot_body_extension",
+   "name": "Square Module",
+   "weight": 15.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "nanobot_body_extension"
+  },
+  {
+   "key": "nanobot_triangle_extension",
+   "name": "Triangle Module",
+   "weight": 15.0,
+   "reward": 0.0,
+   "unlock": false,
+   "rule": "nanobot_body_extension"
+  }
+ ],
+ "organelles": [
+  {
+   "key": "assault_rifle",
+   "name": "Pulsar Gland",
+   "weight": 1.3,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "axopodium",
+   "name": "Axopodium",
+   "weight": 1.0,
+   "tags": [
+    9,
+    7,
+    1,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "bacteriophage_gun",
+   "name": "Bacteriophage Launcher",
+   "weight": 0.8,
+   "tags": [
+    7,
+    1,
+    2,
+    4,
+    20
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "burn_lash",
+   "name": "Pyroflagellum",
+   "weight": 1.5,
+   "tags": [
+    7,
+    1,
+    5,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": true,
+   "tentacle": false,
+   "burn": true,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "cannon",
+   "name": "Spore Cannon",
+   "weight": 1.3,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "charger_tentacle",
+   "name": "Trophic Pseudopod",
+   "weight": 1.0,
+   "tags": [
+    7,
+    4,
+    0,
+    21
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": true,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "chemoreceptor_antenna",
+   "name": "Chemoreceptor Antenna",
+   "weight": 0.0,
+   "tags": [
+    7,
+    1
+   ],
+   "devil": 0.0,
+   "noPrefixes": true,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "chromatophore_gland",
+   "name": "Chromatophore Gland",
+   "weight": 1.0,
+   "tags": [
+    9,
+    7,
+    1,
+    4,
+    10
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "concussive_tendril",
+   "name": "Concussive Tendril",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    2,
+    17,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "continuous_laser",
+   "name": "Luciferase Pump",
+   "weight": 0.5,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 3.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "cryopseudopod",
+   "name": "Cryopseudopod",
+   "weight": 1.0,
+   "tags": [
+    7,
+    4,
+    1,
+    21
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": true,
+   "burn": false,
+   "freeze": true,
+   "hormesis": false
+  },
+  {
+   "key": "dagger",
+   "name": "Stinger Tendril",
+   "weight": 2.0,
+   "tags": [
+    7,
+    1,
+    2,
+    17,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "drill",
+   "name": "Helical Proboscis",
+   "weight": 1.3,
+   "tags": [
+    7,
+    1,
+    2,
+    17,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "dual_blades",
+   "name": "Tri-phase Tendril",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    2,
+    17,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "electric_harpoon",
+   "name": "Galvanic Cnidocyst",
+   "weight": 0.7,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13,
+    19
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": true,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "flamethrower",
+   "name": "Oxidator",
+   "weight": 1.2,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": true,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "freeze_lash",
+   "name": "Cryoflagellum",
+   "weight": 1.5,
+   "tags": [
+    7,
+    1,
+    5,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": true,
+   "tentacle": false,
+   "burn": false,
+   "freeze": true,
+   "hormesis": false
+  },
+  {
+   "key": "freeze_ray",
+   "name": "Cryophore",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": true,
+   "hormesis": false
+  },
+  {
+   "key": "galvanic_flagellum",
+   "name": "Galvanic Flagellum",
+   "weight": 1.5,
+   "tags": [
+    7,
+    1,
+    5,
+    4,
+    10,
+    19
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": true,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "grenade_launcher",
+   "name": "Dehiscence Lobber",
+   "weight": 0.7,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": true
+  },
+  {
+   "key": "gun",
+   "name": "Caustic Secretor",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "hammer",
+   "name": "Capsid Flail",
+   "weight": 1.5,
+   "tags": [
+    7,
+    1,
+    2,
+    17,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "harpoon",
+   "name": "Cnidocyst",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "hydrojet_lash",
+   "name": "Ballistic Flagellum",
+   "weight": 1.5,
+   "tags": [
+    7,
+    1,
+    5,
+    4,
+    10
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": true,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "laser",
+   "name": "Thermal Lance",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "lash",
+   "name": "Flagellum",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    5
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": true,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "lightning_gun",
+   "name": "Galvanic Conduit",
+   "weight": 0.7,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13,
+    19
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "machine_gun",
+   "name": "Rotary Extruder",
+   "weight": 0.7,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "mine_launcher",
+   "name": "Cyst Depositor",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "operculum",
+   "name": "Operculum",
+   "weight": 1.0,
+   "tags": [
+    9,
+    7,
+    1,
+    4,
+    10
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "orb_gun",
+   "name": "Mucus Emitter",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "pizza_cutter",
+   "name": "Gyrase Wheel",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    2,
+    17,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "plasma_whip",
+   "name": "Actin Whip",
+   "weight": 0.7,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "pusher_tentacle",
+   "name": "Kinetic Pseudopod",
+   "weight": 1.0,
+   "tags": [
+    7,
+    4,
+    1,
+    21
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": true,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "pyrocyst",
+   "name": "Pyrocyst",
+   "weight": 1.0,
+   "tags": [
+    9,
+    7,
+    1,
+    4,
+    10
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "rocket_launcher",
+   "name": "Blastocyst Mortar",
+   "weight": 0.7,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": true
+  },
+  {
+   "key": "shield",
+   "name": "Chitin Shield",
+   "weight": 1.5,
+   "tags": [
+    7,
+    0
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "shotgun",
+   "name": "Scatter Ejector",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "shotgun_close",
+   "name": "Cluster Ejector",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "sidegun",
+   "name": "Lateral Vent",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "sniper",
+   "name": "Pressurized Spicule",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "spawn_gun",
+   "name": "Nidublast",
+   "weight": 1.0,
+   "tags": [
+    7,
+    1,
+    2,
+    4,
+    20
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "spear",
+   "name": "Perforator Tendril",
+   "weight": 1.4,
+   "tags": [
+    7,
+    1,
+    2,
+    17,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "staurolobber",
+   "name": "Staurolobber",
+   "weight": 0.5,
+   "tags": [
+    7,
+    1,
+    2,
+    10,
+    4,
+    13
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": true
+  },
+  {
+   "key": "sword",
+   "name": "Lacerator Tendril",
+   "weight": 1.4,
+   "tags": [
+    7,
+    1,
+    2,
+    17,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "symbiotic_pseudopod",
+   "name": "Symbiotic Pseudopod",
+   "weight": 1.0,
+   "tags": [
+    7,
+    4,
+    21
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": true,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false,
+   "rule": "symbiotic_pseudopod_resource"
+  },
+  {
+   "key": "toxin_lash",
+   "name": "Toxic Flagellum",
+   "weight": 1.5,
+   "tags": [
+    7,
+    1,
+    5,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": true,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "active_laser",
+   "name": "Chromatophore Lens",
+   "weight": 1.0,
+   "tags": [
+    9,
+    6,
+    1,
+    4,
+    10
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "apoptosome",
+   "name": "Apoptosome",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    11,
+    3,
+    4
+   ],
+   "devil": 3.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": true
+  },
+  {
+   "key": "armor_maker",
+   "name": "Ossificator",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "auto_shooter",
+   "name": "Photoreceptor",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    15
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "backstab",
+   "name": "Dorsal Lysosome",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    3,
+    4,
+    10
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "burn",
+   "name": "Pyrosome",
+   "weight": 1.5,
+   "tags": [
+    6,
+    1,
+    11,
+    3,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": true,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "charge_active",
+   "name": "Vacuole",
+   "weight": 0.8,
+   "tags": [
+    9,
+    6,
+    0,
+    1
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": true,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "charge_bullets",
+   "name": "Exocytotic Chamber",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    15,
+    4,
+    10
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "circle_shot_active",
+   "name": "Projectile Surge",
+   "weight": 1.0,
+   "tags": [
+    6,
+    9,
+    1,
+    16,
+    10,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "conal_burst",
+   "name": "Conal Burst",
+   "weight": 1.0,
+   "tags": [
+    6,
+    9,
+    1,
+    16,
+    10,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "conduit",
+   "name": "Vesicle",
+   "weight": 0.3,
+   "tags": [
+    6,
+    0,
+    1,
+    11,
+    3,
+    10,
+    4,
+    2,
+    15
+   ],
+   "devil": 6.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": true,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "cryopulse",
+   "name": "Cryopulse",
+   "weight": 1.0,
+   "tags": [
+    9,
+    6,
+    1,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "damage_charge_mult",
+   "name": "Starved Oxysome",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    3
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": true,
+   "needsEnergy": true,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "damage_mult",
+   "name": "Oxysome",
+   "weight": 4.5,
+   "tags": [
+    6,
+    1,
+    3
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "damage_no_attack",
+   "name": "Turgosome",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    3,
+    4,
+    10
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": true,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "damage_up_on_kill",
+   "name": "Phagosome",
+   "weight": 0.8,
+   "tags": [
+    6,
+    1,
+    3
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": true,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "damage_up_on_recycle",
+   "name": "Autolytic Oxysome",
+   "weight": 0.8,
+   "tags": [
+    6,
+    1,
+    3
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "deflector",
+   "name": "Resilinoplast",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    3,
+    11,
+    10,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "dna_maker",
+   "name": "Mutagen",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "dodge_charge",
+   "name": "Elusive Mitochondrion",
+   "weight": 1.0,
+   "tags": [
+    6,
+    0
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "dodge_explode",
+   "name": "Sympathetic Detonator",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    11,
+    3,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "explosion_active",
+   "name": "Explosive Charge",
+   "weight": 1.0,
+   "tags": [
+    9,
+    6,
+    1,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "explosive_attacks",
+   "name": "Peroxisome",
+   "weight": 0.2,
+   "tags": [
+    6,
+    1,
+    11,
+    3,
+    4
+   ],
+   "devil": 5.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": true
+  },
+  {
+   "key": "fast_shooting_minion_active",
+   "name": "Swarm Nidus",
+   "weight": 1.0,
+   "tags": [
+    9,
+    6,
+    1,
+    4,
+    10,
+    20
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "firerate_no_miss",
+   "name": "Resonant Cavity",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    15,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": true,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "freeze",
+   "name": "Cryosome",
+   "weight": 1.5,
+   "tags": [
+    6,
+    1,
+    11,
+    3,
+    10,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": true,
+   "hormesis": false
+  },
+  {
+   "key": "galvanic_node_active",
+   "name": "Galvanic Node",
+   "weight": 1.0,
+   "tags": [
+    9,
+    6,
+    1,
+    4,
+    10
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "generator",
+   "name": "Entrant Mitochondrion",
+   "weight": 1.8,
+   "tags": [
+    6,
+    0
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "gib_explode_active",
+   "name": "Necrolytic Igniter",
+   "weight": 0.8,
+   "tags": [
+    9,
+    6,
+    1,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "glycocalyx",
+   "name": "Glycocalyx",
+   "weight": 1.0,
+   "tags": [
+    6,
+    0
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "gravity_pull",
+   "name": "Magnetosome",
+   "weight": 1.3,
+   "tags": [
+    6,
+    1,
+    11,
+    10,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "gyrosome",
+   "name": "Gyrosome",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    11,
+    10,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "heal",
+   "name": "Regenerator",
+   "weight": 1.8,
+   "tags": [
+    6,
+    1
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "heavy_minion",
+   "name": "Apex Nidus",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    4,
+    20
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "hit_charge",
+   "name": "Recuperative Mitochondrion",
+   "weight": 1.8,
+   "tags": [
+    6,
+    0
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "homing",
+   "name": "Attractor",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    11
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "hurt_charge",
+   "name": "Vengeful Mitochondrion",
+   "weight": 1.0,
+   "tags": [
+    6,
+    0
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "invul_active",
+   "name": "Iridophore Membrane",
+   "weight": 1.0,
+   "tags": [
+    9,
+    6,
+    1,
+    10,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "katanosome",
+   "name": "Katanosome",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    3,
+    4,
+    10
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "kill_charge",
+   "name": "Berserk Mitochondrion",
+   "weight": 1.8,
+   "tags": [
+    6,
+    0
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "kinetosome",
+   "name": "Kinetosome",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "lightning",
+   "name": "Galvanic Infuser",
+   "weight": 1.5,
+   "tags": [
+    6,
+    1,
+    11,
+    3,
+    4,
+    10,
+    19
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "lightning_connection",
+   "name": "Galvanic Weave",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    11,
+    3,
+    4,
+    10,
+    19
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "magnetic_bullets",
+   "name": "Vortisome",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    3,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "max_hp_up",
+   "name": "Endospore",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "melee_on_ranged",
+   "name": "Golgi Apparatus",
+   "weight": 2.0,
+   "tags": [
+    6,
+    1,
+    11,
+    10,
+    4,
+    18
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": true,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false,
+   "rule": "melee_on_ranged_resource"
+  },
+  {
+   "key": "money_maker",
+   "name": "Opulentor",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "opisthoblast",
+   "name": "Opisthoblast",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    11,
+    3,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "opsonin_arc",
+   "name": "Opsonin Arc",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    4,
+    10
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "perfect_generator",
+   "name": "Pristine Mitochondrion",
+   "weight": 1.2,
+   "tags": [
+    6,
+    0
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "phagolysosome",
+   "name": "Phagolysosome",
+   "weight": 0.6,
+   "tags": [
+    9,
+    6,
+    1,
+    3
+   ],
+   "devil": 4.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": true,
+   "needsEnergy": false,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "pickup_charge",
+   "name": "Metabolic Mitochondrion",
+   "weight": 1.5,
+   "tags": [
+    6,
+    0
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "piercing",
+   "name": "Perforin Infuser",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    11,
+    3,
+    10,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "poison",
+   "name": "Toxisome",
+   "weight": 1.3,
+   "tags": [
+    6,
+    1,
+    3,
+    11,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "proximity_zapper",
+   "name": "Galvanic Sac",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    4,
+    10,
+    19
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "range_extender",
+   "name": "Extensor",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    3
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false,
+   "rule": "range_extender_resource",
+   "boost": 2.5
+  },
+  {
+   "key": "reroll_active",
+   "name": "Sequence Scrambler",
+   "weight": 1.0,
+   "tags": [
+    9,
+    6,
+    1
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": true,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "rhythm_damage",
+   "name": "Sinoatrial Node",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    3,
+    4,
+    10
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "rubber_bullets",
+   "name": "Elastosome",
+   "weight": 1.3,
+   "tags": [
+    6,
+    1,
+    11,
+    10,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "sacrifice_charge_active",
+   "name": "Autophagic Mitochondrion",
+   "weight": 1.0,
+   "tags": [
+    9,
+    6,
+    0
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": true,
+   "needsEnergy": false,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": true
+  },
+  {
+   "key": "second_life",
+   "name": "Cryptobiotic Core",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "sentry_minion_active",
+   "name": "Sentry Nidus",
+   "weight": 1.0,
+   "tags": [
+    9,
+    6,
+    1,
+    4,
+    10,
+    20
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "shrapnel",
+   "name": "Ruptusome",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    11,
+    3,
+    10,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "side_laser",
+   "name": "Lateral Emitter",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    3,
+    4,
+    10
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "slash_charge",
+   "name": "Ablative Mitochondrion",
+   "weight": 1.8,
+   "tags": [
+    6,
+    0
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false,
+   "rule": "slash_charge_resource"
+  },
+  {
+   "key": "spear_active",
+   "name": "Ciliate Strike",
+   "weight": 1.0,
+   "tags": [
+    9,
+    6,
+    1,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": true,
+   "active": true,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "splash",
+   "name": "Echosome",
+   "weight": 1.3,
+   "tags": [
+    6,
+    1,
+    11,
+    3,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "split_shot",
+   "name": "Bifurcator",
+   "weight": 1.2,
+   "tags": [
+    6,
+    1,
+    11,
+    3,
+    10,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": true,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "stamina_charger",
+   "name": "Glycogen Synthesizer",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    15
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "travel_modifier",
+   "name": "Chronosome",
+   "weight": 1.3,
+   "tags": [
+    6,
+    1,
+    3,
+    11,
+    10,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "triple_shot",
+   "name": "Triosome",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    11,
+    3,
+    10,
+    4
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": true,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "upgrader",
+   "name": "Refiner",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": true,
+   "needsEnergy": true,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "weapon_minion",
+   "name": "Mitotic Nidus",
+   "weight": 1.0,
+   "tags": [
+    6,
+    1,
+    4,
+    10,
+    16,
+    20
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": true,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "upgrade",
+   "name": "Enhancer",
+   "weight": 4.0,
+   "tags": [
+    14
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": false,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "add_cancerous",
+   "name": "Oncogene",
+   "weight": 0.0,
+   "tags": [
+    14
+   ],
+   "devil": 0.0,
+   "noPrefixes": true,
+   "excitable": false,
+   "onlyCommon": true,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false,
+   "rule": "add_prefix_improvement_resource"
+  },
+  {
+   "key": "add_ephemeral",
+   "name": "Apoptogen",
+   "weight": 0.0,
+   "tags": [
+    14
+   ],
+   "devil": 0.0,
+   "noPrefixes": true,
+   "excitable": false,
+   "onlyCommon": true,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false,
+   "rule": "add_prefix_improvement_resource"
+  },
+  {
+   "key": "add_eternal",
+   "name": "Telomerase",
+   "weight": 0.0,
+   "tags": [
+    14
+   ],
+   "devil": 0.0,
+   "noPrefixes": true,
+   "excitable": false,
+   "onlyCommon": true,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false,
+   "rule": "add_prefix_improvement_resource"
+  },
+  {
+   "key": "add_excitable",
+   "name": "Ion Channel",
+   "weight": 0.0,
+   "tags": [
+    14
+   ],
+   "devil": 0.0,
+   "noPrefixes": true,
+   "excitable": false,
+   "onlyCommon": true,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false,
+   "rule": "add_prefix_improvement_resource"
+  },
+  {
+   "key": "convert_to_damage_slot",
+   "name": "Volatile Graft",
+   "weight": 0.2,
+   "tags": [
+    14
+   ],
+   "devil": 4.0,
+   "noPrefixes": true,
+   "excitable": false,
+   "onlyCommon": true,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "convert_to_energy_slot",
+   "name": "Conductive Graft",
+   "weight": 0.2,
+   "tags": [
+    14
+   ],
+   "devil": 4.0,
+   "noPrefixes": true,
+   "excitable": false,
+   "onlyCommon": true,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "convert_to_turret_slot",
+   "name": "Omni Graft",
+   "weight": 0.2,
+   "tags": [
+    14
+   ],
+   "devil": 4.0,
+   "noPrefixes": true,
+   "excitable": false,
+   "onlyCommon": true,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "convert_weapons",
+   "name": "Homogenizer",
+   "weight": 1.0,
+   "tags": [
+    14
+   ],
+   "devil": 2.0,
+   "noPrefixes": true,
+   "excitable": false,
+   "onlyCommon": true,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "destroy_for_hp",
+   "name": "Autophagy",
+   "weight": 0.6,
+   "tags": [
+    14
+   ],
+   "devil": 0.0,
+   "noPrefixes": true,
+   "excitable": false,
+   "onlyCommon": true,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  },
+  {
+   "key": "remove_prefixes",
+   "name": "Repressor",
+   "weight": 0.0,
+   "tags": [
+    14
+   ],
+   "devil": 0.0,
+   "noPrefixes": false,
+   "excitable": false,
+   "onlyCommon": true,
+   "unlock": false,
+   "needsEnergy": false,
+   "active": false,
+   "lash": false,
+   "tentacle": false,
+   "burn": false,
+   "freeze": false,
+   "hormesis": false
+  }
+ ],
+ "players": {
+  "bacterium": {
+   "kind": "Player",
+   "maxStamina": 100.0,
+   "dodgeCd": 1.2,
+   "dodgeInvul": 0.3
+  },
+  "fungal-spore": {
+   "kind": "PlayerStrafer",
+   "maxStamina": 100.0,
+   "dodgeCd": 1.2,
+   "dodgeInvul": 0.3
+  },
+  "helminth": {
+   "kind": "Player",
+   "maxStamina": 100.0,
+   "dodgeCd": 1.2,
+   "dodgeInvul": 0.3
+  },
+  "diatom": {
+   "kind": "Player",
+   "maxStamina": 100.0,
+   "dodgeCd": 1.2,
+   "dodgeInvul": 0.3
+  },
+  "lil-collector": {
+   "kind": "Player",
+   "maxStamina": 100.0,
+   "dodgeCd": 1.2,
+   "dodgeInvul": 0.3
+  },
+  "nanobot": {
+   "kind": "PlayerNanobot",
+   "maxStamina": 100.0,
+   "dodgeCd": 1.2,
+   "dodgeInvul": 0.3
+  },
+  "amoeba": {
+   "kind": "PlayerAmoeba",
+   "maxStamina": 100.0,
+   "dodgeCd": 1.2,
+   "dodgeInvul": 0.3
+  }
+ },
+ "floors": [
+  {
+   "level": 1,
+   "key": "skin",
+   "name": "Skin",
+   "rooms": 6,
+   "layout": "standard",
+   "roomDraws": [
+    1
+   ],
+   "start": 0,
+   "bosses": [
+    {
+     "key": "beholder_room2",
+     "draws": [
+      {
+       "kind": "choice",
+       "path": "Reward",
+       "shown": [
+        true,
+        true,
+        true
+       ],
+       "money": false
+      }
+     ]
+    },
+    {
+     "key": "beholder_room",
+     "draws": [
+      {
+       "kind": "choice",
+       "path": "Reward",
+       "shown": [
+        true,
+        true,
+        true
+       ],
+       "money": false
+      }
+     ]
+    },
+    {
+     "key": "nest_boss_room2",
+     "draws": [
+      {
+       "kind": "choice",
+       "path": "Reward",
+       "shown": [
+        true,
+        true,
+        true
+       ],
+       "money": false
+      }
+     ]
+    },
+    {
+     "key": "nest_boss_room",
+     "draws": [
+      {
+       "kind": "choice",
+       "path": "Reward",
+       "shown": [
+        true,
+        true,
+        true
+       ],
+       "money": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "level": 2,
+   "key": "intestine",
+   "name": "Intestine",
+   "rooms": 5,
+   "layout": "intestine",
+   "roomDraws": [
+    1
+   ],
+   "start": 0,
+   "bosses": [
+    {
+     "key": "segmented_worm_boss_room",
+     "draws": [
+      {
+       "kind": "choice",
+       "path": "Reward",
+       "shown": [
+        true,
+        true,
+        true
+       ],
+       "money": false
+      }
+     ]
+    },
+    {
+     "key": "thick_long_worm_boss_room2",
+     "draws": [
+      {
+       "kind": "choice",
+       "path": "Reward",
+       "shown": [
+        true,
+        true,
+        true
+       ],
+       "money": false
+      }
+     ]
+    },
+    {
+     "key": "thick_long_worm_boss_room",
+     "draws": [
+      {
+       "kind": "choice",
+       "path": "Reward",
+       "shown": [
+        true,
+        true,
+        true
+       ],
+       "money": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "level": 3,
+   "key": "stomach",
+   "name": "Stomach",
+   "rooms": 8,
+   "layout": "stomach",
+   "roomDraws": [
+    1
+   ],
+   "start": 0,
+   "bosses": [
+    {
+     "key": "rock_boss_room2",
+     "draws": [
+      {
+       "kind": "choice",
+       "path": "Reward",
+       "shown": [
+        true,
+        true,
+        true
+       ],
+       "money": false
+      }
+     ]
+    },
+    {
+     "key": "rock_boss_room",
+     "draws": [
+      {
+       "kind": "choice",
+       "path": "Reward",
+       "shown": [
+        true,
+        true,
+        true
+       ],
+       "money": false
+      }
+     ]
+    },
+    {
+     "key": "scolex_room",
+     "draws": [
+      {
+       "kind": "choice",
+       "path": "Reward",
+       "shown": [
+        true,
+        true,
+        true
+       ],
+       "money": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "level": 4,
+   "key": "liver",
+   "name": "Liver",
+   "rooms": 11,
+   "layout": "standard",
+   "roomDraws": [
+    1
+   ],
+   "start": 0,
+   "bosses": [
+    {
+     "key": "trypanosoma_room",
+     "draws": [
+      {
+       "kind": "choice",
+       "path": "Reward",
+       "shown": [
+        true,
+        true,
+        true
+       ],
+       "money": false
+      }
+     ]
+    },
+    {
+     "key": "wall_boss_room",
+     "draws": [
+      {
+       "kind": "choice",
+       "path": "Reward",
+       "shown": [
+        true,
+        true,
+        true
+       ],
+       "money": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "level": 5,
+   "key": "lungs",
+   "name": "Lung",
+   "rooms": 9,
+   "layout": "lungs",
+   "roomDraws": [
+    1
+   ],
+   "start": 0,
+   "bosses": [
+    {
+     "key": "lungworm_room",
+     "draws": [
+      {
+       "kind": "choice",
+       "path": "Reward",
+       "shown": [
+        true,
+        true,
+        true
+       ],
+       "money": false
+      }
+     ]
+    },
+    {
+     "key": "pneumonia_room",
+     "draws": [
+      {
+       "kind": "choice",
+       "path": "Reward",
+       "shown": [
+        true,
+        true,
+        true
+       ],
+       "money": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "level": 6,
+   "key": "heart",
+   "name": "Heart",
+   "rooms": 15,
+   "layout": "heart",
+   "roomDraws": [
+    1
+   ],
+   "start": 0,
+   "bosses": [
+    {
+     "key": "heart_boss_room",
+     "draws": [
+      {
+       "kind": "drop",
+       "path": "Reward"
+      }
+     ]
+    }
+   ],
+   "tiers": [
+    3,
+    3,
+    3,
+    3,
+    3,
+    3
+   ],
+   "hub": [
+    "heart_shop"
+   ]
+  },
+  {
+   "level": 7,
+   "key": "brain",
+   "name": "Brain",
+   "rooms": 16,
+   "layout": "standard",
+   "roomDraws": [
+    1
+   ],
+   "start": 0,
+   "bosses": [
+    {
+     "key": "brain_boss_room",
+     "draws": []
+    }
+   ]
+  }
+ ],
+ "shop": [
+  {
+   "kind": "pick",
+   "path": "Items/Item1/BodypartReward",
+   "itemType": 6,
+   "pool": null,
+   "mutations": true,
+   "rarity": [
+    0,
+    0
+   ],
+   "unique": [
+    "Items/Item2/BodypartReward",
+    "Items/Item3/BodypartReward"
+   ],
+   "chooseOne": false,
+   "devil": false
+  },
+  {
+   "kind": "pick",
+   "path": "Items/Item2/BodypartReward",
+   "itemType": 2,
+   "pool": null,
+   "mutations": true,
+   "rarity": [
+    0,
+    0
+   ],
+   "unique": [
+    "Items/Item1/BodypartReward",
+    "Items/Item3/BodypartReward"
+   ],
+   "chooseOne": false,
+   "devil": false
+  },
+  {
+   "kind": "pick",
+   "path": "Items/Item3/BodypartReward",
+   "itemType": 8,
+   "pool": null,
+   "mutations": true,
+   "rarity": [
+    0,
+    0
+   ],
+   "unique": [
+    "Items/Item1/BodypartReward",
+    "Items/Item2/BodypartReward"
+   ],
+   "chooseOne": false,
+   "devil": false
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item1",
+   "cost": 10,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "bodypart_reward"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item2",
+   "cost": 10,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "bodypart_reward"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item3",
+   "cost": 10,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "bodypart_reward"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item4",
+   "cost": 3,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "dna_pickup",
+    "dna_pickup",
+    "dna_pickup",
+    "dna_pickup",
+    "dna_pickup"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item5",
+   "cost": 3,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "health_pickup"
+   ]
+  }
+ ],
+ "heartShop": [
+  {
+   "kind": "pick",
+   "path": "Items/Item1/BodypartReward",
+   "itemType": 6,
+   "pool": null,
+   "mutations": true,
+   "rarity": [
+    0,
+    0
+   ],
+   "unique": [
+    "Items/Item2/BodypartReward",
+    "Items/Item3/BodypartReward"
+   ],
+   "chooseOne": false,
+   "devil": false
+  },
+  {
+   "kind": "pick",
+   "path": "Items/Item2/BodypartReward",
+   "itemType": 2,
+   "pool": null,
+   "mutations": true,
+   "rarity": [
+    0,
+    0
+   ],
+   "unique": [
+    "Items/Item1/BodypartReward",
+    "Items/Item3/BodypartReward"
+   ],
+   "chooseOne": false,
+   "devil": false
+  },
+  {
+   "kind": "pick",
+   "path": "Items/Item3/BodypartReward",
+   "itemType": 8,
+   "pool": null,
+   "mutations": true,
+   "rarity": [
+    0,
+    0
+   ],
+   "unique": [
+    "Items/Item1/BodypartReward",
+    "Items/Item2/BodypartReward"
+   ],
+   "chooseOne": false,
+   "devil": false
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item1",
+   "cost": 10,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "bodypart_reward"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item2",
+   "cost": 10,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "bodypart_reward"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item3",
+   "cost": 10,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "bodypart_reward"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item4",
+   "cost": 3,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "dna_pickup",
+    "dna_pickup",
+    "dna_pickup",
+    "dna_pickup",
+    "dna_pickup"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item5",
+   "cost": 3,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "health_pickup"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item6",
+   "cost": 3,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "health_pickup"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item7",
+   "cost": 3,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "health_pickup"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item8",
+   "cost": 3,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "health_pickup"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item9",
+   "cost": 3,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "health_pickup"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item10",
+   "cost": 3,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "health_pickup"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item11",
+   "cost": 3,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "health_pickup"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item12",
+   "cost": 6,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "armor_pickup"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item13",
+   "cost": 6,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "armor_pickup"
+   ]
+  },
+  {
+   "kind": "shop",
+   "path": "Items/Item14",
+   "cost": 6,
+   "sale": true,
+   "blood": false,
+   "skipScaling": false,
+   "contents": [
+    "armor_pickup"
+   ]
+  }
+ ],
+ "itemRooms": [
+  {
+   "key": "item_room",
+   "weight": 0.7,
+   "draws": [
+    {
+     "kind": "choice",
+     "path": "Reward",
+     "shown": [
+      true,
+      true,
+      true
+     ],
+     "money": false
+    }
+   ]
+  },
+  {
+   "key": "item_room_1_item",
+   "weight": 0.3,
+   "draws": [
+    {
+     "kind": "choice",
+     "path": "Reward",
+     "shown": [
+      false,
+      false,
+      true
+     ],
+     "money": false
+    }
+   ]
+  },
+  {
+   "key": "item_room_2_item",
+   "weight": 1.1,
+   "draws": [
+    {
+     "kind": "choice",
+     "path": "Reward",
+     "shown": [
+      true,
+      true,
+      false
+     ],
+     "money": false
+    }
+   ]
+  }
+ ],
+ "special": [
+  {
+   "key": "blacksmith_room",
+   "weight": 1.0,
+   "draws": [
+    {
+     "kind": "pick",
+     "path": "BodypartReward",
+     "itemType": 8,
+     "pool": [
+      {
+       "key": "convert_to_damage_slot",
+       "mutation": false
+      }
+     ],
+     "mutations": true,
+     "rarity": [
+      0,
+      0
+     ],
+     "unique": [
+      "BodypartReward3",
+      "BodypartReward2"
+     ],
+     "chooseOne": true,
+     "devil": false
+    },
+    {
+     "kind": "pick",
+     "path": "BodypartReward3",
+     "itemType": 8,
+     "pool": [
+      {
+       "key": "convert_to_energy_slot",
+       "mutation": false
+      }
+     ],
+     "mutations": true,
+     "rarity": [
+      0,
+      0
+     ],
+     "unique": [
+      "BodypartReward",
+      "BodypartReward2"
+     ],
+     "chooseOne": true,
+     "devil": false
+    },
+    {
+     "kind": "pick",
+     "path": "BodypartReward2",
+     "itemType": 8,
+     "pool": [
+      {
+       "key": "convert_to_turret_slot",
+       "mutation": false
+      }
+     ],
+     "mutations": true,
+     "rarity": [
+      0,
+      0
+     ],
+     "unique": [
+      "BodypartReward",
+      "BodypartReward3"
+     ],
+     "chooseOne": true,
+     "devil": false
+    }
+   ]
+  },
+  {
+   "key": "challenge_room",
+   "weight": 1.0,
+   "draws": [
+    {
+     "kind": "pick",
+     "path": "BodypartReward",
+     "itemType": 8,
+     "pool": null,
+     "mutations": false,
+     "rarity": [
+      3,
+      3
+     ],
+     "unique": [],
+     "chooseOne": false,
+     "devil": false
+    }
+   ]
+  },
+  {
+   "key": "dna_room_1",
+   "weight": 1.5,
+   "draws": [
+    {
+     "kind": "pick",
+     "path": "BodypartReward",
+     "itemType": 8,
+     "pool": null,
+     "mutations": true,
+     "rarity": [
+      0,
+      0
+     ],
+     "unique": [],
+     "chooseOne": false,
+     "devil": false
+    },
+    {
+     "kind": "pick",
+     "path": "BodypartReward2",
+     "itemType": 8,
+     "pool": null,
+     "mutations": true,
+     "rarity": [
+      0,
+      0
+     ],
+     "unique": [],
+     "chooseOne": false,
+     "devil": false
+    },
+    {
+     "kind": "pick",
+     "path": "BodypartReward3",
+     "itemType": 8,
+     "pool": null,
+     "mutations": true,
+     "rarity": [
+      0,
+      0
+     ],
+     "unique": [],
+     "chooseOne": false,
+     "devil": false
+    }
+   ]
+  },
+  {
+   "key": "dna_room_2",
+   "weight": 0.8,
+   "draws": [
+    {
+     "kind": "pick",
+     "path": "BodypartReward",
+     "itemType": 8,
+     "pool": [
+      {
+       "key": "dna_pickup_mutation",
+       "mutation": true
+      }
+     ],
+     "mutations": true,
+     "rarity": [
+      0,
+      0
+     ],
+     "unique": [],
+     "chooseOne": false,
+     "devil": false
+    },
+    {
+     "kind": "pick",
+     "path": "BodypartReward2",
+     "itemType": 8,
+     "pool": [
+      {
+       "key": "dna_pickup_mutation",
+       "mutation": true
+      }
+     ],
+     "mutations": true,
+     "rarity": [
+      0,
+      0
+     ],
+     "unique": [],
+     "chooseOne": false,
+     "devil": false
+    },
+    {
+     "kind": "pick",
+     "path": "BodypartReward3",
+     "itemType": 8,
+     "pool": [
+      {
+       "key": "dna_pickup_mutation",
+       "mutation": true
+      }
+     ],
+     "mutations": true,
+     "rarity": [
+      0,
+      0
+     ],
+     "unique": [],
+     "chooseOne": false,
+     "devil": false
+    }
+   ]
+  },
+  {
+   "key": "heal_room_1",
+   "weight": 0.8,
+   "draws": []
+  },
+  {
+   "key": "heal_room_2",
+   "weight": 1.0,
+   "draws": []
+  }
+ ],
+ "secret": [
+  {
+   "key": "secret_room1",
+   "weight": 1.0,
+   "draws": []
+  },
+  {
+   "key": "secret_room2",
+   "weight": 1.0,
+   "draws": [
+    {
+     "kind": "choice",
+     "path": "Variation/Reward",
+     "shown": [
+      true,
+      true,
+      true
+     ],
+     "money": false
+    },
+    {
+     "kind": "choice",
+     "path": "Variation/Reward2",
+     "shown": [
+      false,
+      false,
+      true
+     ],
+     "money": false
+    }
+   ]
+  }
+ ],
+ "rules": {
+  "prefixChance": 0.03,
+  "maxDodgeUptime": 0.8,
+  "invulAdd": 0.2,
+  "cdMult": 0.7,
+  "staminaAdd": 100.0,
+  "shopDiscount": 0.25,
+  "betterDrops": 0.15,
+  "betterDropsPlasmid": 0.1,
+  "betterDropsPerFloor": 0.05
+ }
+}

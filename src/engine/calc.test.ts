@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { gameData } from '../data';
-import { calculate } from './calc';
+import { calculate, evolutionOffer, evolutionPath, SKIP_EVOLUTION } from './calc';
 import { expectedSplits } from './sim/behaviours';
-import type { Build, Rarity, SlotState } from './types';
+import type { Build, EvolvingBody, Rarity, SlotState } from './types';
 
 // Every expected value below is worked out by hand from the game's formulas
 // (see src/engine/sim/behaviours.ts).
@@ -508,6 +508,23 @@ describe('evolving classes', () => {
     expect(dps(b, 'ESlot1')).toBeCloseTo(1.15 * BASE);
     b.evolutions = ['bacterium-coccus'];
     expect(dps(b, 'ESlot1')).toBeCloseTo(BASE);
+  });
+
+  it("offers evolutions the way the game's picker does: the current one's guaranteed ones first, then the tier's pool", () => {
+    const body = gameData.classes.find((c) => c.id === 'bacterium')!.body as EvolvingBody;
+    const first = evolutionOffer(gameData, body, [], 0);
+    expect(first.guaranteed).toEqual([]);
+    expect(first.pool).toEqual(body.tiers[0]);
+    // Coccus (level_1_ball_evolution) guarantees Diplococcus and Coccus Magnus.
+    const second = evolutionOffer(gameData, body, ['bacterium-coccus'], 1);
+    expect(second.current?.id).toBe('bacterium-coccus');
+    expect(second.guaranteed).toEqual(['bacterium-diplococcus', 'bacterium-coccus-magnus']);
+    expect(second.pool).not.toContain('bacterium-diplococcus');
+    // Skipping level 6 keeps Coccus, whose guaranteed ones are still offered at level 10 (the game doesn't filter them by tier).
+    const third = evolutionOffer(gameData, body, ['bacterium-coccus', SKIP_EVOLUTION], 2);
+    expect(third.guaranteed).toEqual(['bacterium-diplococcus', 'bacterium-coccus-magnus']);
+    const b = evolving('bacterium', { ESlot1: caustic }, { evolutions: ['bacterium-coccus', SKIP_EVOLUTION, 'bacterium-diplococcus'] });
+    expect(evolutionPath(b, gameData).map((p) => p.id)).toEqual(['bacterium-start', 'bacterium-coccus', 'bacterium-diplococcus']);
   });
 
   it('ignores evolutions picked for the wrong tier', () => {
